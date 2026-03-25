@@ -1,0 +1,13 @@
+{
+  "config": {
+    // allow long lines
+    "MD013": false,
+    // allow ordered lists starting with any number
+    "MD029": false,
+    // allow emphasis "as" headline
+    "MD036": false
+  },
+  "ignores": [
+    ".nwave"
+  ]
+}
