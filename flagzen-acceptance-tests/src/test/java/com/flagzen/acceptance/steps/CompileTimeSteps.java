@@ -39,6 +39,7 @@ public class CompileTimeSteps {
     private final Set<String> featureSourcesAdded = new HashSet<>();
     private final Map<String, String> featureKeyMap = new HashMap<>();
     private Compilation compilation;
+    private String generatedProxySource;
 
     @Given("a feature interface {string} with flag key {string}")
     public void aFeatureInterfaceWithFlagKey(String interfaceName, String key) {
@@ -328,6 +329,52 @@ public class CompileTimeSteps {
         assertThat(compilation).hadErrorContaining(class1);
         assertThat(compilation).hadErrorContaining(class2);
         assertThat(compilation).hadErrorContaining("Duplicate");
+    }
+
+    @Given("a compiled feature {string} with flag key {string}")
+    public void aCompiledFeatureWithFlagKey(String interfaceName, String key) {
+        this.featureInterfaceName = interfaceName;
+        this.flagKey = key;
+        this.featureKeyMap.put(interfaceName, key);
+        ensureFeatureSourceExists(interfaceName);
+        // Add a minimal variant so the processor generates a proxy
+        sourceFiles.add(JavaFileObjects.forSourceString(
+                PACKAGE + ".Default" + interfaceName,
+                """
+                package %s;
+
+                import com.flagzen.DefaultVariant;
+
+                @DefaultVariant(of = %s.class)
+                public class Default%s implements %s {
+                }
+                """.formatted(PACKAGE, interfaceName, interfaceName, interfaceName)
+        ));
+        compilation = javac()
+                .withProcessors(new FlagZenProcessor())
+                .compile(sourceFiles.toArray(new JavaFileObject[0]));
+        assertThat(compilation).succeeded();
+    }
+
+    @And("the dispatch proxy {string} has been generated")
+    public void theDispatchProxyHasBeenGenerated(String proxyName) {
+        assertThat(compilation)
+                .generatedSourceFile(PACKAGE + "." + proxyName)
+                .isNotNull();
+    }
+
+    @When("the developer inspects the proxy's string representation")
+    public void theDeveloperInspectsTheProxyStringRepresentation() throws Exception {
+        var proxyFile = compilation.generatedSourceFile(
+                PACKAGE + "." + featureInterfaceName + "_FlagZenProxy");
+        org.assertj.core.api.Assertions.assertThat(proxyFile).isPresent();
+        generatedProxySource = proxyFile.get().getCharContent(false).toString();
+    }
+
+    @Then("it shows {string}")
+    public void itShows(String expected) {
+        org.assertj.core.api.Assertions.assertThat(generatedProxySource)
+                .contains("return \"" + expected + "\"");
     }
 
     private void ensureFeatureSourceExists(String interfaceName) {

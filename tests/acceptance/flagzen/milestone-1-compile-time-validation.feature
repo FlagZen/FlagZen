@@ -103,7 +103,7 @@ Feature: Compile-time validation of features and variants
 
   # --- US-04: Proxy generation ---
 
-  @US-04 @pending
+  @US-04
   Scenario: Generated proxy provides a descriptive identity
     Given a compiled feature "CheckoutFlow" with flag key "checkout-flow"
     And the dispatch proxy "CheckoutFlow_FlagZenProxy" has been generated
