@@ -1,0 +1,274 @@
+journey:
+  name: "Java Developer Integrates FlagZen"
+  goal: "Replace scattered if/else flag conditionals with type-safe polymorphic dispatch, testable with minimal setup"
+  persona: "Marco Pellegrini -- Senior Java developer, 8 years experience, uses LaunchDarkly + env vars, values type safety"
+
+  emotional_arc:
+    start: "Curious/Skeptical -- 'Is this real? Another flag library?'"
+    middle: "Impressed/Confident -- 'Compile-time safety. No if/else. Clean types.'"
+    end: "Delighted/Evangelical -- 'I can't go back to if/else. Let me show my team.'"
+
+steps:
+  - id: 1
+    name: "Discover FlagZen"
+    action: "Read README or blog post"
+    emotional_state:
+      entry: "Curious/Skeptical"
+      exit: "Intrigued"
+    design_lever: "Value proposition in <30 seconds via code example"
+    shared_artifacts:
+      - name: "library_group_id"
+        source: "build.gradle.kts (root project)"
+        displayed_as: "com.flagzen"
+        consumers: ["README", "build.gradle examples", "Maven Central"]
+      - name: "library_version"
+        source: "gradle.properties"
+        displayed_as: "${flagzenVersion}"
+        consumers: ["README", "build.gradle examples", "documentation"]
+    gherkin: |
+      Scenario: Developer discovers FlagZen value proposition
+        Given Marco Pellegrini visits the FlagZen GitHub repository
+        When he reads the README Quick Start section
+        Then he sees a complete @Feature/@Variant code example
+        And he sees the @PinFlag testing example
+        And he understands the value proposition within 30 seconds
+
+  - id: 2
+    name: "Add Dependency"
+    action: "Add flagzen-core and flagzen-test to build.gradle.kts"
+    emotional_state:
+      entry: "Intrigued/Cautious"
+      exit: "Neutral (low friction)"
+    design_lever: "Standard dependency declaration, no plugins needed"
+    shared_artifacts:
+      - name: "core_module_coordinates"
+        source: "flagzen-core/build.gradle.kts"
+        displayed_as: "com.flagzen:flagzen-core"
+        consumers: ["build.gradle examples", "documentation", "Maven Central"]
+      - name: "test_module_coordinates"
+        source: "flagzen-test/build.gradle.kts"
+        displayed_as: "com.flagzen:flagzen-test"
+        consumers: ["build.gradle examples", "documentation", "Maven Central"]
+    integration_checkpoint: |
+      Annotation processor must be auto-discovered via META-INF/services.
+      No manual annotationProcessor() declaration should be needed beyond
+      the standard dependency.
+    gherkin: |
+      Scenario: Developer adds FlagZen dependency
+        Given Marco has a Gradle-based Java 17+ project
+        When he adds flagzen-core to implementation dependencies
+        And he adds flagzen-core to annotationProcessor dependencies
+        And he adds flagzen-test to testImplementation dependencies
+        Then the project compiles without errors
+        And the annotation processor is discovered automatically
+
+  - id: 3
+    name: "Define @Feature Interface"
+    action: "Create a Java interface annotated with @Feature"
+    emotional_state:
+      entry: "Neutral"
+      exit: "Intrigued"
+    design_lever: "Familiar pattern -- just a Java interface with one annotation"
+    shared_artifacts:
+      - name: "feature_flag_key"
+        source: "@Feature annotation value"
+        displayed_as: '"checkout-flow"'
+        consumers: ["@Variant classes", "FlagProvider config", "test @PinFlag", "runtime resolution"]
+      - name: "variant_enum_values"
+        source: "Optional inner Variant enum on @Feature interface"
+        displayed_as: "CheckoutFlow.Variant.{CLASSIC, STREAMLINED, PREMIUM}"
+        consumers: ["@Variant validation", "compile-time completeness check"]
+    gherkin: |
+      Scenario: Developer defines a feature interface
+        Given Marco creates a Java interface CheckoutFlow
+        When he annotates it with @Feature("checkout-flow")
+        And he defines a Variant enum with values CLASSIC, STREAMLINED, PREMIUM
+        Then the project compiles successfully
+        And the annotation processor registers the feature
+
+      Scenario: Developer defines a feature without variant enum
+        Given Marco creates a Java interface DarkMode
+        When he annotates it with @Feature("dark-mode")
+        And he does not define a Variant enum
+        Then the project compiles successfully
+        And variant values are validated as free-form strings
+
+  - id: 4
+    name: "Implement @Variant Classes"
+    action: "Create implementation classes annotated with @Variant"
+    emotional_state:
+      entry: "Intrigued"
+      exit: "Impressed"
+    design_lever: "Each variant is a normal class. Compile-time validation catches errors."
+    shared_artifacts:
+      - name: "variant_value"
+        source: "@Variant annotation value"
+        displayed_as: '"CLASSIC", "STREAMLINED", "PREMIUM"'
+        consumers: ["compile-time validation", "proxy dispatch", "flag provider config"]
+    integration_checkpoint: |
+      Annotation processor must validate:
+      - Variant class implements the @Feature interface
+      - Variant value matches enum (if enum present)
+      - No duplicate variant values for same feature
+    gherkin: |
+      Scenario: Developer implements a valid variant
+        Given CheckoutFlow is annotated with @Feature("checkout-flow")
+        And CheckoutFlow.Variant enum defines CLASSIC, STREAMLINED, PREMIUM
+        When Marco creates ClassicCheckout annotated with @Variant("CLASSIC")
+        And ClassicCheckout implements CheckoutFlow
+        Then the project compiles successfully
+        And the annotation processor generates CheckoutFlow_FlagZenProxy
+
+      Scenario: Compile error for variant typo against enum
+        Given CheckoutFlow has a Variant enum with CLASSIC, STREAMLINED, PREMIUM
+        When Marco creates TurboCheckout annotated with @Variant("TURBO")
+        And TurboCheckout implements CheckoutFlow
+        Then compilation fails with an error identifying the invalid variant value
+        And the error message lists valid values: CLASSIC, STREAMLINED, PREMIUM
+
+      Scenario: Compile error for duplicate variant
+        Given ClassicCheckout is annotated with @Variant("CLASSIC") for CheckoutFlow
+        When Marco creates LegacyCheckout also annotated with @Variant("CLASSIC") for CheckoutFlow
+        Then compilation fails with an error identifying the duplicate variant value
+        And the error message shows both class locations
+
+  - id: 5
+    name: "Resolve via FeatureDispatcher"
+    action: "Call dispatcher.resolve() to get the active variant"
+    emotional_state:
+      entry: "Impressed"
+      exit: "Confident"
+    design_lever: "No if/else. Code reads like normal OOP."
+    shared_artifacts:
+      - name: "dispatcher_instance"
+        source: "FlagZen.dispatcher() or DI injection"
+        displayed_as: "FeatureDispatcher"
+        consumers: ["application code", "Spring auto-configuration"]
+      - name: "flag_provider_config"
+        source: "FlagProvider SPI implementation"
+        displayed_as: "Environment variables, LaunchDarkly, etc."
+        consumers: ["proxy runtime dispatch", "evaluation context"]
+    gherkin: |
+      Scenario: Developer resolves a feature to active variant
+        Given the flag provider returns "STREAMLINED" for "checkout-flow"
+        And StreamlinedCheckout is registered as @Variant("STREAMLINED")
+        When Marco calls dispatcher.resolve(CheckoutFlow.class)
+        Then the returned proxy delegates to StreamlinedCheckout
+        And no if/else or switch statement is needed in application code
+
+      Scenario: Flag value changes at runtime
+        Given the flag provider initially returns "CLASSIC" for "checkout-flow"
+        And Marco has resolved CheckoutFlow via the dispatcher
+        When the flag provider changes to "STREAMLINED"
+        Then the next method call on the resolved proxy delegates to StreamlinedCheckout
+        And no re-injection or re-resolution is needed
+
+  - id: 6
+    name: "Test with @PinFlag"
+    action: "Write tests pinning flag values with annotations or programmatic API"
+    emotional_state:
+      entry: "Confident"
+      exit: "Delighted"
+    design_lever: "2 lines of setup vs. 15-30 with LaunchDarkly. This is the 'aha' moment."
+    shared_artifacts:
+      - name: "pinned_flag_value"
+        source: "@PinFlag annotation or TestFlagContext.pin() call"
+        displayed_as: '@PinFlag(feature = "checkout-flow", variant = "PREMIUM")'
+        consumers: ["test execution", "FlagZen JUnit extension"]
+      - name: "flag_source_file"
+        source: "Properties/YAML/JSON file referenced by @FlagSource"
+        displayed_as: '@FlagSource("flags-test.properties")'
+        consumers: ["test execution", "FlagZen JUnit extension"]
+    gherkin: |
+      Scenario: Developer tests with @PinFlag annotation
+        Given Marco has a test class with @ExtendWith(FlagZenExtension.class)
+        When he annotates a test method with @PinFlag(feature = "checkout-flow", variant = "PREMIUM")
+        Then the test resolves CheckoutFlow to the PremiumCheckout variant
+        And no mock setup or flag provider configuration is needed
+
+      Scenario: Developer tests with programmatic pinning
+        Given Marco has a test method receiving TestFlagContext as parameter
+        When he calls flags.pin("checkout-flow", "PREMIUM")
+        Then subsequent resolution of CheckoutFlow returns the PremiumCheckout variant
+        And the pin is scoped to the current test method only
+
+      Scenario: Developer tests with file-based flag source
+        Given Marco has a file flags-test.properties with checkout-flow=CLASSIC
+        When he annotates the test class with @FlagSource("flags-test.properties")
+        Then all tests in the class resolve checkout-flow to CLASSIC
+        And method-level @PinFlag overrides the file source
+
+  - id: 7
+    name: "Integrate with Spring Boot"
+    action: "Add flagzen-spring dependency for auto-configuration"
+    emotional_state:
+      entry: "Delighted"
+      exit: "Evangelical"
+    design_lever: "Zero configuration. Add dependency, @Autowired works."
+    shared_artifacts:
+      - name: "spring_module_coordinates"
+        source: "flagzen-spring/build.gradle.kts"
+        displayed_as: "com.flagzen:flagzen-spring"
+        consumers: ["build.gradle examples", "documentation"]
+    integration_checkpoint: |
+      Spring auto-configuration must:
+      - Register FactoryBean for each @Feature interface
+      - Auto-discover @Variant @Component beans
+      - Wire FlagProvider from application context
+      - Support @Autowired injection of @Feature interfaces
+    gherkin: |
+      Scenario: Developer uses FlagZen with Spring Boot
+        Given Marco has a Spring Boot application
+        And flagzen-spring is on the classpath
+        When he @Autowires a CheckoutFlow field in a @Service bean
+        Then Spring injects the FlagZen proxy
+        And the proxy resolves to the active variant based on the configured flag provider
+
+      Scenario: Variant implementations are Spring beans
+        Given ClassicCheckout is annotated with both @Variant("CLASSIC") and @Component
+        When Spring context starts
+        Then ClassicCheckout participates in Spring dependency injection
+        And FlagZen uses the Spring-managed instance for dispatch
+
+error_paths:
+  - id: "E1"
+    name: "Missing variant for REQUIRED fallback"
+    trigger: "Feature uses FallbackStrategy.REQUIRED but not all enum values have @Variant implementations"
+    outcome: "Compilation fails with clear message listing missing variants"
+    recovery: "Add missing @Variant implementations or add @DefaultVariant"
+
+  - id: "E2"
+    name: "No flag provider configured"
+    trigger: "Application starts without any FlagProvider on classpath or configured"
+    outcome: "FlagZenException at first resolution with actionable fix suggestions"
+    recovery: "Add flagzen-env or configure a custom provider"
+
+  - id: "E3"
+    name: "Unmatched variant value at runtime"
+    trigger: "Flag provider returns a value with no matching @Variant (EXCEPTION strategy)"
+    outcome: "UnmatchedVariantException with known variants listed and fix suggestions"
+    recovery: "Add @Variant for the value, add @DefaultVariant, or use NOOP strategy"
+
+  - id: "E4"
+    name: "Duplicate variant value"
+    trigger: "Two classes have @Variant with the same value for the same feature"
+    outcome: "Compilation error identifying both classes"
+    recovery: "Remove one of the duplicate implementations"
+
+  - id: "E5"
+    name: "Variant class does not implement feature interface"
+    trigger: "@Variant class does not implement the @Feature interface it targets"
+    outcome: "Compilation error with clear message"
+    recovery: "Add implements clause to the variant class"
+
+integration_validation:
+  shared_artifact_consistency:
+    - artifact: "feature_flag_key"
+      must_match_across: [3, 4, 5, 6]
+      failure_message: "Flag key in @Feature must match key used in @PinFlag, FlagProvider config, and resolution"
+    - artifact: "variant_value"
+      must_match_across: [3, 4, 5, 6]
+      failure_message: "Variant values in @Variant must match enum values, provider config, and @PinFlag"
+    - artifact: "library_version"
+      must_match_across: [1, 2, 7]
+      failure_message: "Library version must be consistent across all module dependencies"
