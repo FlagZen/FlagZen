@@ -6,7 +6,7 @@ Feature: Testing support for flag-dependent code
 
   # --- US-07: @PinFlag ---
 
-  @US-07 @pending
+  @US-07
   Scenario: Programmatic pinning via test context
     Given a compiled feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a test receives a test flag context as a parameter
