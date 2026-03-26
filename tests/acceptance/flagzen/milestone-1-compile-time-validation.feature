@@ -42,7 +42,7 @@ Feature: Compile-time validation of features and variants
     Then compilation fails
     And the error states the variant class must implement the feature interface
 
-  @US-02 @pending
+  @US-02
   Scenario: Multi-feature variant registered for both features
     Given a feature interface "CheckoutFlow" with flag key "checkout-flow"
     And a feature interface "PaymentMethod" with flag key "payment-method"

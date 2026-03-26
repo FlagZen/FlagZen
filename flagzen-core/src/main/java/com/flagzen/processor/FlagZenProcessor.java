@@ -3,6 +3,7 @@ package com.flagzen.processor;
 import com.flagzen.FallbackStrategy;
 import com.flagzen.Feature;
 import com.flagzen.Variant;
+import com.flagzen.Variants;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -37,7 +38,8 @@ public class FlagZenProcessor extends AbstractProcessor {
     public Set<String> getSupportedAnnotationTypes() {
         return Set.of(
                 "com.flagzen.Feature",
-                "com.flagzen.Variant"
+                "com.flagzen.Variant",
+                "com.flagzen.Variants"
         );
     }
 
@@ -139,31 +141,45 @@ public class FlagZenProcessor extends AbstractProcessor {
 
     private List<VariantModel> collectVariants(RoundEnvironment roundEnv, TypeElement featureElement) {
         List<VariantModel> variants = new ArrayList<>();
-        for (Element element : roundEnv.getElementsAnnotatedWith(Variant.class)) {
-            Variant variantAnnotation = element.getAnnotation(Variant.class);
-            TypeMirror targetFeature = extractVariantOf(variantAnnotation);
 
-            if (targetFeature != null) {
-                TypeElement targetElement = (TypeElement) processingEnv.getTypeUtils()
-                        .asElement(targetFeature);
-                if (targetElement != null && targetElement.equals(featureElement)) {
-                    TypeElement variantElement = (TypeElement) element;
-                    if (!implementsInterface(variantElement, featureElement)) {
-                        processingEnv.getMessager().printMessage(
-                                Diagnostic.Kind.ERROR,
-                                "Variant class " + variantElement.getSimpleName()
-                                        + " must implement the feature interface "
-                                        + featureElement.getSimpleName(),
-                                variantElement
-                        );
-                        continue;
-                    }
-                    String qualifiedName = variantElement.getQualifiedName().toString();
-                    variants.add(new VariantModel(qualifiedName, variantAnnotation.value()));
-                }
+        for (Element element : roundEnv.getElementsAnnotatedWith(Variant.class)) {
+            processVariantAnnotation(element, element.getAnnotation(Variant.class), featureElement, variants);
+        }
+
+        for (Element element : roundEnv.getElementsAnnotatedWith(Variants.class)) {
+            Variants container = element.getAnnotation(Variants.class);
+            for (Variant variantAnnotation : container.value()) {
+                processVariantAnnotation(element, variantAnnotation, featureElement, variants);
             }
         }
+
         return variants;
+    }
+
+    private void processVariantAnnotation(Element element, Variant variantAnnotation,
+                                          TypeElement featureElement, List<VariantModel> variants) {
+        TypeMirror targetFeature = extractVariantOf(variantAnnotation);
+        if (targetFeature == null) {
+            return;
+        }
+        TypeElement targetElement = (TypeElement) processingEnv.getTypeUtils()
+                .asElement(targetFeature);
+        if (targetElement == null || !targetElement.equals(featureElement)) {
+            return;
+        }
+        TypeElement variantElement = (TypeElement) element;
+        if (!implementsInterface(variantElement, featureElement)) {
+            processingEnv.getMessager().printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "Variant class " + variantElement.getSimpleName()
+                            + " must implement the feature interface "
+                            + featureElement.getSimpleName(),
+                    variantElement
+            );
+            return;
+        }
+        String qualifiedName = variantElement.getQualifiedName().toString();
+        variants.add(new VariantModel(qualifiedName, variantAnnotation.value()));
     }
 
     private boolean implementsInterface(TypeElement variantElement, TypeElement featureElement) {

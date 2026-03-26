@@ -10,8 +10,10 @@ import io.cucumber.java.en.When;
 
 import javax.tools.JavaFileObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
@@ -33,12 +35,14 @@ public class CompileTimeSteps {
     private final List<JavaFileObject> sourceFiles = new ArrayList<>();
     private final List<String> variantNames = new ArrayList<>();
     private final Set<String> featureSourcesAdded = new HashSet<>();
+    private final Map<String, String> featureKeyMap = new HashMap<>();
     private Compilation compilation;
 
     @Given("a feature interface {string} with flag key {string}")
     public void aFeatureInterfaceWithFlagKey(String interfaceName, String key) {
         this.featureInterfaceName = interfaceName;
         this.flagKey = key;
+        this.featureKeyMap.put(interfaceName, key);
     }
 
     @Given("a feature interface {string} with flag key {string} and fallback strategy {word}")
@@ -129,6 +133,52 @@ public class CompileTimeSteps {
         assertThat(compilation).hadErrorContaining("must implement the feature interface");
     }
 
+    @And("a class {string} annotated for {string} with value {string} and for {string} with value {string}")
+    public void aClassAnnotatedForTwoFeatures(String className, String feature1, String value1, String feature2, String value2) {
+        ensureFeatureSourceExists(feature1);
+        ensureFeatureSourceExists(feature2);
+        variantNames.add(className);
+        sourceFiles.add(JavaFileObjects.forSourceString(
+                PACKAGE + "." + className,
+                """
+                package %s;
+
+                import com.flagzen.Variant;
+
+                @Variant(value = "%s", of = %s.class)
+                @Variant(value = "%s", of = %s.class)
+                public class %s implements %s, %s {
+                }
+                """.formatted(PACKAGE, value1, feature1, value2, feature2, className, feature1, feature2)
+        ));
+    }
+
+    @And("{string} implements both {string} and {string}")
+    public void implementsBothInterfaces(String className, String interface1, String interface2) {
+        // Already handled in the annotation step above - class source already includes implements clause
+    }
+
+    @And("{string} is registered for both {string} and {string}")
+    public void isRegisteredForBothFeatures(String className, String key1, String key2) {
+        String feature1 = featureKeyMap.entrySet().stream()
+                .filter(e -> e.getValue().equals(key1))
+                .map(Map.Entry::getKey)
+                .findFirst().orElseThrow();
+        String feature2 = featureKeyMap.entrySet().stream()
+                .filter(e -> e.getValue().equals(key2))
+                .map(Map.Entry::getKey)
+                .findFirst().orElseThrow();
+
+        assertThat(compilation)
+                .generatedSourceFile(PACKAGE + "." + feature1 + "_FlagZenMetadata")
+                .contentsAsUtf8String()
+                .contains(className);
+        assertThat(compilation)
+                .generatedSourceFile(PACKAGE + "." + feature2 + "_FlagZenMetadata")
+                .contentsAsUtf8String()
+                .contains(className);
+    }
+
     @When("the project compiles")
     public void theProjectCompiles() {
         compilation = javac()
@@ -205,6 +255,7 @@ public class CompileTimeSteps {
             return;
         }
         featureSourcesAdded.add(interfaceName);
+        String key = featureKeyMap.getOrDefault(interfaceName, flagKey);
         if (fallbackStrategy != null) {
             sourceFiles.add(JavaFileObjects.forSourceString(
                     PACKAGE + "." + interfaceName,
@@ -217,7 +268,7 @@ public class CompileTimeSteps {
                     @Feature(value = "%s", fallback = FallbackStrategy.%s)
                     public interface %s {
                     }
-                    """.formatted(PACKAGE, flagKey, fallbackStrategy, interfaceName)
+                    """.formatted(PACKAGE, key, fallbackStrategy, interfaceName)
             ));
         } else {
             sourceFiles.add(JavaFileObjects.forSourceString(
@@ -230,7 +281,7 @@ public class CompileTimeSteps {
                     @Feature("%s")
                     public interface %s {
                     }
-                    """.formatted(PACKAGE, flagKey, interfaceName)
+                    """.formatted(PACKAGE, key, interfaceName)
             ));
         }
     }
