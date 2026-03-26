@@ -135,6 +135,33 @@ public class CompileTimeSteps {
                 .contains("implements " + interfaceName);
     }
 
+    @Given("a class {string} annotated as a feature with key {string}")
+    public void aClassAnnotatedAsAFeatureWithKey(String className, String key) {
+        featureSourcesAdded.add(className);
+        sourceFiles.add(JavaFileObjects.forSourceString(
+                PACKAGE + "." + className,
+                """
+                package %s;
+
+                import com.flagzen.Feature;
+
+                @Feature("%s")
+                public class %s {
+                }
+                """.formatted(PACKAGE, key, className)
+        ));
+    }
+
+    @Then("compilation fails")
+    public void compilationFails() {
+        assertThat(compilation).failed();
+    }
+
+    @And("the error message states {string}")
+    public void theErrorMessageStates(String expectedMessage) {
+        assertThat(compilation).hadErrorContaining(expectedMessage);
+    }
+
     private void ensureFeatureSourceExists(String interfaceName) {
         if (featureSourcesAdded.contains(interfaceName)) {
             return;

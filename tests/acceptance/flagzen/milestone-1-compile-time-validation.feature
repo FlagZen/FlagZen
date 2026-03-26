@@ -15,7 +15,7 @@ Feature: Compile-time validation of features and variants
     Then compilation succeeds
     And "on" is accepted as a valid variant value
 
-  @US-01 @pending
+  @US-01
   Scenario: Feature annotation rejected on a class
     Given a class "CheckoutService" annotated as a feature with key "checkout-flow"
     When the project compiles
