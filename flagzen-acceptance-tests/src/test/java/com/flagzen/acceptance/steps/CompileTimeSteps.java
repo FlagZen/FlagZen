@@ -1,6 +1,7 @@
 package com.flagzen.acceptance.steps;
 
 import com.flagzen.processor.FlagZenProcessor;
+import com.google.common.truth.StringSubject;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import io.cucumber.java.en.And;
@@ -248,6 +249,36 @@ public class CompileTimeSteps {
     @And("the error message states {string}")
     public void theErrorMessageStates(String expectedMessage) {
         assertThat(compilation).hadErrorContaining(expectedMessage);
+    }
+
+    @And("a class {string} annotated as the default variant implementing {string}")
+    public void aClassAnnotatedAsTheDefaultVariantImplementing(String className, String interfaceName) {
+        ensureFeatureSourceExists(interfaceName);
+        variantNames.add(className);
+        sourceFiles.add(JavaFileObjects.forSourceString(
+                PACKAGE + "." + className,
+                """
+                package %s;
+
+                import com.flagzen.DefaultVariant;
+
+                @DefaultVariant(of = %s.class)
+                public class %s implements %s {
+                }
+                """.formatted(PACKAGE, interfaceName, className, interfaceName)
+        ));
+    }
+
+    @And("{string} is registered as the fallback for {string}")
+    public void isRegisteredAsTheFallbackFor(String className, String key) {
+        String feature = featureKeyMap.entrySet().stream()
+                .filter(e -> e.getValue().equals(key))
+                .map(Map.Entry::getKey)
+                .findFirst().orElseThrow();
+        assertThat(compilation)
+                .generatedSourceFile(PACKAGE + "." + feature + "_FlagZenMetadata")
+                .contentsAsUtf8String()
+                .contains(className + "::new");
     }
 
     private void ensureFeatureSourceExists(String interfaceName) {

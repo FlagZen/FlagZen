@@ -223,9 +223,13 @@ final class ProxyGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(supplierType);
 
-        // For now, no @DefaultVariant detection — return null
-        // TODO: enhance when @DefaultVariant support is wired in the processor
-        builder.addStatement("return null");
+        if (model.defaultVariantClassName() != null) {
+            builder.addStatement("return ($T) $T::new",
+                    supplierType,
+                    ClassName.bestGuess(model.defaultVariantClassName()));
+        } else {
+            builder.addStatement("return null");
+        }
 
         return builder.build();
     }

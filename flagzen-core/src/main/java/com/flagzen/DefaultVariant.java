@@ -11,4 +11,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)
 public @interface DefaultVariant {
+    /** The feature interface this default variant belongs to. */
+    Class<?> of() default void.class;
 }

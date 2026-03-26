@@ -15,15 +15,18 @@ final class FeatureModel {
     private final List<MethodModel> methods;
     private final List<VariantModel> variants;
 
+    private final String defaultVariantClassName;
+
     FeatureModel(String packageName, String interfaceName, String flagKey,
                  FallbackStrategy fallbackStrategy, List<MethodModel> methods,
-                 List<VariantModel> variants) {
+                 List<VariantModel> variants, String defaultVariantClassName) {
         this.packageName = packageName;
         this.interfaceName = interfaceName;
         this.flagKey = flagKey;
         this.fallbackStrategy = fallbackStrategy;
         this.methods = methods;
         this.variants = variants;
+        this.defaultVariantClassName = defaultVariantClassName;
     }
 
     String packageName() { return packageName; }
@@ -32,6 +35,7 @@ final class FeatureModel {
     FallbackStrategy fallbackStrategy() { return fallbackStrategy; }
     List<MethodModel> methods() { return methods; }
     List<VariantModel> variants() { return variants; }
+    String defaultVariantClassName() { return defaultVariantClassName; }
 
     String proxyClassName() {
         return interfaceName + "_FlagZenProxy";

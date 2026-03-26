@@ -52,7 +52,7 @@ Feature: Compile-time validation of features and variants
     Then compilation succeeds
     And "PremiumCreditCheckout" is registered for both "checkout-flow" and "payment-method"
 
-  @US-02 @pending
+  @US-02
   Scenario: Default variant registered as fallback
     Given a feature interface "CheckoutFlow" with flag key "checkout-flow"
     And a class "DefaultCheckout" annotated as the default variant implementing "CheckoutFlow"

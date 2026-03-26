@@ -1,5 +1,6 @@
 package com.flagzen.processor;
 
+import com.flagzen.DefaultVariant;
 import com.flagzen.FallbackStrategy;
 import com.flagzen.Feature;
 import com.flagzen.Variant;
@@ -39,7 +40,8 @@ public class FlagZenProcessor extends AbstractProcessor {
         return Set.of(
                 "com.flagzen.Feature",
                 "com.flagzen.Variant",
-                "com.flagzen.Variants"
+                "com.flagzen.Variants",
+                "com.flagzen.DefaultVariant"
         );
     }
 
@@ -92,10 +94,11 @@ public class FlagZenProcessor extends AbstractProcessor {
             }
 
             List<VariantModel> variants = collectVariants(roundEnv, featureElement);
+            String defaultVariantClassName = findDefaultVariant(roundEnv, featureElement);
 
             FeatureModel model = new FeatureModel(
                     packageName, interfaceName, flagKey,
-                    fallbackStrategy, methods, variants
+                    fallbackStrategy, methods, variants, defaultVariantClassName
             );
 
             try {
@@ -136,6 +139,47 @@ public class FlagZenProcessor extends AbstractProcessor {
                     Diagnostic.Kind.WARNING,
                     "Failed to write service file: " + e.getMessage()
             );
+        }
+    }
+
+    private String findDefaultVariant(RoundEnvironment roundEnv, TypeElement featureElement) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(DefaultVariant.class)) {
+            DefaultVariant annotation = element.getAnnotation(DefaultVariant.class);
+            TypeMirror targetFeature = extractDefaultVariantOf(annotation);
+            if (targetFeature == null) {
+                continue;
+            }
+            TypeElement targetElement = (TypeElement) processingEnv.getTypeUtils()
+                    .asElement(targetFeature);
+            if (targetElement == null || !targetElement.equals(featureElement)) {
+                continue;
+            }
+            TypeElement defaultElement = (TypeElement) element;
+            if (!implementsInterface(defaultElement, featureElement)) {
+                processingEnv.getMessager().printMessage(
+                        Diagnostic.Kind.ERROR,
+                        "Default variant class " + defaultElement.getSimpleName()
+                                + " must implement the feature interface "
+                                + featureElement.getSimpleName(),
+                        defaultElement
+                );
+                continue;
+            }
+            return defaultElement.getQualifiedName().toString();
+        }
+        return null;
+    }
+
+    private TypeMirror extractDefaultVariantOf(DefaultVariant annotation) {
+        try {
+            annotation.of();
+            return null;
+        } catch (MirroredTypeException e) {
+            TypeMirror mirror = e.getTypeMirror();
+            if (mirror.toString().equals("void")) {
+                return null;
+            }
+            return mirror;
         }
     }
 
