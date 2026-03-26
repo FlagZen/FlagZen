@@ -22,6 +22,16 @@ public class TestFlagContext {
     }
 
     /**
+     * Creates a new TestFlagContext for programmatic use.
+     * Prefer {@link PinFlag} annotations with {@link FlagZenExtension} for declarative pinning.
+     *
+     * @return a new context with an empty in-memory flag provider
+     */
+    public static TestFlagContext create() {
+        return new TestFlagContext(new InMemoryFlagProvider());
+    }
+
+    /**
      * Pins a flag key to a specific value for the duration of the test.
      *
      * @param key the flag key
