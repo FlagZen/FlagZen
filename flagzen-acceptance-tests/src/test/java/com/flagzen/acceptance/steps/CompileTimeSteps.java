@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
@@ -437,6 +438,108 @@ public class CompileTimeSteps {
                 PACKAGE + "." + featureInterfaceName + "_FlagZenProxy");
         org.assertj.core.api.Assertions.assertThat(proxyFile).isPresent();
         generatedProxySource = proxyFile.get().getCharContent(false).toString();
+    }
+
+    // --- US-04 @property: one proxy per feature ---
+
+    private final List<String> propertyFeatureNames = new ArrayList<>();
+
+    @Given("any valid feature interface with at least one variant")
+    public void anyValidFeatureInterfaceWithAtLeastOneVariant() {
+        // Compile two distinct features, each with at least one variant
+        propertyFeatureNames.clear();
+        propertyFeatureNames.add("CheckoutFlow");
+        propertyFeatureNames.add("DarkMode");
+
+        sourceFiles.add(JavaFileObjects.forSourceString(
+                PACKAGE + ".CheckoutFlow",
+                """
+                package %s;
+
+                import com.flagzen.Feature;
+
+                @Feature("checkout-flow")
+                public interface CheckoutFlow {
+                }
+                """.formatted(PACKAGE)
+        ));
+        featureSourcesAdded.add("CheckoutFlow");
+        featureKeyMap.put("CheckoutFlow", "checkout-flow");
+
+        sourceFiles.add(JavaFileObjects.forSourceString(
+                PACKAGE + ".ClassicCheckout",
+                """
+                package %s;
+
+                import com.flagzen.Variant;
+
+                @Variant(value = "CLASSIC", of = CheckoutFlow.class)
+                public class ClassicCheckout implements CheckoutFlow {
+                }
+                """.formatted(PACKAGE)
+        ));
+
+        sourceFiles.add(JavaFileObjects.forSourceString(
+                PACKAGE + ".DarkMode",
+                """
+                package %s;
+
+                import com.flagzen.Feature;
+
+                @Feature("dark-mode")
+                public interface DarkMode {
+                }
+                """.formatted(PACKAGE)
+        ));
+        featureSourcesAdded.add("DarkMode");
+        featureKeyMap.put("DarkMode", "dark-mode");
+
+        sourceFiles.add(JavaFileObjects.forSourceString(
+                PACKAGE + ".DarkModeOn",
+                """
+                package %s;
+
+                import com.flagzen.Variant;
+
+                @Variant(value = "ON", of = DarkMode.class)
+                public class DarkModeOn implements DarkMode {
+                }
+                """.formatted(PACKAGE)
+        ));
+    }
+
+    @Then("exactly one proxy class is generated per feature interface")
+    public void exactlyOneProxyClassIsGeneratedPerFeatureInterface() {
+        assertThat(compilation).succeeded();
+
+        for (String feature : propertyFeatureNames) {
+            // Exactly one proxy exists for each feature
+            Optional<JavaFileObject> proxy = compilation.generatedSourceFile(
+                    PACKAGE + "." + feature + "_FlagZenProxy");
+            org.assertj.core.api.Assertions.assertThat(proxy)
+                    .as("Proxy for " + feature)
+                    .isPresent();
+
+            // No second proxy (e.g., _FlagZenProxy2)
+            Optional<JavaFileObject> secondProxy = compilation.generatedSourceFile(
+                    PACKAGE + "." + feature + "_FlagZenProxy2");
+            org.assertj.core.api.Assertions.assertThat(secondProxy)
+                    .as("No duplicate proxy for " + feature)
+                    .isEmpty();
+        }
+    }
+
+    @And("each proxy implements its corresponding feature interface")
+    public void eachProxyImplementsItsCorrespondingFeatureInterface() throws Exception {
+        for (String feature : propertyFeatureNames) {
+            Optional<JavaFileObject> proxy = compilation.generatedSourceFile(
+                    PACKAGE + "." + feature + "_FlagZenProxy");
+            org.assertj.core.api.Assertions.assertThat(proxy).isPresent();
+            String source = proxy.get().getCharContent(false).toString();
+            org.assertj.core.api.Assertions.assertThat(source)
+                    .as("Proxy for %s implements %s".formatted(feature, feature))
+                    .contains("implements " + feature);
+        }
     }
 
     private String buildVariantEnumBlock() {

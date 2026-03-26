@@ -118,7 +118,7 @@ Feature: Compile-time validation of features and variants
     Then it contains no reflection imports
     And dispatch uses direct method calls or map lookups
 
-  @US-04 @property @pending
+  @US-04 @property
   Scenario: Every feature interface produces exactly one proxy
     Given any valid feature interface with at least one variant
     When the project compiles
