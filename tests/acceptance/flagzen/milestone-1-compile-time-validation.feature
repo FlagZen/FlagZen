@@ -81,7 +81,7 @@ Feature: Compile-time validation of features and variants
     Then compilation fails
     And the error identifies both "ClassicCheckout" and "LegacyCheckout" as conflicting
 
-  @US-03 @pending
+  @US-03
   Scenario: REQUIRED strategy with incomplete variant coverage is rejected
     Given a feature interface "CheckoutFlow" with flag key "checkout-flow" and fallback strategy REQUIRED
     And an inner Variant enum with values "CLASSIC", "STREAMLINED", "PREMIUM"

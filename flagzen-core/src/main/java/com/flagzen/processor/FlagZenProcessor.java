@@ -106,6 +106,14 @@ public class FlagZenProcessor extends AbstractProcessor {
                 validateVariantValuesAgainstEnum(variants, variantEnumValues, interfaceName, roundEnv);
             }
 
+            if (fallbackStrategy == FallbackStrategy.REQUIRED
+                    && !variantEnumValues.isEmpty()
+                    && defaultVariantClassName == null) {
+                if (hasIncompleteVariantCoverage(variants, variantEnumValues, flagKey, featureElement)) {
+                    continue;
+                }
+            }
+
             FeatureModel model = new FeatureModel(
                     packageName, interfaceName, flagKey,
                     fallbackStrategy, methods, variants, defaultVariantClassName
@@ -291,6 +299,29 @@ public class FlagZenProcessor extends AbstractProcessor {
                 );
             }
         }
+    }
+
+    private boolean hasIncompleteVariantCoverage(List<VariantModel> variants,
+                                                  List<String> variantEnumValues,
+                                                  String flagKey,
+                                                  TypeElement featureElement) {
+        Set<String> coveredValues = new java.util.HashSet<>();
+        for (VariantModel variant : variants) {
+            coveredValues.add(variant.variantValue());
+        }
+        boolean incomplete = false;
+        for (String enumValue : variantEnumValues) {
+            if (!coveredValues.contains(enumValue)) {
+                processingEnv.getMessager().printMessage(
+                        Diagnostic.Kind.ERROR,
+                        "Feature \"" + flagKey + "\" uses REQUIRED fallback but variant "
+                                + enumValue + " has no implementation.",
+                        featureElement
+                );
+                incomplete = true;
+            }
+        }
+        return incomplete;
     }
 
     private boolean hasDuplicateVariantValues(List<VariantModel> variants, String flagKey,

@@ -299,6 +299,12 @@ public class CompileTimeSteps {
         assertThat(compilation).hadErrorContaining("Valid values: " + val1 + ", " + val2 + ", " + val3);
     }
 
+    @And("the error lists {string} as missing an implementation")
+    public void theErrorListsValueAsMissingAnImplementation(String missingValue) {
+        assertThat(compilation).hadErrorContaining(missingValue);
+        assertThat(compilation).hadErrorContaining("has no implementation");
+    }
+
     @And("the error identifies both {string} and {string} as conflicting")
     public void theErrorIdentifiesBothAsConflicting(String class1, String class2) {
         assertThat(compilation).hadErrorContaining(class1);
