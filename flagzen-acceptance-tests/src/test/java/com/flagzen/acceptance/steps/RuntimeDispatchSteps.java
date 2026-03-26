@@ -20,6 +20,7 @@ public class RuntimeDispatchSteps {
     private InMemoryFlagProvider flagProvider;
     private FeatureDispatcher dispatcher;
     private CheckoutFlow resolvedProxy;
+    private CheckoutFlow secondResolvedProxy;
     private String callResult;
 
     @Given("a compiled feature {string} with variants {string} and {string}")
@@ -69,6 +70,24 @@ public class RuntimeDispatchSteps {
     @And("calls {string} on the resolved proxy")
     public void callsOnTheResolvedProxy(String methodName) {
         callResult = resolvedProxy.execute();
+    }
+
+    @When("the developer resolves {string} through the dispatcher twice")
+    public void theDeveloperResolvesThroughTheDispatcherTwice(String featureName) {
+        if (flagProvider == null) {
+            flagProvider = new InMemoryFlagProvider();
+            flagProvider.set("checkout-flow", "CLASSIC");
+        }
+        if (dispatcher == null) {
+            dispatcher = new DefaultFeatureDispatcher(flagProvider);
+        }
+        resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
+        secondResolvedProxy = dispatcher.resolve(CheckoutFlow.class);
+    }
+
+    @Then("both resolutions return the same proxy instance")
+    public void bothResolutionsReturnTheSameProxyInstance() {
+        assertThat(resolvedProxy).isSameAs(secondResolvedProxy);
     }
 
     @Then("the call is handled by the {string} variant")

@@ -15,7 +15,7 @@ Feature: Runtime dispatch and fallback strategies
     And the developer calls "execute" on the same proxy
     Then the call is handled by the "PremiumCheckout" variant
 
-  @US-05 @pending
+  @US-05
   Scenario: Dispatcher returns the same proxy instance for repeated resolutions
     Given a compiled feature "CheckoutFlow" with variants "CLASSIC" and "STREAMLINED"
     When the developer resolves "CheckoutFlow" through the dispatcher twice
