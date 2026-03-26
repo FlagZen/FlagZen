@@ -52,7 +52,7 @@ Feature: Testing support for flag-dependent code
     When a test in the class resolves "CheckoutFlow"
     Then the resolved proxy delegates to "ClassicCheckout"
 
-  @US-08 @pending
+  @US-08
   Scenario: Pin annotation overrides file-based flag source
     Given a properties file containing "checkout-flow=CLASSIC"
     And a test class configured to load flags from this file

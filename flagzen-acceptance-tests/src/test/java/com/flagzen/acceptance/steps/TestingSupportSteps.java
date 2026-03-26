@@ -43,8 +43,10 @@ public class TestingSupportSteps {
 
     @When("the test resolves {string}")
     public void theTestResolvesFeature(String featureName) {
-        testFlagContext = TestFlagContext.create();
-        testFlagContext.pin(pinnedFlagKey, pinnedFlagValue);
+        if (testFlagContext == null) {
+            testFlagContext = TestFlagContext.create();
+            testFlagContext.pin(pinnedFlagKey, pinnedFlagValue);
+        }
         resolvedProxy = testFlagContext.resolve(CheckoutFlow.class);
         SharedProxyHolder.set(resolvedProxy);
     }
@@ -137,7 +139,12 @@ public class TestingSupportSteps {
 
     @Given("a test method that pins {string} to {string}")
     public void aTestMethodThatPinsTo(String flagKey, String variant) {
-        testFlagContext = TestFlagContext.create();
+        // If @FlagSource already loaded a context, simulate @PinFlag overriding it
+        if (flagSourceContext != null) {
+            testFlagContext = flagSourceContext;
+        } else {
+            testFlagContext = TestFlagContext.create();
+        }
         testFlagContext.pin(flagKey, variant);
     }
 
@@ -190,6 +197,15 @@ public class TestingSupportSteps {
     public void aTestInTheClassResolvesFeature(String featureName) {
         resolvedProxy = flagSourceContext.resolve(CheckoutFlow.class);
         SharedProxyHolder.set(resolvedProxy);
+    }
+
+    @Then("other tests in the class still resolve to {string}")
+    public void otherTestsInTheClassStillResolveTo(String variantClass) {
+        // Simulate another test in the same @FlagSource class without @PinFlag:
+        // A fresh context from the same properties file should resolve to the file value
+        TestFlagContext otherTestContext = TestFlagContext.createFromProperties(propertiesFileName);
+        CheckoutFlow otherProxy = otherTestContext.resolve(CheckoutFlow.class);
+        assertThat(otherProxy.execute()).isEqualTo(variantClass);
     }
 
     private Class<?> resolveFeatureType(String featureName) {
