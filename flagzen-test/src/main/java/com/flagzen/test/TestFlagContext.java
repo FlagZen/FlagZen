@@ -4,6 +4,10 @@ import com.flagzen.FeatureDispatcher;
 import com.flagzen.internal.DefaultFeatureDispatcher;
 import com.flagzen.internal.InMemoryFlagProvider;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 /**
  * Programmatic API for pinning flag values in tests.
  * Wraps an {@link InMemoryFlagProvider} and a test-scoped {@link FeatureDispatcher}.
@@ -29,6 +33,37 @@ public class TestFlagContext {
      */
     public static TestFlagContext create() {
         return new TestFlagContext(new InMemoryFlagProvider());
+    }
+
+    /**
+     * Creates a TestFlagContext pre-populated with flag values from a classpath properties file.
+     *
+     * @param classpathResource the classpath resource path to the properties file
+     * @return a new context with flags loaded from the properties file
+     */
+    public static TestFlagContext createFromProperties(String classpathResource) {
+        InMemoryFlagProvider flagProvider = new InMemoryFlagProvider();
+        Properties properties = loadProperties(classpathResource);
+        properties.forEach((key, value) -> flagProvider.set(key.toString(), value.toString()));
+        return new TestFlagContext(flagProvider);
+    }
+
+    private static Properties loadProperties(String classpathResource) {
+        Properties properties = new Properties();
+        InputStream stream = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(classpathResource);
+        if (stream == null) {
+            throw new IllegalArgumentException(
+                    "Flag source file not found on classpath: " + classpathResource
+                            + ". Searched in classpath root and META-INF/.");
+        }
+        try (stream) {
+            properties.load(stream);
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    "Failed to load flag source file: " + classpathResource, e);
+        }
+        return properties;
     }
 
     /**

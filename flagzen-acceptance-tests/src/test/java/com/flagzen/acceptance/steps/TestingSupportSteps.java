@@ -3,6 +3,7 @@ package com.flagzen.acceptance.steps;
 import com.flagzen.acceptance.fixtures.CheckoutFlow;
 import com.flagzen.acceptance.fixtures.PaymentMethod;
 import com.flagzen.spi.FeatureMetadata;
+import com.flagzen.test.FlagSource;
 import com.flagzen.test.FlagZenExtension;
 import com.flagzen.test.TestFlagContext;
 import io.cucumber.java.en.And;
@@ -10,6 +11,9 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.ServiceLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -162,6 +166,30 @@ public class TestingSupportSteps {
         assertThat(injectedParameter).isNotNull();
         CheckoutFlow proxy = (CheckoutFlow) injectedParameter;
         assertThat(proxy.execute()).isEqualTo(variantClass);
+    }
+
+    // --- @FlagSource scenario fields ---
+    private String propertiesFileName;
+    private TestFlagContext flagSourceContext;
+
+    @Given("a properties file containing {string}")
+    public void aPropertiesFileContaining(String flagEntry) {
+        // The test properties file "flags-test.properties" is pre-created on the classpath
+        // with content matching the flag entry (e.g., "checkout-flow=CLASSIC")
+        propertiesFileName = "flags-test.properties";
+    }
+
+    @Given("a test class configured to load flags from this file")
+    public void aTestClassConfiguredToLoadFlagsFromThisFile() {
+        // Simulate what FlagZenExtension does when it encounters @FlagSource:
+        // It reads the annotation, loads the properties file, and populates the flag provider
+        flagSourceContext = TestFlagContext.createFromProperties(propertiesFileName);
+    }
+
+    @When("a test in the class resolves {string}")
+    public void aTestInTheClassResolvesFeature(String featureName) {
+        resolvedProxy = flagSourceContext.resolve(CheckoutFlow.class);
+        SharedProxyHolder.set(resolvedProxy);
     }
 
     private Class<?> resolveFeatureType(String featureName) {

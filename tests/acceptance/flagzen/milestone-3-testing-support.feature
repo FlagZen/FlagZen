@@ -44,7 +44,7 @@ Feature: Testing support for flag-dependent code
 
   # --- US-08: @FlagSource ---
 
-  @US-08 @pending
+  @US-08
   Scenario: Flags loaded from properties file for test class
     Given a compiled feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a properties file containing "checkout-flow=CLASSIC"

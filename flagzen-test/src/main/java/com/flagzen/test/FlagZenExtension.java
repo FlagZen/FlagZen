@@ -39,12 +39,20 @@ public class FlagZenExtension implements BeforeEachCallback, AfterEachCallback, 
 
     @Override
     public void beforeEach(ExtensionContext context) {
-        InMemoryFlagProvider flagProvider = new InMemoryFlagProvider();
-        TestFlagContext testFlagContext = new TestFlagContext(flagProvider);
+        TestFlagContext testFlagContext = createContextFromFlagSource(context);
 
         context.getTestMethod().ifPresent(method -> applyPinFlags(method, testFlagContext));
 
         context.getStore(NAMESPACE).put(CONTEXT_KEY, testFlagContext);
+    }
+
+    private TestFlagContext createContextFromFlagSource(ExtensionContext context) {
+        Class<?> testClass = context.getRequiredTestClass();
+        FlagSource flagSource = testClass.getAnnotation(FlagSource.class);
+        if (flagSource != null) {
+            return TestFlagContext.createFromProperties(flagSource.value());
+        }
+        return new TestFlagContext(new InMemoryFlagProvider());
     }
 
     @Override
