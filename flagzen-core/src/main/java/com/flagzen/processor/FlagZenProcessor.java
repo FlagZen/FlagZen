@@ -61,80 +61,95 @@ public class FlagZenProcessor extends AbstractProcessor {
         }
 
         for (Element element : roundEnv.getElementsAnnotatedWith(Feature.class)) {
-            if (element.getKind() != ElementKind.INTERFACE) {
-                processingEnv.getMessager().printMessage(
-                        Diagnostic.Kind.ERROR,
-                        "@Feature can only be applied to interfaces",
-                        element
-                );
-                continue;
-            }
-
-            TypeElement featureElement = (TypeElement) element;
-            Feature featureAnnotation = featureElement.getAnnotation(Feature.class);
-
-            String packageName = getPackageName(featureElement);
-            String interfaceName = featureElement.getSimpleName().toString();
-            String flagKey = featureAnnotation.value();
-            FallbackStrategy fallbackStrategy = featureAnnotation.fallback();
-
-            List<MethodModel> methods = new ArrayList<>();
-            for (Element enclosed : featureElement.getEnclosedElements()) {
-                if (enclosed.getKind() == ElementKind.METHOD) {
-                    ExecutableElement methodElement = (ExecutableElement) enclosed;
-                    String methodName = methodElement.getSimpleName().toString();
-                    String returnType = methodElement.getReturnType().toString();
-
-                    List<MethodModel.ParameterModel> params = new ArrayList<>();
-                    for (VariableElement param : methodElement.getParameters()) {
-                        params.add(new MethodModel.ParameterModel(
-                                param.asType().toString(),
-                                param.getSimpleName().toString()
-                        ));
-                    }
-                    methods.add(new MethodModel(methodName, returnType, params));
-                }
-            }
-
-            List<VariantModel> variants = collectVariants(roundEnv, featureElement);
-            if (hasDuplicateVariantValues(variants, flagKey, featureElement)) {
-                continue;
-            }
-            String defaultVariantClassName = findDefaultVariant(roundEnv, featureElement);
-
-            List<String> variantEnumValues = collectVariantEnumValues(featureElement);
-            if (!variantEnumValues.isEmpty()) {
-                validateVariantValuesAgainstEnum(variants, variantEnumValues, interfaceName, roundEnv);
-            }
-
-            if (fallbackStrategy == FallbackStrategy.REQUIRED
-                    && !variantEnumValues.isEmpty()
-                    && defaultVariantClassName == null) {
-                if (hasIncompleteVariantCoverage(variants, variantEnumValues, flagKey, featureElement)) {
-                    continue;
-                }
-            }
-
-            FeatureModel model = new FeatureModel(
-                    packageName, interfaceName, flagKey,
-                    fallbackStrategy, methods, variants, defaultVariantClassName
-            );
-
-            try {
-                proxyGenerator.generateProxy(model)
-                        .writeTo(processingEnv.getFiler());
-                proxyGenerator.generateMetadata(model)
-                        .writeTo(processingEnv.getFiler());
-                metadataClassNames.add(packageName + "." + model.metadataClassName());
-            } catch (IOException e) {
-                processingEnv.getMessager().printMessage(
-                        Diagnostic.Kind.ERROR,
-                        "Failed to generate proxy: " + e.getMessage(),
-                        featureElement
-                );
-            }
+            processFeatureElement(element, roundEnv);
         }
         return true;
+    }
+
+    private void processFeatureElement(Element element, RoundEnvironment roundEnv) {
+        if (element.getKind() != ElementKind.INTERFACE) {
+            processingEnv.getMessager().printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "@Feature can only be applied to interfaces",
+                    element
+            );
+            return;
+        }
+
+        TypeElement featureElement = (TypeElement) element;
+        Feature featureAnnotation = featureElement.getAnnotation(Feature.class);
+
+        String packageName = getPackageName(featureElement);
+        String interfaceName = featureElement.getSimpleName().toString();
+        String flagKey = featureAnnotation.value();
+        FallbackStrategy fallbackStrategy = featureAnnotation.fallback();
+
+        List<MethodModel> methods = extractMethods(featureElement);
+
+        List<VariantModel> variants = collectVariants(roundEnv, featureElement);
+        if (hasDuplicateVariantValues(variants, flagKey, featureElement)) {
+            return;
+        }
+        String defaultVariantClassName = findDefaultVariant(roundEnv, featureElement);
+
+        List<String> variantEnumValues = collectVariantEnumValues(featureElement);
+        if (!variantEnumValues.isEmpty()) {
+            validateVariantValuesAgainstEnum(variants, variantEnumValues, interfaceName, roundEnv);
+        }
+
+        if (fallbackStrategy == FallbackStrategy.REQUIRED
+                && !variantEnumValues.isEmpty()
+                && defaultVariantClassName == null) {
+            if (hasIncompleteVariantCoverage(variants, variantEnumValues, flagKey, featureElement)) {
+                return;
+            }
+        }
+
+        FeatureModel model = new FeatureModel(
+                packageName, interfaceName, flagKey,
+                fallbackStrategy, methods, variants, defaultVariantClassName
+        );
+
+        generateCode(model, featureElement);
+    }
+
+    private List<MethodModel> extractMethods(TypeElement featureElement) {
+        List<MethodModel> methods = new ArrayList<>();
+        for (Element enclosed : featureElement.getEnclosedElements()) {
+            if (enclosed.getKind() != ElementKind.METHOD) {
+                continue;
+            }
+            ExecutableElement methodElement = (ExecutableElement) enclosed;
+            List<MethodModel.ParameterModel> params = new ArrayList<>();
+            for (VariableElement param : methodElement.getParameters()) {
+                params.add(new MethodModel.ParameterModel(
+                        param.asType().toString(),
+                        param.getSimpleName().toString()
+                ));
+            }
+            methods.add(new MethodModel(
+                    methodElement.getSimpleName().toString(),
+                    methodElement.getReturnType().toString(),
+                    params
+            ));
+        }
+        return methods;
+    }
+
+    private void generateCode(FeatureModel model, TypeElement featureElement) {
+        try {
+            proxyGenerator.generateProxy(model)
+                    .writeTo(processingEnv.getFiler());
+            proxyGenerator.generateMetadata(model)
+                    .writeTo(processingEnv.getFiler());
+            metadataClassNames.add(model.packageName() + "." + model.metadataClassName());
+        } catch (IOException e) {
+            processingEnv.getMessager().printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "Failed to generate proxy: " + e.getMessage(),
+                    featureElement
+            );
+        }
     }
 
     private void writeServiceFile() {

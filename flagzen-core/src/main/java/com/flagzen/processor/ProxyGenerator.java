@@ -17,6 +17,7 @@ import javax.lang.model.element.Modifier;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Generates {Feature}_FlagZenProxy and {Feature}_FlagZenMetadata classes using JavaPoet.
@@ -184,12 +185,9 @@ final class ProxyGenerator {
             builder.addParameter(resolveTypeName(param.type()), param.name());
         }
 
-        // Build parameter names for delegation
-        StringBuilder paramNames = new StringBuilder();
-        for (int i = 0; i < method.parameters().size(); i++) {
-            if (i > 0) paramNames.append(", ");
-            paramNames.append(method.parameters().get(i).name());
-        }
+        String paramNames = method.parameters().stream()
+                .map(MethodModel.ParameterModel::name)
+                .collect(Collectors.joining(", "));
 
         if (fallbackStrategy == FallbackStrategy.NOOP) {
             buildNoopDispatch(builder, method, interfaceType, paramNames.toString());
