@@ -21,7 +21,7 @@ Feature: Runtime dispatch and fallback strategies
     When the developer resolves "CheckoutFlow" through the dispatcher twice
     Then both resolutions return the same proxy instance
 
-  @US-05 @pending
+  @US-05
   Scenario: Resolution fails clearly when no flag provider is configured
     Given no flag provider is configured
     When the developer resolves "CheckoutFlow" through the dispatcher

@@ -1,6 +1,7 @@
 package com.flagzen.acceptance.steps;
 
 import com.flagzen.FeatureDispatcher;
+import com.flagzen.FlagZen;
 import com.flagzen.acceptance.fixtures.CheckoutFlow;
 import com.flagzen.internal.DefaultFeatureDispatcher;
 import com.flagzen.internal.InMemoryFlagProvider;
@@ -12,8 +13,7 @@ import io.cucumber.java.en.When;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Step definitions for walking skeleton scenario 2:
- * "Developer resolves a feature to the active variant at runtime"
+ * Step definitions for runtime dispatch scenarios.
  */
 public class RuntimeDispatchSteps {
 
@@ -22,6 +22,13 @@ public class RuntimeDispatchSteps {
     private CheckoutFlow resolvedProxy;
     private CheckoutFlow secondResolvedProxy;
     private String callResult;
+    private Exception caughtException;
+    private boolean noProviderConfigured;
+
+    @Given("no flag provider is configured")
+    public void noFlagProviderIsConfigured() {
+        noProviderConfigured = true;
+    }
 
     @Given("a compiled feature {string} with variants {string} and {string}")
     public void aCompiledFeatureWithVariants(String featureName, String variant1, String variant2) {
@@ -64,7 +71,14 @@ public class RuntimeDispatchSteps {
 
     @When("the developer resolves {string} through the dispatcher")
     public void theDeveloperResolvesThroughTheDispatcher(String featureName) {
-        resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
+        try {
+            if (noProviderConfigured) {
+                dispatcher = FlagZen.dispatcher(config -> { /* no provider */ });
+            }
+            resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
+        } catch (Exception e) {
+            caughtException = e;
+        }
     }
 
     @And("calls {string} on the resolved proxy")
@@ -93,5 +107,23 @@ public class RuntimeDispatchSteps {
     @Then("the call is handled by the {string} variant")
     public void theCallIsHandledByTheVariant(String variantClass) {
         assertThat(callResult).isEqualTo(variantClass);
+    }
+
+    @Then("a configuration error is raised")
+    public void aConfigurationErrorIsRaised() {
+        assertThat(caughtException).isNotNull();
+        assertThat(caughtException).isInstanceOf(com.flagzen.FlagZenException.class);
+    }
+
+    @Then("the message states no flag provider is configured")
+    public void theMessageStatesNoFlagProviderIsConfigured() {
+        assertThat(caughtException.getMessage())
+                .containsIgnoringCase("no flagprovider configured");
+    }
+
+    @Then("the message suggests how to add one")
+    public void theMessageSuggestsHowToAddOne() {
+        assertThat(caughtException.getMessage())
+                .containsIgnoringCase("provider");
     }
 }
