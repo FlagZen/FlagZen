@@ -6,7 +6,7 @@ Feature: Compile-time validation of features and variants
 
   # --- US-01: @Feature annotation ---
 
-  @US-01 @pending
+  @US-01
   Scenario: Feature defined without variant enum accepts free-form values
     Given a feature interface "DarkMode" with flag key "dark-mode"
     And no inner Variant enum is defined on "DarkMode"
