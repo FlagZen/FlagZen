@@ -28,6 +28,28 @@ public class RuntimeDispatchSteps {
         // (CheckoutFlowMetadata in META-INF/services)
     }
 
+    @And("the flag provider returns {string} for {string}")
+    public void theFlagProviderReturnsForKey(String flagValue, String flagKey) {
+        flagProvider = new InMemoryFlagProvider();
+        flagProvider.set(flagKey, flagValue);
+        dispatcher = new DefaultFeatureDispatcher(flagProvider);
+    }
+
+    @And("the developer has resolved {string} through the dispatcher")
+    public void theDeveloperHasResolvedThroughTheDispatcher(String featureName) {
+        resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
+    }
+
+    @When("the flag provider value changes to {string}")
+    public void theFlagProviderValueChangesTo(String newValue) {
+        flagProvider.set("checkout-flow", newValue);
+    }
+
+    @And("the developer calls {string} on the same proxy")
+    public void theDeveloperCallsOnTheSameProxy(String methodName) {
+        callResult = resolvedProxy.execute();
+    }
+
     @And("an in-memory flag provider with {string} set to {string}")
     public void anInMemoryFlagProviderWithSetTo(String flagKey, String flagValue) {
         flagProvider = new InMemoryFlagProvider();

@@ -6,7 +6,7 @@ Feature: Runtime dispatch and fallback strategies
 
   # --- US-05: Runtime resolution ---
 
-  @US-05 @pending
+  @US-05
   Scenario: Proxy follows runtime flag value changes
     Given a compiled feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And the flag provider returns "CLASSIC" for "checkout-flow"
