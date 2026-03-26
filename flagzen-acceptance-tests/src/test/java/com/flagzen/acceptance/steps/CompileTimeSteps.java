@@ -282,6 +282,24 @@ public class CompileTimeSteps {
                 .contains(className + "::new");
     }
 
+    @And("a default variant {string} implementing {string}")
+    public void aDefaultVariantImplementing(String className, String interfaceName) {
+        ensureFeatureSourceExists(interfaceName);
+        variantNames.add(className);
+        sourceFiles.add(JavaFileObjects.forSourceString(
+                PACKAGE + "." + className,
+                """
+                package %s;
+
+                import com.flagzen.DefaultVariant;
+
+                @DefaultVariant(of = %s.class)
+                public class %s implements %s {
+                }
+                """.formatted(PACKAGE, interfaceName, className, interfaceName)
+        ));
+    }
+
     @And("an inner Variant enum with values {string}, {string}, {string}")
     public void anInnerVariantEnumWithValues(String val1, String val2, String val3) {
         this.variantEnumValues = List.of(val1, val2, val3);

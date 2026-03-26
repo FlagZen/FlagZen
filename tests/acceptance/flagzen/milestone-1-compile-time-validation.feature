@@ -91,7 +91,7 @@ Feature: Compile-time validation of features and variants
     Then compilation fails
     And the error lists "PREMIUM" as missing an implementation
 
-  @US-03 @pending
+  @US-03
   Scenario: REQUIRED strategy satisfied by a default variant
     Given a feature interface "CheckoutFlow" with flag key "checkout-flow" and fallback strategy REQUIRED
     And an inner Variant enum with values "CLASSIC", "STREAMLINED", "PREMIUM"
