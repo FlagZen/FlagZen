@@ -61,7 +61,7 @@ Feature: Testing support for flag-dependent code
     Then the resolved proxy delegates to "PremiumCheckout"
     And other tests in the class still resolve to "ClassicCheckout"
 
-  @US-08 @pending
+  @US-08
   Scenario: Missing flag source file produces a clear error
     Given a test class configured to load flags from "nonexistent.properties"
     When the test class initializes

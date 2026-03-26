@@ -3,6 +3,7 @@ package com.flagzen.acceptance.steps;
 import com.flagzen.acceptance.fixtures.CheckoutFlow;
 import com.flagzen.acceptance.fixtures.PaymentMethod;
 import com.flagzen.spi.FeatureMetadata;
+import com.flagzen.FlagZenException;
 import com.flagzen.test.FlagSource;
 import com.flagzen.test.FlagZenExtension;
 import com.flagzen.test.TestFlagContext;
@@ -17,6 +18,7 @@ import java.util.Properties;
 import java.util.ServiceLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchException;
 
 /**
  * Step definitions for testing support scenarios (US-07).
@@ -173,6 +175,36 @@ public class TestingSupportSteps {
         assertThat(injectedParameter).isNotNull();
         CheckoutFlow proxy = (CheckoutFlow) injectedParameter;
         assertThat(proxy.execute()).isEqualTo(variantClass);
+    }
+
+    // --- Missing @FlagSource scenario fields ---
+    private String missingFileName;
+    private Exception caughtException;
+
+    @Given("a test class configured to load flags from {string}")
+    public void aTestClassConfiguredToLoadFlagsFrom(String fileName) {
+        missingFileName = fileName;
+    }
+
+    @When("the test class initializes")
+    public void theTestClassInitializes() {
+        caughtException = catchException(() ->
+                TestFlagContext.createFromProperties(missingFileName));
+    }
+
+    @Then("a clear error is raised stating the file was not found")
+    public void aClearErrorIsRaisedStatingTheFileWasNotFound() {
+        assertThat(caughtException)
+                .isNotNull()
+                .isInstanceOf(FlagZenException.class)
+                .hasMessageContaining(missingFileName)
+                .hasMessageContaining("not found");
+    }
+
+    @And("the searched locations are listed in the message")
+    public void theSearchedLocationsAreListedInTheMessage() {
+        assertThat(caughtException.getMessage())
+                .containsIgnoringCase("classpath");
     }
 
     // --- @FlagSource scenario fields ---

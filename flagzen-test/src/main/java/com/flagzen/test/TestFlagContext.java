@@ -4,6 +4,8 @@ import com.flagzen.FeatureDispatcher;
 import com.flagzen.internal.DefaultFeatureDispatcher;
 import com.flagzen.internal.InMemoryFlagProvider;
 
+import com.flagzen.FlagZenException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -53,9 +55,9 @@ public class TestFlagContext {
         InputStream stream = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream(classpathResource);
         if (stream == null) {
-            throw new IllegalArgumentException(
-                    "Flag source file not found on classpath: " + classpathResource
-                            + ". Searched in classpath root and META-INF/.");
+            throw new FlagZenException(
+                    "Flag source file not found: " + classpathResource
+                            + ". Searched in: classpath");
         }
         try (stream) {
             properties.load(stream);
