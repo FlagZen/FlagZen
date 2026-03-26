@@ -9,8 +9,19 @@ import java.util.function.Supplier;
 
 /**
  * Hand-crafted FeatureMetadata for DarkMode acceptance tests.
+ * Supports configurable fallback strategy for testing different scenarios.
  */
 public class DarkModeMetadata implements FeatureMetadata<DarkMode> {
+
+    private static volatile FallbackStrategy configuredFallback = FallbackStrategy.EXCEPTION;
+
+    public static void setFallbackStrategy(FallbackStrategy strategy) {
+        configuredFallback = strategy;
+    }
+
+    public static void reset() {
+        configuredFallback = FallbackStrategy.EXCEPTION;
+    }
 
     @Override
     public Class<DarkMode> featureType() {
@@ -24,7 +35,7 @@ public class DarkModeMetadata implements FeatureMetadata<DarkMode> {
 
     @Override
     public FallbackStrategy fallbackStrategy() {
-        return FallbackStrategy.EXCEPTION;
+        return configuredFallback;
     }
 
     @Override
@@ -43,6 +54,6 @@ public class DarkModeMetadata implements FeatureMetadata<DarkMode> {
     public DarkMode createProxy(FlagProvider flagProvider,
                                 Map<String, Supplier<DarkMode>> variants,
                                 Supplier<DarkMode> defaultVariant) {
-        return new DarkModeProxy(flagProvider, variants, defaultVariant);
+        return new DarkModeProxy(flagProvider, variants, defaultVariant, configuredFallback);
     }
 }

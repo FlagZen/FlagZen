@@ -1,5 +1,6 @@
 package com.flagzen.acceptance.steps;
 
+import com.flagzen.acceptance.fixtures.DarkModeMetadata;
 import io.cucumber.java.Before;
 
 /**
@@ -10,5 +11,6 @@ public class ScenarioHooks {
     @Before
     public void resetSharedState() {
         SharedProxyHolder.reset();
+        DarkModeMetadata.reset();
     }
 }

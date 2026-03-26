@@ -5,6 +5,7 @@ import com.flagzen.FlagZen;
 import com.flagzen.UnmatchedVariantException;
 import com.flagzen.acceptance.fixtures.CheckoutFlow;
 import com.flagzen.acceptance.fixtures.DarkMode;
+import com.flagzen.acceptance.fixtures.DarkModeMetadata;
 import com.flagzen.internal.DefaultFeatureDispatcher;
 import com.flagzen.internal.InMemoryFlagProvider;
 import com.flagzen.spi.FlagProvider;
@@ -28,9 +29,12 @@ public class RuntimeDispatchSteps {
     private FeatureDispatcher dispatcher;
     private CheckoutFlow resolvedProxy;
     private CheckoutFlow secondResolvedProxy;
+    private DarkMode darkModeProxy;
     private String callResult;
+    private Object methodResult;
     private Exception caughtException;
     private boolean noProviderConfigured;
+    private String activeFeature;
 
     @Given("no flag provider is configured")
     public void noFlagProviderIsConfigured() {
@@ -43,11 +47,28 @@ public class RuntimeDispatchSteps {
         // (CheckoutFlowMetadata in META-INF/services)
     }
 
+    @Given("a compiled feature {string} with a void method {string} and a boolean method {string}")
+    public void aCompiledFeatureWithVoidAndBooleanMethods(String featureName, String voidMethod, String booleanMethod) {
+        activeFeature = featureName;
+        // DarkMode fixture already declares both methods
+    }
+
     @And("the flag provider returns {string} for {string}")
     public void theFlagProviderReturnsForKey(String flagValue, String flagKey) {
         flagProvider = new InMemoryFlagProvider();
         flagProvider.set(flagKey, flagValue);
         dispatcher = new DefaultFeatureDispatcher(flagProvider);
+    }
+
+    @And("the flag provider returns {string} for {string} with no matching variant")
+    public void theFlagProviderReturnsForKeyWithNoMatchingVariant(String flagValue, String flagKey) {
+        if (flagProvider == null) {
+            flagProvider = new InMemoryFlagProvider();
+        }
+        flagProvider.set(flagKey, flagValue);
+        if (dispatcher == null) {
+            dispatcher = new DefaultFeatureDispatcher(flagProvider);
+        }
     }
 
     @And("the developer has resolved {string} through the dispatcher")
@@ -198,14 +219,38 @@ public class RuntimeDispatchSteps {
         // Dispatcher will be created when flag provider step runs.
     }
 
+    @And("{string} uses fallback strategy NOOP")
+    public void featureUsesFallbackStrategyNoop(String featureName) {
+        DarkModeMetadata.setFallbackStrategy(com.flagzen.FallbackStrategy.NOOP);
+    }
+
     @When("the developer calls {string} on the resolved proxy")
     public void theDeveloperCallsOnTheResolvedProxy(String methodName) {
         try {
-            resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
-            callResult = resolvedProxy.execute();
+            if ("DarkMode".equals(activeFeature)) {
+                darkModeProxy = dispatcher.resolve(DarkMode.class);
+                switch (methodName) {
+                    case "apply" -> darkModeProxy.apply();
+                    case "isEnabled" -> methodResult = darkModeProxy.isEnabled();
+                    default -> throw new IllegalArgumentException("Unknown method: " + methodName);
+                }
+            } else {
+                resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
+                callResult = resolvedProxy.execute();
+            }
         } catch (Exception e) {
             caughtException = e;
         }
+    }
+
+    @Then("no exception is thrown and the method does nothing")
+    public void noExceptionIsThrownAndTheMethodDoesNothing() {
+        assertThat(caughtException).isNull();
+    }
+
+    @Then("the result is false")
+    public void theResultIsFalse() {
+        assertThat(methodResult).isEqualTo(false);
     }
 
     @And("the error message lists known variants: {string}, {string}, {string}")

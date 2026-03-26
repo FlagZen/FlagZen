@@ -5,4 +5,5 @@ package com.flagzen.acceptance.fixtures;
  */
 public interface DarkMode {
     void apply();
+    boolean isEnabled();
 }

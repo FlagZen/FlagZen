@@ -10,6 +10,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import javax.lang.model.element.Modifier;
@@ -60,7 +61,7 @@ final class ProxyGenerator {
 
         // Interface methods with dispatch logic
         for (MethodModel method : model.methods()) {
-            proxyBuilder.addMethod(buildDispatchMethod(method, interfaceType));
+            proxyBuilder.addMethod(buildDispatchMethod(method, interfaceType, model.fallbackStrategy()));
         }
 
         // toString
@@ -142,7 +143,7 @@ final class ProxyGenerator {
     }
 
     private MethodSpec buildResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
-        return MethodSpec.methodBuilder("resolveVariant")
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
                 .addModifiers(Modifier.PRIVATE)
                 .returns(interfaceType)
                 .addStatement("$T<$T> flagValue = flagProvider.getString($S)",
@@ -156,24 +157,31 @@ final class ProxyGenerator {
                 .endControlFlow()
                 .beginControlFlow("if (defaultVariant != null)")
                 .addStatement("return defaultVariant.get()")
-                .endControlFlow()
+                .endControlFlow();
+
+        if (model.fallbackStrategy() == FallbackStrategy.NOOP) {
+            builder.addStatement("return null");
+        } else {
+            builder
                 .beginControlFlow("if (value == null)")
                 .addStatement("throw $T.noFlagValue($S)",
                         UnmatchedVariantException.class, model.flagKey())
                 .endControlFlow()
                 .addStatement("throw new $T($S, value, variants.keySet())",
-                        UnmatchedVariantException.class, model.flagKey())
-                .build();
+                        UnmatchedVariantException.class, model.flagKey());
+        }
+
+        return builder.build();
     }
 
-    private MethodSpec buildDispatchMethod(MethodModel method, ClassName interfaceType) {
+    private MethodSpec buildDispatchMethod(MethodModel method, ClassName interfaceType, FallbackStrategy fallbackStrategy) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(method.name())
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC);
 
         // Add parameters
         for (MethodModel.ParameterModel param : method.parameters()) {
-            builder.addParameter(ClassName.bestGuess(param.type()), param.name());
+            builder.addParameter(resolveTypeName(param.type()), param.name());
         }
 
         // Build parameter names for delegation
@@ -183,14 +191,61 @@ final class ProxyGenerator {
             paramNames.append(method.parameters().get(i).name());
         }
 
-        if (method.isVoid()) {
+        if (fallbackStrategy == FallbackStrategy.NOOP) {
+            buildNoopDispatch(builder, method, interfaceType, paramNames.toString());
+        } else if (method.isVoid()) {
             builder.addStatement("resolveVariant().$L($L)", method.name(), paramNames);
         } else {
-            builder.returns(ClassName.bestGuess(method.returnType()));
+            builder.returns(resolveTypeName(method.returnType()));
             builder.addStatement("return resolveVariant().$L($L)", method.name(), paramNames);
         }
 
         return builder.build();
+    }
+
+    private void buildNoopDispatch(MethodSpec.Builder builder, MethodModel method,
+                                    ClassName interfaceType, String paramNames) {
+        builder.addStatement("$T delegate = resolveVariant()", interfaceType);
+
+        if (method.isVoid()) {
+            builder.beginControlFlow("if (delegate != null)")
+                    .addStatement("delegate.$L($L)", method.name(), paramNames)
+                    .endControlFlow();
+        } else {
+            TypeName returnType = resolveTypeName(method.returnType());
+            builder.returns(returnType);
+            builder.beginControlFlow("if (delegate != null)")
+                    .addStatement("return delegate.$L($L)", method.name(), paramNames)
+                    .endControlFlow()
+                    .addStatement("return $L", defaultValueFor(method.returnType()));
+        }
+    }
+
+    private static TypeName resolveTypeName(String typeName) {
+        return switch (typeName) {
+            case "boolean" -> TypeName.BOOLEAN;
+            case "byte" -> TypeName.BYTE;
+            case "short" -> TypeName.SHORT;
+            case "int" -> TypeName.INT;
+            case "long" -> TypeName.LONG;
+            case "float" -> TypeName.FLOAT;
+            case "double" -> TypeName.DOUBLE;
+            case "char" -> TypeName.CHAR;
+            case "void" -> TypeName.VOID;
+            default -> ClassName.bestGuess(typeName);
+        };
+    }
+
+    private static String defaultValueFor(String typeName) {
+        return switch (typeName) {
+            case "boolean" -> "false";
+            case "byte", "short", "int" -> "0";
+            case "long" -> "0L";
+            case "float" -> "0.0f";
+            case "double" -> "0.0d";
+            case "char" -> "'\\0'";
+            default -> "null";
+        };
     }
 
     private MethodSpec buildVariantSuppliersMethod(FeatureModel model, ClassName interfaceType,

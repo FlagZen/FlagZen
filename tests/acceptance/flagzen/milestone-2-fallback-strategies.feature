@@ -65,7 +65,7 @@ Feature: Runtime dispatch and fallback strategies
     Then an unmatched variant error is raised
     And the error message lists known variants: "CLASSIC", "STREAMLINED", "PREMIUM"
 
-  @US-09 @pending
+  @US-09
   Scenario: NOOP strategy returns safe defaults for unmatched variant
     Given a compiled feature "DarkMode" with a void method "apply" and a boolean method "isEnabled"
     And "DarkMode" uses fallback strategy NOOP

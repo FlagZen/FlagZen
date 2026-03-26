@@ -8,4 +8,9 @@ public class DarkModeEnabled implements DarkMode {
     public void apply() {
         // variant implementation
     }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
