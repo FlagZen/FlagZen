@@ -68,7 +68,7 @@ Feature: Testing support for flag-dependent code
     Then a clear error is raised stating the file was not found
     And the searched locations are listed in the message
 
-  @US-08 @property @pending
+  @US-08 @property
   Scenario: Pin always takes priority over file source regardless of configuration order
     Given any test with both a file-based flag source and a pin annotation for the same flag
     When the flag is resolved

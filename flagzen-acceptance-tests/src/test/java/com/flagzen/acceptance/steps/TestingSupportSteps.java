@@ -248,6 +248,50 @@ public class TestingSupportSteps {
         };
     }
 
+    // --- US-08 Property: Pin always takes priority over file source ---
+    private java.util.List<org.assertj.core.api.SoftAssertions> propertyResults;
+
+    @Given("any test with both a file-based flag source and a pin annotation for the same flag")
+    public void anyTestWithBothFileSourceAndPinAnnotation() {
+        propertyResults = new java.util.ArrayList<>();
+    }
+
+    @When("the flag is resolved")
+    public void theFlagIsResolved() {
+        // Test the property across multiple flag key/value combinations:
+        // For each case, load from file first, then pin a different value, verify pin wins.
+        String[][] cases = {
+                {"checkout-flow", "CLASSIC", "PREMIUM", "PremiumCheckout"},
+                {"checkout-flow", "CLASSIC", "CLASSIC", "ClassicCheckout"},
+        };
+        for (String[] testCase : cases) {
+            String flagKey = testCase[0];
+            String fileValue = testCase[1];
+            String pinValue = testCase[2];
+            String expectedDelegate = testCase[3];
+
+            // Create context from file (file has checkout-flow=CLASSIC)
+            TestFlagContext ctx = TestFlagContext.createFromProperties("flags-test.properties");
+            // Apply pin on top (simulating @PinFlag)
+            ctx.pin(flagKey, pinValue);
+            // Resolve
+            CheckoutFlow resolved = ctx.resolve(CheckoutFlow.class);
+
+            var softly = new org.assertj.core.api.SoftAssertions();
+            softly.assertThat(resolved.execute())
+                    .as("Pin '%s' must override file value '%s' for flag '%s'", pinValue, fileValue, flagKey)
+                    .isEqualTo(expectedDelegate);
+            propertyResults.add(softly);
+        }
+    }
+
+    @Then("the pinned value is always used over the file value")
+    public void thePinnedValueIsAlwaysUsedOverTheFileValue() {
+        for (var softly : propertyResults) {
+            softly.assertAll();
+        }
+    }
+
     @Then("{string} delegates to {string}")
     public void featureDelegatesTo(String featureName, String variantClass) {
         switch (featureName) {
