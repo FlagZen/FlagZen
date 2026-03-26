@@ -21,13 +21,17 @@ subprojects {
 
     tasks.withType<JavaCompile> {
         options.release.set(17)
-    }
-
-    tasks.withType<JavaCompile> {
         options.encoding = "UTF-8"
     }
 
     tasks.withType<Test> {
         useJUnitPlatform()
+        testLogging {
+            events("passed", "skipped", "failed")
+            showExceptions = true
+            showCauses = true
+            showStackTraces = true
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        }
     }
 }
