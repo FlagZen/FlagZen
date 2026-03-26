@@ -4,8 +4,10 @@ import com.flagzen.FeatureDispatcher;
 import com.flagzen.FlagZen;
 import com.flagzen.UnmatchedVariantException;
 import com.flagzen.acceptance.fixtures.CheckoutFlow;
+import com.flagzen.acceptance.fixtures.CheckoutFlowMetadata;
 import com.flagzen.acceptance.fixtures.DarkMode;
 import com.flagzen.acceptance.fixtures.DarkModeMetadata;
+import com.flagzen.acceptance.fixtures.DefaultCheckout;
 import com.flagzen.internal.DefaultFeatureDispatcher;
 import com.flagzen.internal.InMemoryFlagProvider;
 import com.flagzen.spi.FlagProvider;
@@ -259,5 +261,20 @@ public class RuntimeDispatchSteps {
                 .contains(v1)
                 .contains(v2)
                 .contains(v3);
+    }
+
+    @And("a default variant {string} is registered for {string}")
+    public void aDefaultVariantIsRegisteredFor(String variantName, String featureName) {
+        CheckoutFlowMetadata.setDefaultVariant(DefaultCheckout::new);
+    }
+
+    @Then("the call is handled by {string}")
+    public void theCallIsHandledBy(String expectedHandler) {
+        assertThat(callResult).isEqualTo(expectedHandler);
+    }
+
+    @And("no exception is thrown")
+    public void noExceptionIsThrown() {
+        assertThat(caughtException).isNull();
     }
 }

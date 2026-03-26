@@ -75,7 +75,7 @@ Feature: Runtime dispatch and fallback strategies
     When the developer calls "isEnabled" on the resolved proxy
     Then the result is false
 
-  @US-09 @pending
+  @US-09
   Scenario: Default variant handles unmatched values before fallback strategy
     Given a compiled feature "CheckoutFlow" with variants "CLASSIC" and "STREAMLINED"
     And "CheckoutFlow" uses fallback strategy EXCEPTION

@@ -13,6 +13,16 @@ import java.util.function.Supplier;
  */
 public class CheckoutFlowMetadata implements FeatureMetadata<CheckoutFlow> {
 
+    private static volatile Supplier<CheckoutFlow> configuredDefaultVariant = null;
+
+    public static void setDefaultVariant(Supplier<CheckoutFlow> supplier) {
+        configuredDefaultVariant = supplier;
+    }
+
+    public static void reset() {
+        configuredDefaultVariant = null;
+    }
+
     @Override
     public Class<CheckoutFlow> featureType() {
         return CheckoutFlow.class;
@@ -38,7 +48,7 @@ public class CheckoutFlowMetadata implements FeatureMetadata<CheckoutFlow> {
 
     @Override
     public Supplier<CheckoutFlow> defaultVariantSupplier() {
-        return null;
+        return configuredDefaultVariant;
     }
 
     @Override

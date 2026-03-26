@@ -785,6 +785,97 @@
       "s": "EXECUTED",
       "d": "PASS",
       "t": "2026-03-26T14:27:53Z"
+    },
+    {
+      "sid": "03-07",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:29:30Z"
+    },
+    {
+      "sid": "03-07",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:30:29Z"
+    },
+    {
+      "sid": "03-07",
+      "p": "RED_UNIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:30:59Z"
+    },
+    {
+      "sid": "03-07",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:32:29Z"
+    },
+    {
+      "sid": "03-07",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:32:51Z"
+    },
+    {
+      "sid": "03-08",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:34:29Z"
+    },
+    {
+      "sid": "03-08",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:36:52Z"
+    },
+    {
+      "sid": "03-08",
+      "p": "RED_UNIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:38:09Z"
+    },
+    {
+      "sid": "03-08",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:40:31Z"
+    },
+    {
+      "sid": "03-09",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:42:19Z"
+    },
+    {
+      "sid": "03-09",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS - acceptance test passes immediately; proxy already implements default-variant-before-fallback dispatch order",
+      "t": "2026-03-26T14:43:37Z"
+    },
+    {
+      "sid": "03-09",
+      "p": "RED_UNIT",
+      "s": "EXECUTED",
+      "d": "PASS - unit test passes immediately; dispatch logic already correct in CheckoutFlowProxy",
+      "t": "2026-03-26T14:44:51Z"
+    },
+    {
+      "sid": "03-09",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:44:59Z"
     }
   ]
 }
