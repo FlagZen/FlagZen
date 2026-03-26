@@ -34,7 +34,7 @@ Feature: Compile-time validation of features and variants
 
   # --- US-02: @Variant annotation ---
 
-  @US-02 @pending
+  @US-02
   Scenario: Variant class that does not implement the feature interface is rejected
     Given a feature interface "CheckoutFlow" with flag key "checkout-flow"
     And a class "BrokenVariant" annotated as variant "CLASSIC" but not implementing "CheckoutFlow"

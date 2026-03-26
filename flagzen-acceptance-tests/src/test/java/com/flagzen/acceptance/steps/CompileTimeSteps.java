@@ -107,6 +107,28 @@ public class CompileTimeSteps {
         }
     }
 
+    @And("a class {string} annotated as variant {string} but not implementing {string}")
+    public void aClassAnnotatedAsVariantButNotImplementing(String className, String value, String interfaceName) {
+        ensureFeatureSourceExists(interfaceName);
+        sourceFiles.add(JavaFileObjects.forSourceString(
+                PACKAGE + "." + className,
+                """
+                package %s;
+
+                import com.flagzen.Variant;
+
+                @Variant(value = "%s", of = %s.class)
+                public class %s {
+                }
+                """.formatted(PACKAGE, value, interfaceName, className)
+        ));
+    }
+
+    @And("the error states the variant class must implement the feature interface")
+    public void theErrorStatesTheVariantClassMustImplementTheFeatureInterface() {
+        assertThat(compilation).hadErrorContaining("must implement the feature interface");
+    }
+
     @When("the project compiles")
     public void theProjectCompiles() {
         compilation = javac()

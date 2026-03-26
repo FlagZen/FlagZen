@@ -147,12 +147,35 @@ public class FlagZenProcessor extends AbstractProcessor {
                 TypeElement targetElement = (TypeElement) processingEnv.getTypeUtils()
                         .asElement(targetFeature);
                 if (targetElement != null && targetElement.equals(featureElement)) {
-                    String qualifiedName = ((TypeElement) element).getQualifiedName().toString();
+                    TypeElement variantElement = (TypeElement) element;
+                    if (!implementsInterface(variantElement, featureElement)) {
+                        processingEnv.getMessager().printMessage(
+                                Diagnostic.Kind.ERROR,
+                                "Variant class " + variantElement.getSimpleName()
+                                        + " must implement the feature interface "
+                                        + featureElement.getSimpleName(),
+                                variantElement
+                        );
+                        continue;
+                    }
+                    String qualifiedName = variantElement.getQualifiedName().toString();
                     variants.add(new VariantModel(qualifiedName, variantAnnotation.value()));
                 }
             }
         }
         return variants;
+    }
+
+    private boolean implementsInterface(TypeElement variantElement, TypeElement featureElement) {
+        TypeMirror featureType = featureElement.asType();
+        for (TypeMirror implementedInterface : variantElement.getInterfaces()) {
+            if (processingEnv.getTypeUtils().isSameType(
+                    processingEnv.getTypeUtils().erasure(implementedInterface),
+                    processingEnv.getTypeUtils().erasure(featureType))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private TypeMirror extractVariantOf(Variant annotation) {
