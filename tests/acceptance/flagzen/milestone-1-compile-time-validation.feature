@@ -62,7 +62,7 @@ Feature: Compile-time validation of features and variants
 
   # --- US-03: Compile-time variant value validation ---
 
-  @US-03 @pending
+  @US-03
   Scenario: Variant value not in enum is rejected at compile time
     Given a feature interface "CheckoutFlow" with flag key "checkout-flow"
     And an inner Variant enum with values "CLASSIC", "STREAMLINED", "PREMIUM"

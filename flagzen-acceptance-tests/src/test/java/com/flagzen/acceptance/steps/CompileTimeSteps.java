@@ -33,6 +33,7 @@ public class CompileTimeSteps {
     private String fallbackStrategy;
     private String methodName;
     private boolean hasVariantEnum = true;
+    private List<String> variantEnumValues;
     private final List<JavaFileObject> sourceFiles = new ArrayList<>();
     private final List<String> variantNames = new ArrayList<>();
     private final Set<String> featureSourcesAdded = new HashSet<>();
@@ -281,12 +282,30 @@ public class CompileTimeSteps {
                 .contains(className + "::new");
     }
 
+    @And("an inner Variant enum with values {string}, {string}, {string}")
+    public void anInnerVariantEnumWithValues(String val1, String val2, String val3) {
+        this.variantEnumValues = List.of(val1, val2, val3);
+    }
+
+    @And("the error states {string} is not a valid value for {string}")
+    public void theErrorStatesValueIsNotValidForFeature(String value, String featureName) {
+        assertThat(compilation).hadErrorContaining(
+                "@Variant(\"" + value + "\") does not match any value in " + featureName + ".Variant"
+        );
+    }
+
+    @And("the error lists valid values: {string}, {string}, {string}")
+    public void theErrorListsValidValues(String val1, String val2, String val3) {
+        assertThat(compilation).hadErrorContaining("Valid values: " + val1 + ", " + val2 + ", " + val3);
+    }
+
     private void ensureFeatureSourceExists(String interfaceName) {
         if (featureSourcesAdded.contains(interfaceName)) {
             return;
         }
         featureSourcesAdded.add(interfaceName);
         String key = featureKeyMap.getOrDefault(interfaceName, flagKey);
+        String enumBlock = buildVariantEnumBlock();
         if (fallbackStrategy != null) {
             sourceFiles.add(JavaFileObjects.forSourceString(
                     PACKAGE + "." + interfaceName,
@@ -298,8 +317,8 @@ public class CompileTimeSteps {
 
                     @Feature(value = "%s", fallback = FallbackStrategy.%s)
                     public interface %s {
-                    }
-                    """.formatted(PACKAGE, key, fallbackStrategy, interfaceName)
+                    %s}
+                    """.formatted(PACKAGE, key, fallbackStrategy, interfaceName, enumBlock)
             ));
         } else {
             sourceFiles.add(JavaFileObjects.forSourceString(
@@ -311,9 +330,16 @@ public class CompileTimeSteps {
 
                     @Feature("%s")
                     public interface %s {
-                    }
-                    """.formatted(PACKAGE, key, interfaceName)
+                    %s}
+                    """.formatted(PACKAGE, key, interfaceName, enumBlock)
             ));
         }
+    }
+
+    private String buildVariantEnumBlock() {
+        if (variantEnumValues == null || variantEnumValues.isEmpty()) {
+            return "";
+        }
+        return "    enum Variant { " + String.join(", ", variantEnumValues) + " }\n";
     }
 }

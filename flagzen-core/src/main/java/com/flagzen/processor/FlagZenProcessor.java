@@ -96,6 +96,11 @@ public class FlagZenProcessor extends AbstractProcessor {
             List<VariantModel> variants = collectVariants(roundEnv, featureElement);
             String defaultVariantClassName = findDefaultVariant(roundEnv, featureElement);
 
+            List<String> variantEnumValues = collectVariantEnumValues(featureElement);
+            if (!variantEnumValues.isEmpty()) {
+                validateVariantValuesAgainstEnum(variants, variantEnumValues, interfaceName, roundEnv);
+            }
+
             FeatureModel model = new FeatureModel(
                     packageName, interfaceName, flagKey,
                     fallbackStrategy, methods, variants, defaultVariantClassName
@@ -248,6 +253,38 @@ public class FlagZenProcessor extends AbstractProcessor {
                 return null;
             }
             return mirror;
+        }
+    }
+
+    private List<String> collectVariantEnumValues(TypeElement featureElement) {
+        List<String> values = new ArrayList<>();
+        for (Element enclosed : featureElement.getEnclosedElements()) {
+            if (enclosed.getKind() == ElementKind.ENUM
+                    && enclosed.getSimpleName().toString().equals("Variant")) {
+                TypeElement enumElement = (TypeElement) enclosed;
+                for (Element enumConstant : enumElement.getEnclosedElements()) {
+                    if (enumConstant.getKind() == ElementKind.ENUM_CONSTANT) {
+                        values.add(enumConstant.getSimpleName().toString());
+                    }
+                }
+            }
+        }
+        return values;
+    }
+
+    private void validateVariantValuesAgainstEnum(List<VariantModel> variants,
+                                                   List<String> validValues,
+                                                   String interfaceName,
+                                                   RoundEnvironment roundEnv) {
+        for (VariantModel variant : variants) {
+            if (!validValues.contains(variant.variantValue())) {
+                String validValuesStr = String.join(", ", validValues);
+                processingEnv.getMessager().printMessage(
+                        Diagnostic.Kind.ERROR,
+                        "@Variant(\"" + variant.variantValue() + "\") does not match any value in "
+                                + interfaceName + ".Variant. Valid values: " + validValuesStr
+                );
+            }
         }
     }
 
