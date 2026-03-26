@@ -13,7 +13,7 @@ import static com.google.testing.compile.Compiler.javac;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Acceptance test for step 01-01: @Feature + @Variant annotations and proxy generation.
+ * Acceptance test for @Feature + @Variant annotations, proxy generation, and metadata generation.
  *
  * Scenario: Developer defines a feature with variants and a dispatch proxy is generated.
  * Port-to-port: Java compiler (driving port) -> FlagZenProcessor -> generated source (driven port output).
@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProxyGenerationTest {
 
     @Test
-    void generatesProxyThatImplementsFeatureInterface() throws IOException {
+    void generatesProxyWithDispatchLogicAndMetadata() throws IOException {
         // Given: a feature interface annotated with @Feature
         JavaFileObject featureInterface = JavaFileObjects.forSourceString(
                 "com.example.CheckoutFlow",
@@ -81,27 +81,43 @@ class ProxyGenerationTest {
                 .generatedSourceFile("com.example.CheckoutFlow_FlagZenProxy")
                 .isNotNull();
 
-        // And: the proxy implements the "CheckoutFlow" interface
-        Optional<JavaFileObject> generatedFile = compilation.generatedSourceFile(
+        // And: a metadata "CheckoutFlow_FlagZenMetadata" is generated
+        assertThat(compilation)
+                .generatedSourceFile("com.example.CheckoutFlow_FlagZenMetadata")
+                .isNotNull();
+
+        // Verify proxy structure
+        Optional<JavaFileObject> proxyFile = compilation.generatedSourceFile(
                 "com.example.CheckoutFlow_FlagZenProxy");
-        assertThat(generatedFile).isPresent();
+        assertThat(proxyFile).isPresent();
+        String proxySource = proxyFile.get().getCharContent(false).toString();
 
-        String generatedSource = generatedFile.get()
-                .getCharContent(false).toString();
-
-        // Verify structural properties of the generated proxy
-        assertThat(generatedSource)
+        assertThat(proxySource)
                 .contains("public class CheckoutFlow_FlagZenProxy implements CheckoutFlow")
-                .contains("private final String flagKey")
+                .contains("private final FlagProvider flagProvider")
                 .contains("private final Map<String, Supplier<CheckoutFlow>> variants")
                 .contains("private final Supplier<CheckoutFlow> defaultVariant")
                 .contains("private final FallbackStrategy fallbackStrategy")
-                .contains("CheckoutFlow_FlagZenProxy(String flagKey")
                 .contains("public void execute()")
+                .contains("resolveVariant()")
                 .contains("return \"FlagZenProxy[checkout-flow]\"");
 
         // Verify no runtime reflection
-        assertThat(generatedSource)
+        assertThat(proxySource)
                 .doesNotContain("java.lang.reflect");
+
+        // Verify metadata structure
+        Optional<JavaFileObject> metadataFile = compilation.generatedSourceFile(
+                "com.example.CheckoutFlow_FlagZenMetadata");
+        assertThat(metadataFile).isPresent();
+        String metadataSource = metadataFile.get().getCharContent(false).toString();
+
+        assertThat(metadataSource)
+                .contains("implements FeatureMetadata<CheckoutFlow>")
+                .contains("return CheckoutFlow.class")
+                .contains("return \"checkout-flow\"")
+                .contains("FallbackStrategy.EXCEPTION")
+                .contains("ClassicCheckout::new")
+                .contains("StreamlinedCheckout::new");
     }
 }
