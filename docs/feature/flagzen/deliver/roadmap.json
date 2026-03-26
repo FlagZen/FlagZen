@@ -1,0 +1,445 @@
+{
+  "roadmap": {
+    "project_id": "flagzen",
+    "created_at": "2026-03-26T12:17:46Z",
+    "total_steps": 34,
+    "phases": 4
+  },
+  "phases": [
+    {
+      "id": "01",
+      "name": "Walking Skeleton",
+      "steps": [
+        {
+          "id": "01-01",
+          "name": "@Feature + @Variant annotations and proxy generation",
+          "criteria": "A feature interface annotated with @Feature and variant classes annotated with @Variant compile successfully, and a dispatch proxy is generated that implements the feature interface.",
+          "test_file": "tests/acceptance/flagzen/walking-skeleton.feature",
+          "scenario_name": "Developer defines a feature with variants and a dispatch proxy is generated",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/Feature.java",
+            "flagzen-core/src/main/java/com/flagzen/Variant.java",
+            "flagzen-core/src/main/java/com/flagzen/FallbackStrategy.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/ProxyGenerationTest.java"
+          ]
+        },
+        {
+          "id": "01-02",
+          "name": "FlagProvider SPI and runtime dispatch",
+          "criteria": "A FlagProvider supplies flag values via getString(String key), the FeatureDispatcher resolves a feature to its active variant proxy, and method calls on the proxy are delegated to the correct variant.",
+          "test_file": "tests/acceptance/flagzen/walking-skeleton.feature",
+          "scenario_name": "Developer resolves a feature to the active variant at runtime",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java",
+            "flagzen-core/src/main/java/com/flagzen/FeatureDispatcher.java",
+            "flagzen-core/src/main/java/com/flagzen/internal/DefaultFeatureDispatcher.java",
+            "flagzen-core/src/main/java/com/flagzen/FlagZen.java",
+            "flagzen-core/src/test/java/com/flagzen/internal/DefaultFeatureDispatcherTest.java"
+          ]
+        },
+        {
+          "id": "01-03",
+          "name": "@PinFlag testing support",
+          "criteria": "A test method annotated with @PinFlag resolves a feature to the pinned variant without any flag provider setup.",
+          "test_file": "tests/acceptance/flagzen/walking-skeleton.feature",
+          "scenario_name": "Developer pins a flag value in a test with a single annotation",
+          "files": [
+            "flagzen-test/src/main/java/com/flagzen/test/PinFlag.java",
+            "flagzen-test/src/main/java/com/flagzen/test/FlagZenExtension.java",
+            "flagzen-test/src/test/java/com/flagzen/test/PinFlagTest.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "Milestone 1 — Compile-time Validation",
+      "steps": [
+        {
+          "id": "02-01",
+          "name": "Free-form variant values without enum",
+          "criteria": "A feature interface without an inner Variant enum accepts any string as a valid variant value and compilation succeeds.",
+          "test_file": "tests/acceptance/flagzen/milestone-1-compile-time-validation.feature",
+          "scenario_name": "Feature defined without variant enum accepts free-form values",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/FreeFormVariantTest.java"
+          ]
+        },
+        {
+          "id": "02-02",
+          "name": "@Feature rejected on class",
+          "criteria": "Applying @Feature to a class instead of an interface produces a compile error stating @Feature can only be applied to interfaces.",
+          "test_file": "tests/acceptance/flagzen/milestone-1-compile-time-validation.feature",
+          "scenario_name": "Feature annotation rejected on a class",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/FeatureTargetValidationTest.java"
+          ]
+        },
+        {
+          "id": "02-03",
+          "name": "Fallback strategy configuration recorded at compile time",
+          "criteria": "A feature with an explicit fallback strategy compiles successfully and the strategy is recorded in the generated proxy metadata.",
+          "test_file": "tests/acceptance/flagzen/milestone-1-compile-time-validation.feature",
+          "scenario_name": "Feature with fallback strategy records configuration",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/FallbackStrategyRecordingTest.java"
+          ]
+        },
+        {
+          "id": "02-04",
+          "name": "Variant not implementing feature interface rejected",
+          "criteria": "A variant class that does not implement its declared feature interface produces a compile error stating the variant must implement the feature interface.",
+          "test_file": "tests/acceptance/flagzen/milestone-1-compile-time-validation.feature",
+          "scenario_name": "Variant class that does not implement the feature interface is rejected",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/VariantInterfaceValidationTest.java"
+          ]
+        },
+        {
+          "id": "02-05",
+          "name": "Multi-feature variant registration",
+          "criteria": "A variant class annotated for two different features and implementing both interfaces compiles successfully and is registered for both features.",
+          "test_file": "tests/acceptance/flagzen/milestone-1-compile-time-validation.feature",
+          "scenario_name": "Multi-feature variant registered for both features",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/MultiFeatureVariantTest.java"
+          ]
+        },
+        {
+          "id": "02-06",
+          "name": "Default variant as fallback",
+          "criteria": "A variant annotated as default compiles successfully and is registered as the fallback for its feature.",
+          "test_file": "tests/acceptance/flagzen/milestone-1-compile-time-validation.feature",
+          "scenario_name": "Default variant registered as fallback",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/Variant.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/DefaultVariantTest.java"
+          ]
+        },
+        {
+          "id": "02-07",
+          "name": "Variant value not in enum rejected",
+          "criteria": "A variant value that is not in the feature's inner Variant enum produces a compile error listing the valid values.",
+          "test_file": "tests/acceptance/flagzen/milestone-1-compile-time-validation.feature",
+          "scenario_name": "Variant value not in enum is rejected at compile time",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/EnumValidationTest.java"
+          ]
+        },
+        {
+          "id": "02-08",
+          "name": "Duplicate variant value rejected",
+          "criteria": "Two variant classes with the same value for the same feature produce a compile error identifying both conflicting classes.",
+          "test_file": "tests/acceptance/flagzen/milestone-1-compile-time-validation.feature",
+          "scenario_name": "Duplicate variant value for the same feature is rejected",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/DuplicateVariantTest.java"
+          ]
+        },
+        {
+          "id": "02-09",
+          "name": "REQUIRED strategy with incomplete coverage rejected",
+          "criteria": "A feature with REQUIRED fallback strategy and an inner Variant enum that has values without implementations produces a compile error listing the missing values.",
+          "test_file": "tests/acceptance/flagzen/milestone-1-compile-time-validation.feature",
+          "scenario_name": "REQUIRED strategy with incomplete variant coverage is rejected",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/RequiredCoverageTest.java"
+          ]
+        },
+        {
+          "id": "02-10",
+          "name": "REQUIRED strategy satisfied by default variant",
+          "criteria": "A feature with REQUIRED fallback strategy and incomplete enum coverage compiles successfully when a default variant is registered.",
+          "test_file": "tests/acceptance/flagzen/milestone-1-compile-time-validation.feature",
+          "scenario_name": "REQUIRED strategy satisfied by a default variant",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/RequiredWithDefaultTest.java"
+          ]
+        },
+        {
+          "id": "02-11",
+          "name": "Generated proxy descriptive identity",
+          "criteria": "The generated proxy's toString() returns a descriptive string showing its flag key (e.g., FlagZenProxy[checkout-flow]).",
+          "test_file": "tests/acceptance/flagzen/milestone-1-compile-time-validation.feature",
+          "scenario_name": "Generated proxy provides a descriptive identity",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/ProxyIdentityTest.java"
+          ]
+        },
+        {
+          "id": "02-12",
+          "name": "Generated proxy contains no runtime reflection",
+          "criteria": "The generated proxy source code contains no reflection imports and uses direct method calls or map lookups for dispatch.",
+          "test_file": "tests/acceptance/flagzen/milestone-1-compile-time-validation.feature",
+          "scenario_name": "Generated proxy contains no runtime reflection",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/NoReflectionTest.java"
+          ]
+        },
+        {
+          "id": "02-13",
+          "name": "Exactly one proxy per feature interface",
+          "criteria": "Every valid feature interface with at least one variant produces exactly one proxy class that implements the feature interface.",
+          "test_file": "tests/acceptance/flagzen/milestone-1-compile-time-validation.feature",
+          "scenario_name": "Every feature interface produces exactly one proxy",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/OneProxyPerFeatureTest.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "name": "Milestone 2 — Runtime Dispatch and Fallback",
+      "steps": [
+        {
+          "id": "03-01",
+          "name": "Proxy follows runtime flag value changes",
+          "criteria": "When the flag provider's value changes after initial resolution, subsequent method calls on the same proxy are delegated to the newly active variant.",
+          "test_file": "tests/acceptance/flagzen/milestone-2-fallback-strategies.feature",
+          "scenario_name": "Proxy follows runtime flag value changes",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/internal/DefaultFeatureDispatcher.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/test/java/com/flagzen/internal/DynamicDispatchTest.java"
+          ]
+        },
+        {
+          "id": "03-02",
+          "name": "Same proxy instance for repeated resolutions",
+          "criteria": "Resolving the same feature through the dispatcher multiple times returns the same proxy instance.",
+          "test_file": "tests/acceptance/flagzen/milestone-2-fallback-strategies.feature",
+          "scenario_name": "Dispatcher returns the same proxy instance for repeated resolutions",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/internal/DefaultFeatureDispatcher.java",
+            "flagzen-core/src/test/java/com/flagzen/internal/ProxyCachingTest.java"
+          ]
+        },
+        {
+          "id": "03-03",
+          "name": "Clear error when no flag provider configured",
+          "criteria": "Resolving a feature without a configured flag provider raises a configuration error with a message suggesting how to add one.",
+          "test_file": "tests/acceptance/flagzen/milestone-2-fallback-strategies.feature",
+          "scenario_name": "Resolution fails clearly when no flag provider is configured",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/internal/DefaultFeatureDispatcher.java",
+            "flagzen-core/src/test/java/com/flagzen/internal/NoProviderErrorTest.java"
+          ]
+        },
+        {
+          "id": "03-04",
+          "name": "In-memory flag provider for development",
+          "criteria": "An in-memory flag provider serves configured flag values, and the dispatcher resolves features to the correct variants using it.",
+          "test_file": "tests/acceptance/flagzen/milestone-2-fallback-strategies.feature",
+          "scenario_name": "In-memory flag provider serves flag values for development",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/spi/InMemoryFlagProvider.java",
+            "flagzen-core/src/test/java/com/flagzen/spi/InMemoryFlagProviderTest.java"
+          ]
+        },
+        {
+          "id": "03-05",
+          "name": "Programmatic flag provider registration",
+          "criteria": "A custom flag provider registered via the configuration API is used by the dispatcher to resolve features.",
+          "test_file": "tests/acceptance/flagzen/milestone-2-fallback-strategies.feature",
+          "scenario_name": "Flag provider registered programmatically via configuration API",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/FlagZen.java",
+            "flagzen-core/src/main/java/com/flagzen/internal/DefaultFeatureDispatcher.java",
+            "flagzen-core/src/test/java/com/flagzen/internal/ProgrammaticProviderTest.java"
+          ]
+        },
+        {
+          "id": "03-06",
+          "name": "No value for unknown flag key with EXCEPTION strategy",
+          "criteria": "When the flag provider returns no value for a flag key and the feature uses EXCEPTION strategy, an unmatched variant error is raised indicating no flag value was found.",
+          "test_file": "tests/acceptance/flagzen/milestone-2-fallback-strategies.feature",
+          "scenario_name": "Flag provider returns no value for an unknown flag key",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/internal/DefaultFeatureDispatcher.java",
+            "flagzen-core/src/test/java/com/flagzen/internal/UnknownFlagKeyTest.java"
+          ]
+        },
+        {
+          "id": "03-07",
+          "name": "EXCEPTION fallback strategy",
+          "criteria": "When a flag value has no matching variant and the feature uses EXCEPTION strategy, an error is raised listing the known variants.",
+          "test_file": "tests/acceptance/flagzen/milestone-2-fallback-strategies.feature",
+          "scenario_name": "EXCEPTION strategy throws on unmatched variant value",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/main/java/com/flagzen/internal/DefaultFeatureDispatcher.java",
+            "flagzen-core/src/test/java/com/flagzen/internal/ExceptionFallbackTest.java"
+          ]
+        },
+        {
+          "id": "03-08",
+          "name": "NOOP fallback strategy",
+          "criteria": "When a flag value has no matching variant and the feature uses NOOP strategy, void methods do nothing and typed methods return safe defaults (false, 0, null).",
+          "test_file": "tests/acceptance/flagzen/milestone-2-fallback-strategies.feature",
+          "scenario_name": "NOOP strategy returns safe defaults for unmatched variant",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/test/java/com/flagzen/internal/NoopFallbackTest.java"
+          ]
+        },
+        {
+          "id": "03-09",
+          "name": "Default variant takes priority over fallback strategy",
+          "criteria": "When a flag value has no matching variant but a default variant exists, the default handles the call regardless of the fallback strategy.",
+          "test_file": "tests/acceptance/flagzen/milestone-2-fallback-strategies.feature",
+          "scenario_name": "Default variant handles unmatched values before fallback strategy",
+          "files": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/main/java/com/flagzen/internal/DefaultFeatureDispatcher.java",
+            "flagzen-core/src/test/java/com/flagzen/internal/DefaultVariantPriorityTest.java"
+          ]
+        },
+        {
+          "id": "03-10",
+          "name": "NOOP fallback never throws (property test)",
+          "criteria": "For any feature with NOOP strategy and any unmatched flag value, no method call on the proxy throws an exception and return values are safe defaults.",
+          "test_file": "tests/acceptance/flagzen/milestone-2-fallback-strategies.feature",
+          "scenario_name": "NOOP fallback never throws regardless of flag value",
+          "files": [
+            "flagzen-core/src/test/java/com/flagzen/internal/NoopPropertyTest.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "name": "Milestone 3 — Testing Support",
+      "steps": [
+        {
+          "id": "04-01",
+          "name": "Programmatic pinning via test context",
+          "criteria": "A test that receives a test flag context can pin a flag value programmatically, and the resolved proxy delegates to the pinned variant, scoped to the current test only.",
+          "test_file": "tests/acceptance/flagzen/milestone-3-testing-support.feature",
+          "scenario_name": "Programmatic pinning via test context",
+          "files": [
+            "flagzen-test/src/main/java/com/flagzen/test/FlagZenTestContext.java",
+            "flagzen-test/src/main/java/com/flagzen/test/FlagZenExtension.java",
+            "flagzen-test/src/test/java/com/flagzen/test/ProgrammaticPinTest.java"
+          ]
+        },
+        {
+          "id": "04-02",
+          "name": "Multiple flags pinned in a single test",
+          "criteria": "A test pinning multiple flags resolves each feature to its respectively pinned variant.",
+          "test_file": "tests/acceptance/flagzen/milestone-3-testing-support.feature",
+          "scenario_name": "Multiple flags pinned in a single test",
+          "files": [
+            "flagzen-test/src/main/java/com/flagzen/test/PinFlag.java",
+            "flagzen-test/src/main/java/com/flagzen/test/PinFlags.java",
+            "flagzen-test/src/main/java/com/flagzen/test/FlagZenExtension.java",
+            "flagzen-test/src/test/java/com/flagzen/test/MultiplePinTest.java"
+          ]
+        },
+        {
+          "id": "04-03",
+          "name": "Pin value isolation between tests",
+          "criteria": "Pinned flag values in one test do not affect another test; each test sees only its own pinned values.",
+          "test_file": "tests/acceptance/flagzen/milestone-3-testing-support.feature",
+          "scenario_name": "Pin values are isolated between tests",
+          "files": [
+            "flagzen-test/src/main/java/com/flagzen/test/FlagZenExtension.java",
+            "flagzen-test/src/test/java/com/flagzen/test/PinIsolationTest.java"
+          ]
+        },
+        {
+          "id": "04-04",
+          "name": "Feature interface injected as resolved proxy in test parameter",
+          "criteria": "A test method declaring a feature interface as a parameter receives a resolved proxy matching the pinned variant.",
+          "test_file": "tests/acceptance/flagzen/milestone-3-testing-support.feature",
+          "scenario_name": "Feature interface injected as resolved proxy in test parameter",
+          "files": [
+            "flagzen-test/src/main/java/com/flagzen/test/FlagZenExtension.java",
+            "flagzen-test/src/test/java/com/flagzen/test/ParameterInjectionTest.java"
+          ]
+        },
+        {
+          "id": "04-05",
+          "name": "Flags loaded from properties file via @FlagSource",
+          "criteria": "A test class annotated with @FlagSource loads flag values from a properties file and the dispatcher resolves features accordingly.",
+          "test_file": "tests/acceptance/flagzen/milestone-3-testing-support.feature",
+          "scenario_name": "Flags loaded from properties file for test class",
+          "files": [
+            "flagzen-test/src/main/java/com/flagzen/test/FlagSource.java",
+            "flagzen-test/src/main/java/com/flagzen/test/FlagZenExtension.java",
+            "flagzen-test/src/test/java/com/flagzen/test/FlagSourceTest.java"
+          ]
+        },
+        {
+          "id": "04-06",
+          "name": "@PinFlag overrides @FlagSource",
+          "criteria": "When both @FlagSource and @PinFlag are present, the pinned value takes priority for that flag while other flags resolve from the file source.",
+          "test_file": "tests/acceptance/flagzen/milestone-3-testing-support.feature",
+          "scenario_name": "Pin annotation overrides file-based flag source",
+          "files": [
+            "flagzen-test/src/main/java/com/flagzen/test/FlagZenExtension.java",
+            "flagzen-test/src/test/java/com/flagzen/test/PinOverridesSourceTest.java"
+          ]
+        },
+        {
+          "id": "04-07",
+          "name": "Missing flag source file error",
+          "criteria": "A test class with @FlagSource pointing to a nonexistent file produces a clear error stating the file was not found and listing the searched locations.",
+          "test_file": "tests/acceptance/flagzen/milestone-3-testing-support.feature",
+          "scenario_name": "Missing flag source file produces a clear error",
+          "files": [
+            "flagzen-test/src/main/java/com/flagzen/test/FlagZenExtension.java",
+            "flagzen-test/src/test/java/com/flagzen/test/MissingFlagSourceTest.java"
+          ]
+        },
+        {
+          "id": "04-08",
+          "name": "Pin always takes priority over file source (property test)",
+          "criteria": "For any test with both a file-based flag source and a pin annotation for the same flag, the pinned value is always used regardless of configuration order.",
+          "test_file": "tests/acceptance/flagzen/milestone-3-testing-support.feature",
+          "scenario_name": "Pin always takes priority over file source regardless of configuration order",
+          "files": [
+            "flagzen-test/src/test/java/com/flagzen/test/PinPriorityPropertyTest.java"
+          ]
+        }
+      ]
+    }
+  ],
+  "implementation_scope": {
+    "source_directories": [
+      "flagzen-core/src/main/java",
+      "flagzen-test/src/main/java"
+    ],
+    "test_directories": [
+      "flagzen-core/src/test/java",
+      "flagzen-test/src/test/java",
+      "tests/acceptance/flagzen"
+    ],
+    "excluded_patterns": [
+      "*.class",
+      "build/**"
+    ]
+  },
+  "validation": {
+    "status": "pending",
+    "reviewer": "nw-acceptance-designer-reviewer",
+    "approved_at": null
+  }
+}
