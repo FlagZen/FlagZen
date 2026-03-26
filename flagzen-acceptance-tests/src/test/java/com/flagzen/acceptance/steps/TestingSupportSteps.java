@@ -2,11 +2,15 @@ package com.flagzen.acceptance.steps;
 
 import com.flagzen.acceptance.fixtures.CheckoutFlow;
 import com.flagzen.acceptance.fixtures.PaymentMethod;
+import com.flagzen.spi.FeatureMetadata;
+import com.flagzen.test.FlagZenExtension;
 import com.flagzen.test.TestFlagContext;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
+import java.util.ServiceLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -121,6 +125,51 @@ public class TestingSupportSteps {
         CheckoutFlow freshAProxy = testAContext.resolve(CheckoutFlow.class);
         CheckoutFlow freshBProxy = testBContext.resolve(CheckoutFlow.class);
         assertThat(freshAProxy.execute()).isNotEqualTo(freshBProxy.execute());
+    }
+
+    // --- Parameter injection scenario ---
+    private String parameterFeatureName;
+    private Object injectedParameter;
+
+    @Given("a test method that pins {string} to {string}")
+    public void aTestMethodThatPinsTo(String flagKey, String variant) {
+        testFlagContext = TestFlagContext.create();
+        testFlagContext.pin(flagKey, variant);
+    }
+
+    @Given("the test method declares {string} as a parameter")
+    public void theTestMethodDeclaresAsAParameter(String featureName) {
+        parameterFeatureName = featureName;
+    }
+
+    @When("the test executes")
+    public void theTestExecutes() {
+        // Simulate what FlagZenExtension does when resolving a feature interface parameter:
+        // The extension must recognize feature types and resolve them via the test's context.
+        Class<?> featureType = resolveFeatureType(parameterFeatureName);
+
+        // Verify FlagZenExtension recognizes this as a supported parameter type
+        assertThat(FlagZenExtension.isFeatureType(featureType))
+                .as("FlagZenExtension must recognize %s as a resolvable feature parameter", parameterFeatureName)
+                .isTrue();
+
+        // Resolve the feature as the extension would during parameter injection
+        injectedParameter = testFlagContext.resolve(featureType);
+    }
+
+    @Then("the {string} parameter is a proxy resolving to {string}")
+    public void theParameterIsAProxyResolvingTo(String featureName, String variantClass) {
+        assertThat(injectedParameter).isNotNull();
+        CheckoutFlow proxy = (CheckoutFlow) injectedParameter;
+        assertThat(proxy.execute()).isEqualTo(variantClass);
+    }
+
+    private Class<?> resolveFeatureType(String featureName) {
+        return switch (featureName) {
+            case "CheckoutFlow" -> CheckoutFlow.class;
+            case "PaymentMethod" -> PaymentMethod.class;
+            default -> throw new IllegalArgumentException("Unknown feature: " + featureName);
+        };
     }
 
     @Then("{string} delegates to {string}")

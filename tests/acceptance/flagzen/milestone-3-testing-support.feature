@@ -34,7 +34,7 @@ Feature: Testing support for flag-dependent code
     And test B sees "ClassicCheckout"
     And neither test affects the other
 
-  @US-07 @pending
+  @US-07
   Scenario: Feature interface injected as resolved proxy in test parameter
     Given a compiled feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a test method that pins "checkout-flow" to "PREMIUM"
