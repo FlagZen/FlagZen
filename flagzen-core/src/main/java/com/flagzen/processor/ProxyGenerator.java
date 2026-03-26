@@ -161,7 +161,7 @@ final class ProxyGenerator {
                 .addStatement("throw $T.noFlagValue($S)",
                         UnmatchedVariantException.class, model.flagKey())
                 .endControlFlow()
-                .addStatement("throw new $T($S, value)",
+                .addStatement("throw new $T($S, value, variants.keySet())",
                         UnmatchedVariantException.class, model.flagKey())
                 .build();
     }

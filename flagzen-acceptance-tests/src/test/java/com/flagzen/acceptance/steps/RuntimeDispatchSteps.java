@@ -186,4 +186,33 @@ public class RuntimeDispatchSteps {
                 .containsIgnoringCase("no flag value")
                 .containsIgnoringCase(flagKey);
     }
+
+    @Given("a compiled feature {string} with variants {string}, {string}, {string}")
+    public void aCompiledFeatureWithThreeVariants(String featureName, String v1, String v2, String v3) {
+        // Fixtures are pre-compiled: CheckoutFlowMetadata registers CLASSIC, STREAMLINED, PREMIUM
+    }
+
+    @And("{string} uses fallback strategy EXCEPTION")
+    public void featureUsesFallbackStrategyException(String featureName) {
+        // CheckoutFlowMetadata already declares EXCEPTION as fallback strategy.
+        // Dispatcher will be created when flag provider step runs.
+    }
+
+    @When("the developer calls {string} on the resolved proxy")
+    public void theDeveloperCallsOnTheResolvedProxy(String methodName) {
+        try {
+            resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
+            callResult = resolvedProxy.execute();
+        } catch (Exception e) {
+            caughtException = e;
+        }
+    }
+
+    @And("the error message lists known variants: {string}, {string}, {string}")
+    public void theErrorMessageListsKnownVariants(String v1, String v2, String v3) {
+        assertThat(caughtException.getMessage())
+                .contains(v1)
+                .contains(v2)
+                .contains(v3);
+    }
 }

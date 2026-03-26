@@ -56,7 +56,7 @@ Feature: Runtime dispatch and fallback strategies
 
   # --- US-09: Fallback strategies ---
 
-  @US-09 @pending
+  @US-09
   Scenario: EXCEPTION strategy throws on unmatched variant value
     Given a compiled feature "CheckoutFlow" with variants "CLASSIC", "STREAMLINED", "PREMIUM"
     And "CheckoutFlow" uses fallback strategy EXCEPTION

@@ -1,5 +1,8 @@
 package com.flagzen;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 /**
  * Thrown when no variant matches the current flag value
  * and the fallback strategy requires a match.
@@ -8,6 +11,11 @@ public class UnmatchedVariantException extends FlagZenException {
 
     public UnmatchedVariantException(String flagKey, String flagValue) {
         super("No variant matches flag value '" + flagValue + "' for key '" + flagKey + "'");
+    }
+
+    public UnmatchedVariantException(String flagKey, String flagValue, Collection<String> knownVariants) {
+        super("No variant matches flag value '" + flagValue + "' for key '" + flagKey
+                + "'. Known variants: " + knownVariants.stream().sorted().collect(Collectors.joining(", ")));
     }
 
     private UnmatchedVariantException(String message) {

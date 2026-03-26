@@ -41,6 +41,6 @@ class DarkModeProxy implements DarkMode {
         if (flagValue == null) {
             throw UnmatchedVariantException.noFlagValue("dark-mode");
         }
-        throw new UnmatchedVariantException("dark-mode", flagValue);
+        throw new UnmatchedVariantException("dark-mode", flagValue, variants.keySet());
     }
 }
