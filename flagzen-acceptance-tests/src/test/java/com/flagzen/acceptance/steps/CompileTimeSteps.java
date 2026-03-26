@@ -365,16 +365,34 @@ public class CompileTimeSteps {
 
     @When("the developer inspects the proxy's string representation")
     public void theDeveloperInspectsTheProxyStringRepresentation() throws Exception {
-        var proxyFile = compilation.generatedSourceFile(
-                PACKAGE + "." + featureInterfaceName + "_FlagZenProxy");
-        org.assertj.core.api.Assertions.assertThat(proxyFile).isPresent();
-        generatedProxySource = proxyFile.get().getCharContent(false).toString();
+        extractGeneratedProxySource();
     }
+
+    @When("the developer inspects the generated source code")
+    public void theDeveloperInspectsTheGeneratedSourceCode() throws Exception {
+        extractGeneratedProxySource();
+    }
+
 
     @Then("it shows {string}")
     public void itShows(String expected) {
         org.assertj.core.api.Assertions.assertThat(generatedProxySource)
                 .contains("return \"" + expected + "\"");
+    }
+
+    @Then("it contains no reflection imports")
+    public void itContainsNoReflectionImports() {
+        org.assertj.core.api.Assertions.assertThat(generatedProxySource)
+                .doesNotContain("java.lang.reflect");
+    }
+
+    @And("dispatch uses direct method calls or map lookups")
+    public void dispatchUsesDirectMethodCallsOrMapLookups() {
+        org.assertj.core.api.Assertions.assertThat(generatedProxySource)
+                .satisfiesAnyOf(
+                        source -> org.assertj.core.api.Assertions.assertThat(source).contains("variants.get("),
+                        source -> org.assertj.core.api.Assertions.assertThat(source).contains("resolveVariant()")
+                );
     }
 
     private void ensureFeatureSourceExists(String interfaceName) {
@@ -412,6 +430,13 @@ public class CompileTimeSteps {
                     """.formatted(PACKAGE, key, interfaceName, enumBlock)
             ));
         }
+    }
+
+    private void extractGeneratedProxySource() throws Exception {
+        var proxyFile = compilation.generatedSourceFile(
+                PACKAGE + "." + featureInterfaceName + "_FlagZenProxy");
+        org.assertj.core.api.Assertions.assertThat(proxyFile).isPresent();
+        generatedProxySource = proxyFile.get().getCharContent(false).toString();
     }
 
     private String buildVariantEnumBlock() {

@@ -110,7 +110,7 @@ Feature: Compile-time validation of features and variants
     When the developer inspects the proxy's string representation
     Then it shows "FlagZenProxy[checkout-flow]"
 
-  @US-04 @pending
+  @US-04
   Scenario: Generated proxy contains no runtime reflection
     Given a compiled feature "CheckoutFlow" with flag key "checkout-flow"
     And the dispatch proxy "CheckoutFlow_FlagZenProxy" has been generated
