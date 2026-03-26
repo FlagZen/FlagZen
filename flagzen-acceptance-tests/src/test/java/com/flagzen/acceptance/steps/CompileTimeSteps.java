@@ -27,6 +27,7 @@ public class CompileTimeSteps {
 
     private String featureInterfaceName;
     private String flagKey;
+    private String fallbackStrategy;
     private String methodName;
     private boolean hasVariantEnum = true;
     private final List<JavaFileObject> sourceFiles = new ArrayList<>();
@@ -38,6 +39,13 @@ public class CompileTimeSteps {
     public void aFeatureInterfaceWithFlagKey(String interfaceName, String key) {
         this.featureInterfaceName = interfaceName;
         this.flagKey = key;
+    }
+
+    @Given("a feature interface {string} with flag key {string} and fallback strategy {word}")
+    public void aFeatureInterfaceWithFlagKeyAndFallbackStrategy(String interfaceName, String key, String strategy) {
+        this.featureInterfaceName = interfaceName;
+        this.flagKey = key;
+        this.fallbackStrategy = strategy;
     }
 
     @And("no inner Variant enum is defined on {string}")
@@ -111,6 +119,14 @@ public class CompileTimeSteps {
         assertThat(compilation).succeeded();
     }
 
+    @And("the fallback strategy {word} is recorded for {string}")
+    public void theFallbackStrategyIsRecordedFor(String strategy, String key) {
+        assertThat(compilation)
+                .generatedSourceFile(PACKAGE + "." + featureInterfaceName + "_FlagZenMetadata")
+                .contentsAsUtf8String()
+                .contains("FallbackStrategy." + strategy);
+    }
+
     @And("{string} is accepted as a valid variant value")
     public void isAcceptedAsAValidVariantValue(String value) {
         assertThat(compilation).succeeded();
@@ -167,17 +183,33 @@ public class CompileTimeSteps {
             return;
         }
         featureSourcesAdded.add(interfaceName);
-        sourceFiles.add(JavaFileObjects.forSourceString(
-                PACKAGE + "." + interfaceName,
-                """
-                package %s;
+        if (fallbackStrategy != null) {
+            sourceFiles.add(JavaFileObjects.forSourceString(
+                    PACKAGE + "." + interfaceName,
+                    """
+                    package %s;
 
-                import com.flagzen.Feature;
+                    import com.flagzen.Feature;
+                    import com.flagzen.FallbackStrategy;
 
-                @Feature("%s")
-                public interface %s {
-                }
-                """.formatted(PACKAGE, flagKey, interfaceName)
-        ));
+                    @Feature(value = "%s", fallback = FallbackStrategy.%s)
+                    public interface %s {
+                    }
+                    """.formatted(PACKAGE, flagKey, fallbackStrategy, interfaceName)
+            ));
+        } else {
+            sourceFiles.add(JavaFileObjects.forSourceString(
+                    PACKAGE + "." + interfaceName,
+                    """
+                    package %s;
+
+                    import com.flagzen.Feature;
+
+                    @Feature("%s")
+                    public interface %s {
+                    }
+                    """.formatted(PACKAGE, flagKey, interfaceName)
+            ));
+        }
     }
 }

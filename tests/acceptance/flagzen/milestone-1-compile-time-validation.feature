@@ -22,7 +22,7 @@ Feature: Compile-time validation of features and variants
     Then compilation fails
     And the error message states "@Feature can only be applied to interfaces"
 
-  @US-01 @pending
+  @US-01
   Scenario: Feature with fallback strategy records configuration
     Given a feature interface "CheckoutFlow" with flag key "checkout-flow" and fallback strategy REQUIRED
     And a variant "ClassicCheckout" implementing "CheckoutFlow" for value "CLASSIC"
