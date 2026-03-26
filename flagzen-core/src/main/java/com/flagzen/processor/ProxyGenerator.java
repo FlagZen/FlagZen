@@ -292,12 +292,4 @@ final class ProxyGenerator {
 
         return builder.build();
     }
-
-    /**
-     * @deprecated Use {@link #generateProxy(FeatureModel)} instead.
-     */
-    @Deprecated
-    JavaFile generate(FeatureModel model) {
-        return generateProxy(model);
-    }
 }

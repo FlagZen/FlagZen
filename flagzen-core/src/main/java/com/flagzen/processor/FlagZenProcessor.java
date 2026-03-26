@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -305,7 +306,7 @@ public class FlagZenProcessor extends AbstractProcessor {
                                                   List<String> variantEnumValues,
                                                   String flagKey,
                                                   TypeElement featureElement) {
-        Set<String> coveredValues = new java.util.HashSet<>();
+        Set<String> coveredValues = new HashSet<>();
         for (VariantModel variant : variants) {
             coveredValues.add(variant.variantValue());
         }

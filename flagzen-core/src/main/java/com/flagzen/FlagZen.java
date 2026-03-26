@@ -1,7 +1,6 @@
 package com.flagzen;
 
 import com.flagzen.internal.DefaultFeatureDispatcher;
-import com.flagzen.internal.InMemoryFlagProvider;
 import com.flagzen.spi.FlagProvider;
 
 import java.util.Objects;
