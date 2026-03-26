@@ -39,7 +39,7 @@ Feature: Runtime dispatch and fallback strategies
     And calls "execute" on the resolved proxy
     Then the call is handled by the "StreamlinedCheckout" variant
 
-  @US-06 @pending
+  @US-06
   Scenario: Flag provider registered programmatically via configuration API
     Given a custom flag provider that returns "PREMIUM" for "checkout-flow"
     When the developer configures the dispatcher with this provider

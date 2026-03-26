@@ -5,10 +5,14 @@ import com.flagzen.FlagZen;
 import com.flagzen.acceptance.fixtures.CheckoutFlow;
 import com.flagzen.internal.DefaultFeatureDispatcher;
 import com.flagzen.internal.InMemoryFlagProvider;
+import com.flagzen.spi.FlagProvider;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
+import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RuntimeDispatchSteps {
 
     private InMemoryFlagProvider flagProvider;
+    private FlagProvider customFlagProvider;
     private FeatureDispatcher dispatcher;
     private CheckoutFlow resolvedProxy;
     private CheckoutFlow secondResolvedProxy;
@@ -76,6 +81,7 @@ public class RuntimeDispatchSteps {
                 dispatcher = FlagZen.dispatcher(config -> { /* no provider */ });
             }
             resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
+            SharedProxyHolder.set(resolvedProxy);
         } catch (Exception e) {
             caughtException = e;
         }
@@ -125,5 +131,22 @@ public class RuntimeDispatchSteps {
     public void theMessageSuggestsHowToAddOne() {
         assertThat(caughtException.getMessage())
                 .containsIgnoringCase("provider");
+    }
+
+    @Given("a custom flag provider that returns {string} for {string}")
+    public void aCustomFlagProviderThatReturnsFor(String flagValue, String flagKey) {
+        Map<String, String> flags = Map.of(flagKey, flagValue);
+        customFlagProvider = key -> Optional.ofNullable(flags.get(key));
+    }
+
+    @When("the developer configures the dispatcher with this provider")
+    public void theDeveloperConfiguresTheDispatcherWithThisProvider() {
+        dispatcher = FlagZen.dispatcher(config -> config.provider(customFlagProvider));
+    }
+
+    @When("resolves {string} through the dispatcher")
+    public void resolvesFeatureThroughTheDispatcher(String featureName) {
+        resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
+        SharedProxyHolder.set(resolvedProxy);
     }
 }

@@ -1,14 +1,10 @@
 package com.flagzen.acceptance.steps;
 
 import com.flagzen.acceptance.fixtures.CheckoutFlow;
-import com.flagzen.internal.InMemoryFlagProvider;
 import com.flagzen.test.TestFlagContext;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Step definitions for walking skeleton scenario 3:
@@ -35,12 +31,7 @@ public class TestingSupportSteps {
         testFlagContext = TestFlagContext.create();
         testFlagContext.pin(pinnedFlagKey, pinnedFlagValue);
         resolvedProxy = testFlagContext.resolve(CheckoutFlow.class);
-    }
-
-    @Then("the resolved proxy delegates to {string}")
-    public void theResolvedProxyDelegatesTo(String variantClass) {
-        String result = resolvedProxy.execute();
-        assertThat(result).isEqualTo(variantClass);
+        SharedProxyHolder.set(resolvedProxy);
     }
 
     @And("no flag provider setup was needed in the test")
