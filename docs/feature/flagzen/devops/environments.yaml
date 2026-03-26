@@ -1,0 +1,42 @@
+feature_id: flagzen
+type: library
+description: >
+  FlagZen is a library published to Maven Central, not a deployed service.
+  "Environments" are the consumer JDK versions the library must support.
+
+java_version_matrix:
+  - version: 17
+    status: primary
+    description: "Minimum supported version (--release 17 compilation target)"
+  - version: 21
+    status: supported
+    description: "Current LTS -- majority of production workloads"
+  - version: 25
+    status: supported
+    description: "Latest release -- build toolchain and forward compatibility"
+
+target_environments:
+  - name: clean
+    description: "Fresh JDK install, no prior FlagZen artifacts in local Maven cache"
+    platform: [linux, macos, windows]
+    preconditions: []
+
+  - name: ci
+    description: "GitHub Actions ubuntu-latest runner with Gradle wrapper"
+    platform: [linux]
+    preconditions:
+      - "Gradle wrapper committed to repository"
+      - "No local .gradle cache (clean runner)"
+
+publishing_target:
+  registry: Maven Central (Sonatype OSSRH)
+  group_id: com.flagzen
+  artifacts:
+    - flagzen-core
+    - flagzen-test
+  signing: GPG (required by Maven Central)
+  credentials:
+    - SONATYPE_USERNAME
+    - SONATYPE_PASSWORD
+    - GPG_PRIVATE_KEY
+    - GPG_PASSPHRASE

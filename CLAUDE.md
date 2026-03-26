@@ -37,3 +37,7 @@ See `docs/adrs/` for architectural decision records.
 3. FeatureDispatcher is an interface with default factory method; concrete implementation is internal
 4. Generated proxies: public class, package-private constructor
 5. Zero runtime reflection in core -- all dispatch via compile-time generated code
+
+## Mutation Testing Strategy
+
+This project uses **per-feature** mutation testing. PITest runs in CI after the build job succeeds, scoped to `com.flagzen.*` classes in flagzen-core. Kill rate gate: >= 80%. Current baseline: 84% kill rate.
