@@ -299,6 +299,13 @@ public class CompileTimeSteps {
         assertThat(compilation).hadErrorContaining("Valid values: " + val1 + ", " + val2 + ", " + val3);
     }
 
+    @And("the error identifies both {string} and {string} as conflicting")
+    public void theErrorIdentifiesBothAsConflicting(String class1, String class2) {
+        assertThat(compilation).hadErrorContaining(class1);
+        assertThat(compilation).hadErrorContaining(class2);
+        assertThat(compilation).hadErrorContaining("Duplicate");
+    }
+
     private void ensureFeatureSourceExists(String interfaceName) {
         if (featureSourcesAdded.contains(interfaceName)) {
             return;

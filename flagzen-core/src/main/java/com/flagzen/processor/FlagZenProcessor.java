@@ -23,7 +23,9 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -94,6 +96,9 @@ public class FlagZenProcessor extends AbstractProcessor {
             }
 
             List<VariantModel> variants = collectVariants(roundEnv, featureElement);
+            if (hasDuplicateVariantValues(variants, flagKey, featureElement)) {
+                continue;
+            }
             String defaultVariantClassName = findDefaultVariant(roundEnv, featureElement);
 
             List<String> variantEnumValues = collectVariantEnumValues(featureElement);
@@ -286,6 +291,32 @@ public class FlagZenProcessor extends AbstractProcessor {
                 );
             }
         }
+    }
+
+    private boolean hasDuplicateVariantValues(List<VariantModel> variants, String flagKey,
+                                                TypeElement featureElement) {
+        Map<String, List<String>> valueToClassNames = new HashMap<>();
+        for (VariantModel variant : variants) {
+            String simpleName = variant.qualifiedClassName()
+                    .substring(variant.qualifiedClassName().lastIndexOf('.') + 1);
+            valueToClassNames
+                    .computeIfAbsent(variant.variantValue(), k -> new ArrayList<>())
+                    .add(simpleName);
+        }
+        boolean foundDuplicate = false;
+        for (Map.Entry<String, List<String>> entry : valueToClassNames.entrySet()) {
+            if (entry.getValue().size() > 1) {
+                String classNames = String.join(" and ", entry.getValue());
+                processingEnv.getMessager().printMessage(
+                        Diagnostic.Kind.ERROR,
+                        "Duplicate @Variant(\"" + entry.getKey() + "\") for feature \""
+                                + flagKey + "\". Found on: " + classNames,
+                        featureElement
+                );
+                foundDuplicate = true;
+            }
+        }
+        return foundDuplicate;
     }
 
     private String getPackageName(TypeElement element) {

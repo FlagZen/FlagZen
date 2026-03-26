@@ -72,7 +72,7 @@ Feature: Compile-time validation of features and variants
     And the error states "TURBO" is not a valid value for "CheckoutFlow"
     And the error lists valid values: "CLASSIC", "STREAMLINED", "PREMIUM"
 
-  @US-03 @pending
+  @US-03
   Scenario: Duplicate variant value for the same feature is rejected
     Given a feature interface "CheckoutFlow" with flag key "checkout-flow"
     And a variant "ClassicCheckout" implementing "CheckoutFlow" for value "CLASSIC"
