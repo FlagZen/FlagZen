@@ -1,2 +1,3 @@
 com.flagzen.acceptance.fixtures.CheckoutFlowMetadata
 com.flagzen.acceptance.fixtures.DarkModeMetadata
+com.flagzen.acceptance.fixtures.PaymentMethodMetadata

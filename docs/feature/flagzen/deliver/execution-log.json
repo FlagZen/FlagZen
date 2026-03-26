@@ -860,7 +860,7 @@
       "sid": "03-09",
       "p": "RED_ACCEPTANCE",
       "s": "EXECUTED",
-      "d": "PASS - acceptance test passes immediately; proxy already implements default-variant-before-fallback dispatch order",
+      "d": "PASS",
       "t": "2026-03-26T14:43:37Z"
     },
     {
@@ -876,6 +876,125 @@
       "s": "EXECUTED",
       "d": "PASS",
       "t": "2026-03-26T14:44:59Z"
+    },
+    {
+      "sid": "03-09",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:45:23Z"
+    },
+    {
+      "sid": "03-09",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:45:43Z"
+    },
+    {
+      "sid": "03-09",
+      "p": "RED_UNIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:45:44Z"
+    },
+    {
+      "sid": "03-10",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:46:57Z"
+    },
+    {
+      "sid": "03-10",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:47:44Z"
+    },
+    {
+      "sid": "03-10",
+      "p": "RED_UNIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:49:38Z"
+    },
+    {
+      "sid": "03-10",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:49:46Z"
+    },
+    {
+      "sid": "03-10",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:50:34Z"
+    },
+    {
+      "sid": "04-01",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:52:04Z"
+    },
+    {
+      "sid": "04-01",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:53:32Z"
+    },
+    {
+      "sid": "04-01",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: Production code already exists from step 01-03",
+      "t": "2026-03-26T14:53:37Z"
+    },
+    {
+      "sid": "04-01",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:53:37Z"
+    },
+    {
+      "sid": "04-01",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:54:05Z"
+    },
+    {
+      "sid": "04-02",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:55:29Z"
+    },
+    {
+      "sid": "04-02",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:57:13Z"
+    },
+    {
+      "sid": "04-02",
+      "p": "RED_UNIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:58:28Z"
+    },
+    {
+      "sid": "04-02",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-26T14:58:35Z"
     }
   ]
 }

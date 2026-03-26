@@ -15,7 +15,7 @@ Feature: Testing support for flag-dependent code
     Then the resolved proxy delegates to "PremiumCheckout"
     And the pin is scoped to the current test only
 
-  @US-07 @pending
+  @US-07
   Scenario: Multiple flags pinned in a single test
     Given a compiled feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a compiled feature "PaymentMethod" with variants "CREDIT_CARD" and "DEBIT"

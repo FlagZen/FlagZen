@@ -2,6 +2,7 @@ package com.flagzen.acceptance.steps;
 
 import com.flagzen.acceptance.fixtures.CheckoutFlowMetadata;
 import com.flagzen.acceptance.fixtures.DarkModeMetadata;
+import com.flagzen.acceptance.fixtures.PaymentMethodMetadata;
 import io.cucumber.java.Before;
 
 /**
@@ -14,5 +15,6 @@ public class ScenarioHooks {
         SharedProxyHolder.reset();
         DarkModeMetadata.reset();
         CheckoutFlowMetadata.reset();
+        PaymentMethodMetadata.reset();
     }
 }
