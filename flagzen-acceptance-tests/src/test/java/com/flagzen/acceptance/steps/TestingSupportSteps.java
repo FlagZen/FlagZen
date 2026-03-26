@@ -21,6 +21,12 @@ public class TestingSupportSteps {
     private String pinnedFlagKey;
     private String pinnedFlagValue;
 
+    // Isolation scenario fields
+    private TestFlagContext testAContext;
+    private TestFlagContext testBContext;
+    private CheckoutFlow testAProxy;
+    private CheckoutFlow testBProxy;
+
     @Given("a test method annotated to pin {string} to {string}")
     public void aTestMethodAnnotatedToPinTo(String flagKey, String flagValue) {
         pinnedFlagKey = flagKey;
@@ -79,6 +85,42 @@ public class TestingSupportSteps {
         resolvedPaymentProxy = testFlagContext.resolve(PaymentMethod.class);
         SharedProxyHolder.set(resolvedProxy);
         SharedProxyHolder.setPayment(resolvedPaymentProxy);
+    }
+
+    @Given("test A pins {string} to {string}")
+    public void testAPinsTo(String flagKey, String variant) {
+        testAContext = TestFlagContext.create();
+        testAContext.pin(flagKey, variant);
+    }
+
+    @Given("test B pins {string} to {string}")
+    public void testBPinsTo(String flagKey, String variant) {
+        testBContext = TestFlagContext.create();
+        testBContext.pin(flagKey, variant);
+    }
+
+    @When("both tests execute")
+    public void bothTestsExecute() {
+        testAProxy = testAContext.resolve(CheckoutFlow.class);
+        testBProxy = testBContext.resolve(CheckoutFlow.class);
+    }
+
+    @Then("test A sees {string}")
+    public void testASees(String expectedVariant) {
+        assertThat(testAProxy.execute()).isEqualTo(expectedVariant);
+    }
+
+    @Then("test B sees {string}")
+    public void testBSees(String expectedVariant) {
+        assertThat(testBProxy.execute()).isEqualTo(expectedVariant);
+    }
+
+    @Then("neither test affects the other")
+    public void neitherTestAffectsTheOther() {
+        // Re-resolve to confirm no cross-contamination
+        CheckoutFlow freshAProxy = testAContext.resolve(CheckoutFlow.class);
+        CheckoutFlow freshBProxy = testBContext.resolve(CheckoutFlow.class);
+        assertThat(freshAProxy.execute()).isNotEqualTo(freshBProxy.execute());
     }
 
     @Then("{string} delegates to {string}")

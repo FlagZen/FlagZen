@@ -24,7 +24,7 @@ Feature: Testing support for flag-dependent code
     Then "CheckoutFlow" delegates to "PremiumCheckout"
     And "PaymentMethod" delegates to "CreditCardPayment"
 
-  @US-07 @pending
+  @US-07
   Scenario: Pin values are isolated between tests
     Given a compiled feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And test A pins "checkout-flow" to "PREMIUM"
