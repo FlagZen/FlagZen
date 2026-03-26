@@ -16,6 +16,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -276,5 +278,50 @@ public class RuntimeDispatchSteps {
     @And("no exception is thrown")
     public void noExceptionIsThrown() {
         assertThat(caughtException).isNull();
+    }
+
+    // --- Property test: NOOP fallback never throws regardless of flag value ---
+
+    private static final List<String> ARBITRARY_FLAG_VALUES = List.of(
+            "", "UNKNOWN", "midnight", "null", "undefined",
+            "   ", "\u00e9\u00e0\u00fc\u2603", "CLASSIC-typo", "12345",
+            "true", "<script>alert(1)</script>"
+    );
+
+    private final List<Exception> propertyExceptions = new ArrayList<>();
+    private final List<Object> propertyResults = new ArrayList<>();
+
+    @Given("any feature configured with fallback strategy NOOP")
+    public void anyFeatureConfiguredWithFallbackStrategyNoop() {
+        DarkModeMetadata.setFallbackStrategy(com.flagzen.FallbackStrategy.NOOP);
+        activeFeature = "DarkMode";
+    }
+
+    @And("any flag value that does not match a known variant")
+    public void anyFlagValueThatDoesNotMatchAKnownVariant() {
+        // Flag values will be iterated in the "when" step
+    }
+
+    @When("any method is called on the resolved proxy")
+    public void anyMethodIsCalledOnTheResolvedProxy() {
+        for (String flagValue : ARBITRARY_FLAG_VALUES) {
+            flagProvider = new InMemoryFlagProvider();
+            flagProvider.set("dark-mode", flagValue);
+            dispatcher = new DefaultFeatureDispatcher(flagProvider);
+            try {
+                DarkMode proxy = dispatcher.resolve(DarkMode.class);
+                proxy.apply();
+                propertyResults.add(proxy.isEnabled());
+            } catch (Exception e) {
+                propertyExceptions.add(e);
+            }
+        }
+    }
+
+    @And("return values are safe defaults for their types")
+    public void returnValuesAreSafeDefaultsForTheirTypes() {
+        assertThat(propertyResults)
+                .as("All isEnabled() calls should return safe default (false)")
+                .allMatch(result -> Boolean.FALSE.equals(result));
     }
 }

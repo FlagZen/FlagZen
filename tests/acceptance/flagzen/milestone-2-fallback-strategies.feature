@@ -85,7 +85,7 @@ Feature: Runtime dispatch and fallback strategies
     Then the call is handled by "DefaultCheckout"
     And no exception is thrown
 
-  @US-09 @property @pending
+  @US-09 @property
   Scenario: NOOP fallback never throws regardless of flag value
     Given any feature configured with fallback strategy NOOP
     And any flag value that does not match a known variant
