@@ -31,7 +31,7 @@ Feature: Runtime dispatch and fallback strategies
 
   # --- US-06: FlagProvider SPI ---
 
-  @US-06 @pending
+  @US-06
   Scenario: In-memory flag provider serves flag values for development
     Given an in-memory flag provider with "checkout-flow" set to "STREAMLINED"
     And the dispatcher is configured with this provider
