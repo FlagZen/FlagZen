@@ -1,0 +1,21 @@
+# Gradle
+.gradle/
+build/
+gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# nWave transient state
+.nwave/des/des-task-active*
+.nwave/des/deliver-session.json
