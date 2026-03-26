@@ -35,6 +35,9 @@ class CheckoutFlowProxy implements CheckoutFlow {
         if (defaultVariant != null) {
             return defaultVariant.get().execute();
         }
-        throw new UnmatchedVariantException("checkout-flow", String.valueOf(flagValue));
+        if (flagValue == null) {
+            throw UnmatchedVariantException.noFlagValue("checkout-flow");
+        }
+        throw new UnmatchedVariantException("checkout-flow", flagValue);
     }
 }

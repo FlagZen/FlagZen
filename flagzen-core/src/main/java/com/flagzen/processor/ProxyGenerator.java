@@ -157,8 +157,12 @@ final class ProxyGenerator {
                 .beginControlFlow("if (defaultVariant != null)")
                 .addStatement("return defaultVariant.get()")
                 .endControlFlow()
-                .addStatement("throw new $T($S, $T.valueOf(value))",
-                        UnmatchedVariantException.class, model.flagKey(), String.class)
+                .beginControlFlow("if (value == null)")
+                .addStatement("throw $T.noFlagValue($S)",
+                        UnmatchedVariantException.class, model.flagKey())
+                .endControlFlow()
+                .addStatement("throw new $T($S, value)",
+                        UnmatchedVariantException.class, model.flagKey())
                 .build();
     }
 

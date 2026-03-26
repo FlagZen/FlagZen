@@ -2,7 +2,9 @@ package com.flagzen.acceptance.steps;
 
 import com.flagzen.FeatureDispatcher;
 import com.flagzen.FlagZen;
+import com.flagzen.UnmatchedVariantException;
 import com.flagzen.acceptance.fixtures.CheckoutFlow;
+import com.flagzen.acceptance.fixtures.DarkMode;
 import com.flagzen.internal.DefaultFeatureDispatcher;
 import com.flagzen.internal.InMemoryFlagProvider;
 import com.flagzen.spi.FlagProvider;
@@ -148,5 +150,40 @@ public class RuntimeDispatchSteps {
     public void resolvesFeatureThroughTheDispatcher(String featureName) {
         resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
         SharedProxyHolder.set(resolvedProxy);
+    }
+
+    @Given("an in-memory flag provider with no flags configured")
+    public void anInMemoryFlagProviderWithNoFlagsConfigured() {
+        flagProvider = new InMemoryFlagProvider();
+    }
+
+    @And("the feature {string} uses fallback strategy EXCEPTION")
+    public void theFeatureUsesFallbackStrategyException(String featureName) {
+        // DarkModeMetadata already has EXCEPTION as its fallback strategy.
+        // Dispatcher created here with the empty provider.
+        dispatcher = new DefaultFeatureDispatcher(flagProvider);
+    }
+
+    @When("the developer resolves {string} and calls a method")
+    public void theDeveloperResolvesAndCallsAMethod(String featureName) {
+        try {
+            DarkMode proxy = dispatcher.resolve(DarkMode.class);
+            proxy.apply();
+        } catch (Exception e) {
+            caughtException = e;
+        }
+    }
+
+    @Then("an unmatched variant error is raised")
+    public void anUnmatchedVariantErrorIsRaised() {
+        assertThat(caughtException).isNotNull();
+        assertThat(caughtException).isInstanceOf(UnmatchedVariantException.class);
+    }
+
+    @And("the message indicates no flag value was found for {string}")
+    public void theMessageIndicatesNoFlagValueWasFoundFor(String flagKey) {
+        assertThat(caughtException.getMessage())
+                .containsIgnoringCase("no flag value")
+                .containsIgnoringCase(flagKey);
     }
 }

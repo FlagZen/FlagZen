@@ -46,7 +46,7 @@ Feature: Runtime dispatch and fallback strategies
     And resolves "CheckoutFlow" through the dispatcher
     Then the resolved proxy delegates to "PremiumCheckout"
 
-  @US-06 @pending
+  @US-06
   Scenario: Flag provider returns no value for an unknown flag key
     Given an in-memory flag provider with no flags configured
     And the feature "DarkMode" uses fallback strategy EXCEPTION
