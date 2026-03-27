@@ -35,7 +35,7 @@ Feature: Evaluation context model and explicit context resolution
 
   # --- US-EC-02: Explicit Context on FeatureDispatcher.resolve() ---
 
-  @US-EC-02 @US-EC-03 @pending
+  @US-EC-02 @US-EC-03
   Scenario: Explicit context is forwarded to flag provider
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a flag provider that returns "PREMIUM" when context attribute "plan" is "enterprise"
@@ -43,7 +43,7 @@ Feature: Evaluation context model and explicit context resolution
     When the developer resolves "CheckoutFlow" with that evaluation context
     Then the resolved proxy dispatches to the "PREMIUM" variant
 
-  @US-EC-02 @pending
+  @US-EC-02
   Scenario: Resolve without context remains backward compatible
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "STREAMLINED"
     And an in-memory flag provider with "checkout-flow" set to "CLASSIC"
@@ -51,7 +51,7 @@ Feature: Evaluation context model and explicit context resolution
     Then the resolved proxy dispatches to the "CLASSIC" variant
     And behavior is identical to pre-context FlagZen
 
-  @US-EC-02 @error @pending
+  @US-EC-02 @error
   Scenario: Null context is treated as no context
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "STREAMLINED"
     And an in-memory flag provider with "checkout-flow" set to "CLASSIC"
@@ -61,7 +61,7 @@ Feature: Evaluation context model and explicit context resolution
 
   # --- US-EC-03: FlagProvider Context-Aware Overload ---
 
-  @US-EC-03 @pending
+  @US-EC-03
   Scenario: Existing flag provider ignores context via default method
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "STREAMLINED"
     And an in-memory flag provider with "checkout-flow" set to "CLASSIC"
@@ -70,7 +70,7 @@ Feature: Evaluation context model and explicit context resolution
     Then the in-memory flag provider returns "CLASSIC" regardless of context
     And the resolved proxy dispatches to the "CLASSIC" variant
 
-  @US-EC-03 @pending
+  @US-EC-03
   Scenario: Context-aware flag provider uses context for resolution
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a context-aware flag provider that returns "PREMIUM" for plan "enterprise"
@@ -78,7 +78,7 @@ Feature: Evaluation context model and explicit context resolution
     When the developer resolves "CheckoutFlow" with that evaluation context
     Then the resolved proxy dispatches to the "PREMIUM" variant
 
-  @US-EC-03 @pending
+  @US-EC-03
   Scenario: Context-aware flag provider falls back when attribute missing
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a context-aware flag provider that returns "PREMIUM" for plan "enterprise"
@@ -88,7 +88,7 @@ Feature: Evaluation context model and explicit context resolution
 
   # --- US-EC-04: Generated Proxy Passes Context ---
 
-  @US-EC-04 @pending
+  @US-EC-04
   Scenario: Generated proxy forwards context to flag provider
     Given a feature "CheckoutFlow" with flag key "checkout-flow"
     And a context-aware flag provider
@@ -96,7 +96,7 @@ Feature: Evaluation context model and explicit context resolution
     When the developer resolves "CheckoutFlow" with that evaluation context
     Then the flag provider receives both the flag key "checkout-flow" and the evaluation context
 
-  @US-EC-04 @pending
+  @US-EC-04
   Scenario: Generated proxy works without context
     Given a feature "CheckoutFlow" with flag key "checkout-flow"
     And an in-memory flag provider with "checkout-flow" set to "CLASSIC"

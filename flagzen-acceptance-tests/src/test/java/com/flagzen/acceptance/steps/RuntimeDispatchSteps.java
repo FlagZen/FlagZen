@@ -94,6 +94,7 @@ public class RuntimeDispatchSteps {
     public void anInMemoryFlagProviderWithSetTo(String flagKey, String flagValue) {
         flagProvider = new InMemoryFlagProvider();
         flagProvider.set(flagKey, flagValue);
+        SharedDispatcherHolder.setInMemoryProvider(flagProvider);
     }
 
     @And("the dispatcher is configured with this provider")

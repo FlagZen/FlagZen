@@ -1,5 +1,6 @@
 package com.flagzen.acceptance.steps;
 
+import com.flagzen.FlagContext;
 import com.flagzen.acceptance.fixtures.CheckoutFlowMetadata;
 import com.flagzen.acceptance.fixtures.DarkModeMetadata;
 import com.flagzen.acceptance.fixtures.PaymentMethodMetadata;
@@ -13,8 +14,10 @@ public class ScenarioHooks {
     @Before
     public void resetSharedState() {
         SharedProxyHolder.reset();
+        SharedDispatcherHolder.reset();
         DarkModeMetadata.reset();
         CheckoutFlowMetadata.reset();
         PaymentMethodMetadata.reset();
+        FlagContext.clear();
     }
 }

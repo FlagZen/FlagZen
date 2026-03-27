@@ -61,7 +61,11 @@ public class DefaultFeatureDispatcher implements FeatureDispatcher {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T resolve(Class<T> featureType, EvaluationContext context) {
-        FlagContext.set(context);
+        if (context != null) {
+            FlagContext.set(context);
+        } else {
+            FlagContext.clear();
+        }
         return (T) proxyCache.computeIfAbsent(featureType, this::createProxy);
     }
 

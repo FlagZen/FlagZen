@@ -1,14 +1,18 @@
 package com.flagzen.acceptance.fixtures;
 
+import com.flagzen.EvaluationContext;
+import com.flagzen.FlagContext;
 import com.flagzen.UnmatchedVariantException;
 import com.flagzen.spi.FlagProvider;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
  * Hand-crafted proxy for Cucumber acceptance tests.
- * Simulates the dispatch logic the annotation processor would generate.
+ * Simulates the dispatch logic the annotation processor would generate,
+ * including context-aware flag resolution via {@link FlagContext}.
  */
 class CheckoutFlowProxy implements CheckoutFlow {
 
@@ -26,19 +30,27 @@ class CheckoutFlowProxy implements CheckoutFlow {
 
     @Override
     public String execute() {
-        String flagValue = flagProvider.getString("checkout-flow").orElse(null);
-        if (flagValue != null) {
-            Supplier<CheckoutFlow> supplier = variants.get(flagValue);
+        return resolveVariant().execute();
+    }
+
+    private CheckoutFlow resolveVariant() {
+        EvaluationContext context = FlagContext.current();
+        Optional<String> flagValue = (context != null)
+                ? flagProvider.getString("checkout-flow", context)
+                : flagProvider.getString("checkout-flow");
+        String value = flagValue.orElse(null);
+        if (value != null) {
+            Supplier<CheckoutFlow> supplier = variants.get(value);
             if (supplier != null) {
-                return supplier.get().execute();
+                return supplier.get();
             }
         }
         if (defaultVariant != null) {
-            return defaultVariant.get().execute();
+            return defaultVariant.get();
         }
-        if (flagValue == null) {
+        if (value == null) {
             throw UnmatchedVariantException.noFlagValue("checkout-flow");
         }
-        throw new UnmatchedVariantException("checkout-flow", flagValue, variants.keySet());
+        throw new UnmatchedVariantException("checkout-flow", value, variants.keySet());
     }
 }
