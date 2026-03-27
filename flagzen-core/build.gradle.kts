@@ -7,7 +7,7 @@ pitest {
     targetClasses.set(listOf("com.flagzen.*"))
     targetTests.set(listOf("com.flagzen.*"))
     threads.set(4)
-    outputFormats.set(listOf("HTML"))
+    outputFormats.set(listOf("HTML", "XML"))
     timestampedReports.set(false)
     junit5PluginVersion.set("1.2.1")
 }

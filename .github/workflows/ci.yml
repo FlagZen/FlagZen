@@ -66,17 +66,19 @@ jobs:
 
       - name: Check mutation kill rate
         run: |
-          REPORT="flagzen-core/build/reports/pitest/index.html"
+          REPORT="flagzen-core/build/reports/pitest/mutations.xml"
           if [ ! -f "$REPORT" ]; then
-            echo "PITest report not found"
+            echo "PITest XML report not found"
             exit 1
           fi
-          KILL_RATE=$(grep -oP '(?<=<td>)\d+(?=%</td>)' "$REPORT" | head -1)
-          if [ -z "$KILL_RATE" ]; then
-            echo "Could not parse kill rate from report"
+          TOTAL=$(grep -c '<mutation ' "$REPORT")
+          KILLED=$(grep -c "status='KILLED'" "$REPORT" || true)
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "No mutations found in report"
             exit 1
           fi
-          echo "Mutation kill rate: ${KILL_RATE}%"
+          KILL_RATE=$((KILLED * 100 / TOTAL))
+          echo "Mutation kill rate: ${KILL_RATE}% (${KILLED}/${TOTAL})"
           if [ "$KILL_RATE" -lt 80 ]; then
             echo "Kill rate ${KILL_RATE}% is below 80% threshold"
             exit 1
