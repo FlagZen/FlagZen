@@ -41,3 +41,10 @@ See `docs/adrs/` for architectural decision records.
 ## Mutation Testing Strategy
 
 This project uses **per-feature** mutation testing. PITest runs in CI after the build job succeeds, scoped to `com.flagzen.*` classes in flagzen-core. Kill rate gate: >= 80%. Current baseline: 84% kill rate.
+
+## Progress Tracking
+
+See `docs/progress.md` for milestone-based progress against the project brief. Each milestone has an nWave feature-id (e.g., `flagzen-eval-context`) for use with `/nw-deliver`, `/nw-design`, etc. Update `docs/progress.md` when:
+- A milestone item is completed (check the box)
+- A milestone status changes (NOT STARTED -> IN PROGRESS -> DONE)
+- New scope is added to the project brief
