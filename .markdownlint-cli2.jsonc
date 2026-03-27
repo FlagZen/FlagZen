@@ -11,6 +11,7 @@
     // allow code fences without specifying the language (used for plain text)
     "MD040": false
   },
+  "gitignore": true,
   "ignores": [
     ".nwave"
   ]
