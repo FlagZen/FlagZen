@@ -7,6 +7,10 @@ import com.flagzen.FlagZenException;
 import com.flagzen.spi.FeatureMetadata;
 import com.flagzen.spi.FlagProvider;
 
+import com.flagzen.spi.ContextAccessor;
+
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,22 +27,58 @@ public class DefaultFeatureDispatcher implements FeatureDispatcher {
     private final FlagProvider flagProvider;
     private final ConcurrentMap<Class<?>, Object> proxyCache = new ConcurrentHashMap<>();
     private final Map<Class<?>, FeatureMetadata<?>> metadataByType;
+    private final List<ContextAccessor> contextAccessors;
 
     public DefaultFeatureDispatcher(FlagProvider flagProvider) {
+        this(flagProvider, List.of());
+    }
+
+    /**
+     * Creates a dispatcher with explicit context accessors.
+     *
+     * @param flagProvider the flag provider
+     * @param contextAccessors the context accessors, consulted in priority order
+     */
+    public DefaultFeatureDispatcher(FlagProvider flagProvider, ContextAccessor... contextAccessors) {
+        this(flagProvider, List.of(contextAccessors));
+    }
+
+    private DefaultFeatureDispatcher(FlagProvider flagProvider, List<ContextAccessor> contextAccessors) {
         this.flagProvider = flagProvider;
+        this.contextAccessors = contextAccessors.stream()
+                .sorted(Comparator.comparingInt(ContextAccessor::priority))
+                .toList();
         this.metadataByType = discoverMetadata();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> T resolve(Class<T> featureType) {
+        resolveContextFromAccessors();
         return (T) proxyCache.computeIfAbsent(featureType, this::createProxy);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T resolve(Class<T> featureType, EvaluationContext context) {
         FlagContext.set(context);
-        return resolve(featureType);
+        return (T) proxyCache.computeIfAbsent(featureType, this::createProxy);
+    }
+
+    /**
+     * Consults registered {@link ContextAccessor}s in priority order.
+     * If any accessor provides a context, sets it in {@link FlagContext},
+     * overriding any scoped context. If no accessor provides context,
+     * the existing scoped context (if any) is left untouched.
+     */
+    private void resolveContextFromAccessors() {
+        for (ContextAccessor accessor : contextAccessors) {
+            var context = accessor.getContext();
+            if (context.isPresent()) {
+                FlagContext.set(context.get());
+                return;
+            }
+        }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
