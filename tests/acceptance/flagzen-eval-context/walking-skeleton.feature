@@ -6,7 +6,7 @@ Feature: Targeted flag resolution with evaluation context
 
   # Walking Skeleton 1: Build context, pass to resolve, provider receives it
   # Covers: US-EC-01, US-EC-02, US-EC-03 (thinnest slice through context-aware dispatch)
-  @US-EC-01 @US-EC-02 @US-EC-03
+  @US-EC-01 @US-EC-02 @US-EC-03 @pending
   Scenario: Developer resolves a feature with per-user evaluation context
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a flag provider that returns "PREMIUM" when targeting key is "user-vip-42"
@@ -17,7 +17,7 @@ Feature: Targeted flag resolution with evaluation context
 
   # Walking Skeleton 2: Block-scoped context applies to multiple resolve calls
   # Covers: US-EC-05, US-EC-02, US-EC-03 (thinnest slice through scoped context)
-  @US-EC-05 @US-EC-02
+  @US-EC-05 @US-EC-02 @pending
   Scenario: Developer scopes evaluation context to a block of code
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a feature "PaymentMethod" with variants "CARD" and "INVOICE"
@@ -28,7 +28,7 @@ Feature: Targeted flag resolution with evaluation context
 
   # Walking Skeleton 3: Context resolution order with all sources
   # Covers: US-EC-07, US-EC-06 (thinnest slice through resolution chain)
-  @US-EC-07 @US-EC-06
+  @US-EC-07 @US-EC-06 @pending
   Scenario: Explicit context takes precedence over all other context sources
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a flag provider that uses targeting key for resolution

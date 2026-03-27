@@ -16,7 +16,10 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-    systemProperty("cucumber.features", rootProject.projectDir.resolve("tests/acceptance/flagzen").absolutePath)
+    systemProperty("cucumber.features", listOf(
+        rootProject.projectDir.resolve("tests/acceptance/flagzen").absolutePath,
+        rootProject.projectDir.resolve("tests/acceptance/flagzen-eval-context").absolutePath
+    ).joinToString(","))
     systemProperty("cucumber.glue", "com.flagzen.acceptance.steps")
     systemProperty("cucumber.plugin", "pretty")
     systemProperty("cucumber.filter.tags", "not @pending")
