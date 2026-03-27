@@ -12,30 +12,30 @@ All condition predicate types, annotation changes, processor extensions, and pro
 
 **New types in `com.flagzen`**:
 
-|        Type        |      Kind       |                          Responsibility                           |
-| ------------------ | --------------- | ----------------------------------------------------------------- |
-| `@Condition`       | Annotation type | Declares predicate binding within `@Variant` via `matches`/`notMatches` |
+|     Type     |      Kind       |                             Responsibility                              |
+| ------------ | --------------- | ----------------------------------------------------------------------- |
+| `@Condition` | Annotation type | Declares predicate binding within `@Variant` via `matches`/`notMatches` |
 
 **Modified types in `com.flagzen`**:
 
-|    Type    |                          Change                           |
-| ---------- | --------------------------------------------------------- |
+|    Type    |                                          Change                                           |
+| ---------- | ----------------------------------------------------------------------------------------- |
 | `@Variant` | New `when` attribute for condition binding, new `order` attribute for evaluation sequence |
 
 **New types in `com.flagzen.processor`**:
 
-|       Type       |  Kind  |                     Responsibility                      |
-| ---------------- | ------ | ------------------------------------------------------- |
-| `ConditionModel` | Record | Processor-internal model for @Condition metadata        |
+|       Type       |  Kind  |                  Responsibility                  |
+| ---------------- | ------ | ------------------------------------------------ |
+| `ConditionModel` | Record | Processor-internal model for @Condition metadata |
 
 **Modified types in `com.flagzen.processor`**:
 
-|        Type        |                                                                  Change                                                                  |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `VariantModel`     | New `condition` field (nullable ConditionModel), new `order` field                                                                       |
-| `FeatureModel`     | New `hasOrderedDispatch` field                                                                                                           |
-| `FlagZenProcessor` | Condition validation (predicate type matches @Feature type, constructor check, order uniqueness, REQUIRED + conditions)                   |
-| `ProxyGenerator`   | Unified ordered dispatch generation path alongside existing value-based path                                                             |
+|        Type        |                                                         Change                                                          |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `VariantModel`     | New `condition` field (nullable ConditionModel), new `order` field                                                      |
+| `FeatureModel`     | New `hasOrderedDispatch` field                                                                                          |
+| `FlagZenProcessor` | Condition validation (predicate type matches @Feature type, constructor check, order uniqueness, REQUIRED + conditions) |
+| `ProxyGenerator`   | Unified ordered dispatch generation path alongside existing value-based path                                            |
 
 **Modified types in `com.flagzen`**:
 
@@ -128,10 +128,10 @@ flagzen-spring (future: resolves @Component predicates from ApplicationContext)
 
 ## Public API Surface Change
 
-|       Before (M0)       |        After (M6)        |            Delta            |
-| ----------------------- | ------------------------ | --------------------------- |
-| 8 consumer-facing types | 9 consumer-facing types  | +1 (`@Condition`)           |
-| 3 SPI types             | 3 SPI types              | 0                           |
-| 4 test types            | 4 test types             | 0                           |
+|       Before (M0)       |       After (M6)        |       Delta       |
+| ----------------------- | ----------------------- | ----------------- |
+| 8 consumer-facing types | 9 consumer-facing types | +1 (`@Condition`) |
+| 3 SPI types             | 3 SPI types             | 0                 |
+| 4 test types            | 4 test types            | 0                 |
 
 The public API surface remains minimal. One new type in `com.flagzen` with a clear single responsibility. No FlagZen-specific predicate interface -- users implement standard JDK functional interfaces.

@@ -18,21 +18,21 @@ Nested annotation type used exclusively within `@Variant(when = ...)`.
 | Target           | Implicitly scoped via `@Variant` (applies to `TYPE`)             |
 | Standalone usage | Not supported -- used only as `@Variant(when = @Condition(...))` |
 
-| Attribute    |       Type        |             Default             |                                                  Description                                                  |
-| ------------ | ----------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `matches`    | `Class<?>`        | (required -- see sentinel note) | The predicate class to evaluate. Must match `@Feature(type=...)`: `Predicate<String>`, `IntPredicate`, etc.   |
-| `notMatches` | `Class<?>`        | sentinel                        | Negation predicate (mutually exclusive with `matches`). Same type constraints apply.                          |
+|  Attribute   |    Type    |             Default             |                                                 Description                                                 |
+| ------------ | ---------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `matches`    | `Class<?>` | (required -- see sentinel note) | The predicate class to evaluate. Must match `@Feature(type=...)`: `Predicate<String>`, `IntPredicate`, etc. |
+| `notMatches` | `Class<?>` | sentinel                        | Negation predicate (mutually exclusive with `matches`). Same type constraints apply.                        |
 
 `matches` and `notMatches` are mutually exclusive. The processor emits a compile error if both are specified on the same `@Condition`.
 
 Predicate type constraints -- the processor validates that the predicate class matches the feature's declared type:
 
-| `@Feature(type=...)` | Required predicate type       |
-| --------------------- | ----------------------------- |
-| `STRING` (default)    | `java.util.function.Predicate<String>` |
-| `INT`                 | `java.util.function.IntPredicate`      |
-| `LONG`                | `java.util.function.LongPredicate`     |
-| `DOUBLE`              | `java.util.function.DoublePredicate`   |
+| `@Feature(type=...)` |        Required predicate type         |
+| -------------------- | -------------------------------------- |
+| `STRING` (default)   | `java.util.function.Predicate<String>` |
+| `INT`                | `java.util.function.IntPredicate`      |
+| `LONG`               | `java.util.function.LongPredicate`     |
+| `DOUBLE`             | `java.util.function.DoublePredicate`   |
 
 Sentinel handling: `@Condition` needs a default value for `matches` to serve as the sentinel for `@Variant.when`. A package-private or nested sentinel class can serve this purpose. The processor detects this sentinel to distinguish "no condition" from a real condition.
 
@@ -42,12 +42,12 @@ Sentinel handling: `@Condition` needs a default value for `matches` to serve as 
 
 New `when` and `order` attributes added. Existing attributes unchanged.
 
-| Attribute |     Type     |        Default        |                      Status                      |                   Description                    |
-| --------- | ------------ | --------------------- | ------------------------------------------------ | ------------------------------------------------ |
-| `value`   | `String`     | `""`                  | Existing (default changed from required to `""`) | Variant value for value-based dispatch           |
-| `of`      | `Class<?>`   | `void.class`          | Existing (unchanged)                             | Target @Feature interface                        |
-| `when`    | `@Condition` | sentinel `@Condition` | **New**                                          | Condition for predicate-based dispatch           |
-| `order`   | `int`        | `Integer.MAX_VALUE`   | **New**                                          | Evaluation sequence (ascending, first match wins)|
+| Attribute |     Type     |        Default        |                      Status                      |                    Description                    |
+| --------- | ------------ | --------------------- | ------------------------------------------------ | ------------------------------------------------- |
+| `value`   | `String`     | `""`                  | Existing (default changed from required to `""`) | Variant value for value-based dispatch            |
+| `of`      | `Class<?>`   | `void.class`          | Existing (unchanged)                             | Target @Feature interface                         |
+| `when`    | `@Condition` | sentinel `@Condition` | **New**                                          | Condition for predicate-based dispatch            |
+| `order`   | `int`        | `Integer.MAX_VALUE`   | **New**                                          | Evaluation sequence (ascending, first match wins) |
 
 `order` controls the evaluation sequence for variants with conditions. When no `order` is specified on any variant, the proxy uses map-based O(1) lookup (no performance regression for value-based features). When `order` is present, variants are evaluated as an ordered list; the first match wins.
 
@@ -59,10 +59,10 @@ Backward compatibility: The `value` attribute default changes from required to `
 
 Represents a processed `@Condition` annotation. Internal to the processor, not part of the public API.
 
-|     Field      |     Type      |                       Description                        |
-| -------------- | ------------- | -------------------------------------------------------- |
-| predicateClass | `TypeMirror`  | Fully qualified type of the predicate implementor        |
-| negated        | `boolean`     | `true` if declared via `notMatches`, `false` for `matches` |
+|     Field      |     Type     |                        Description                         |
+| -------------- | ------------ | ---------------------------------------------------------- |
+| predicateClass | `TypeMirror` | Fully qualified type of the predicate implementor          |
+| negated        | `boolean`    | `true` if declared via `notMatches`, `false` for `matches` |
 
 ### VariantModel (modified)
 
@@ -104,14 +104,15 @@ Exact-match variants and condition-based variants can coexist on the same `@Feat
 
 **`order` present on any variant**: Ordered list evaluation, first match wins. The proxy stores an ordered list of evaluation entries:
 
-|       Field       |                     Type                      |                          Description                           |
-| ----------------- | --------------------------------------------- | -------------------------------------------------------------- |
-| entries           | Ordered evaluation entry array (final)        | Entries sorted by order (ascending), mixing exact + conditions |
-| defaultVariant    | Feature interface instance (nullable, final)  | @DefaultVariant instance, if any                               |
-| fallbackStrategy  | `FallbackStrategy` (final)                    | Configured strategy                                            |
-| flagProvider      | `FlagProvider` (final, if exact matches exist) | Used for exact-match entries that need flag value               |
+|      Field       |                      Type                      |                          Description                           |
+| ---------------- | ---------------------------------------------- | -------------------------------------------------------------- |
+| entries          | Ordered evaluation entry array (final)         | Entries sorted by order (ascending), mixing exact + conditions |
+| defaultVariant   | Feature interface instance (nullable, final)   | @DefaultVariant instance, if any                               |
+| fallbackStrategy | `FallbackStrategy` (final)                     | Configured strategy                                            |
+| flagProvider     | `FlagProvider` (final, if exact matches exist) | Used for exact-match entries that need flag value              |
 
 Each evaluation entry is either:
+
 - **Exact match**: compares the flag value (from FlagProvider) against a known string
 - **Condition match**: evaluates a predicate against the flag value
 
@@ -152,21 +153,21 @@ No new exception types are introduced.
 
 ### New types
 
-|        Type        |         Package         |          Kind          | Public API |
-| ------------------ | ----------------------- | ---------------------- | ---------- |
-| `@Condition`       | `com.flagzen`           | Annotation type        | Yes        |
-| `ConditionModel`   | `com.flagzen.processor` | Record (processor-internal) | No    |
+|       Type       |         Package         |            Kind             | Public API |
+| ---------------- | ----------------------- | --------------------------- | ---------- |
+| `@Condition`     | `com.flagzen`           | Annotation type             | Yes        |
+| `ConditionModel` | `com.flagzen.processor` | Record (processor-internal) | No         |
 
 ### Modified types
 
-|            Type             |                             Change                              |
-| --------------------------- | --------------------------------------------------------------- |
-| `@Variant`                  | New `when` and `order` attributes, `value` default changed to `""` |
-| `VariantModel`              | New `condition` field (nullable), new `order` field             |
-| `FeatureModel`              | New `hasOrderedDispatch` field                                  |
+|            Type             |                               Change                                |
+| --------------------------- | ------------------------------------------------------------------- |
+| `@Variant`                  | New `when` and `order` attributes, `value` default changed to `""`  |
+| `VariantModel`              | New `condition` field (nullable), new `order` field                 |
+| `FeatureModel`              | New `hasOrderedDispatch` field                                      |
 | `FlagZenProcessor`          | Condition validation, predicate type matching, order-based dispatch |
-| `ProxyGenerator`            | Unified ordered dispatch generation path                        |
-| `UnmatchedVariantException` | Condition-aware error messages                                  |
+| `ProxyGenerator`            | Unified ordered dispatch generation path                            |
+| `UnmatchedVariantException` | Condition-aware error messages                                      |
 
 ### Unchanged types
 

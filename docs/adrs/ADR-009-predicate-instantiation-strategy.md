@@ -18,13 +18,13 @@ Condition-based dispatch requires instantiating user-defined predicates inside t
 
 Predicates use the standard `java.util.function` predicate types — no custom `FeaturePredicate` interface:
 
-| Feature type | Predicate interface | Example |
-|---|---|---|
-| STRING | `Predicate<String>` | `class StartsWithV2 implements Predicate<String>` |
-| INT | `IntPredicate` | `class HighRetryRange implements IntPredicate` |
-| LONG | `LongPredicate` | `class AboveRateLimit implements LongPredicate` |
-| DOUBLE | `DoublePredicate` | `class HighSamplingRate implements DoublePredicate` |
-| BOOLEAN | — | Only two values, use exact match |
+| Feature type | Predicate interface |                       Example                       |
+| ------------ | ------------------- | --------------------------------------------------- |
+| STRING       | `Predicate<String>` | `class StartsWithV2 implements Predicate<String>`   |
+| INT          | `IntPredicate`      | `class HighRetryRange implements IntPredicate`      |
+| LONG         | `LongPredicate`     | `class AboveRateLimit implements LongPredicate`     |
+| DOUBLE       | `DoublePredicate`   | `class HighSamplingRate implements DoublePredicate` |
+| BOOLEAN      | —                   | Only two values, use exact match                    |
 
 The annotation processor validates that the class referenced in `@Condition(matches = X.class)` implements the correct predicate type for the feature's declared `FeatureType`.
 

@@ -182,3 +182,6 @@
 {"event":"HOOK_INVOKED","handler":"post_tool_use","hook_id":"bcb6bdcf-7e85-4056-89af-f691f688bfbf","input_summary":{"tool_name":"Agent"},"timestamp":"2026-03-27T20:12:10.691591+00:00"}
 {"event":"HOOK_POST_TOOL_USE_PASSTHROUGH","hook_id":"bcb6bdcf-7e85-4056-89af-f691f688bfbf","is_des_task":false,"reason":"non_des_task","timestamp":"2026-03-27T20:12:10.693669+00:00"}
 {"decision":"allow","duration_ms":2.538708,"event":"HOOK_COMPLETED","exit_code":0,"handler":"post_tool_use","hook_id":"bcb6bdcf-7e85-4056-89af-f691f688bfbf","timestamp":"2026-03-27T20:12:10.693934+00:00"}
+{"event":"HOOK_INVOKED","handler":"pre_tool_use","hook_id":"635a153c-3e70-47d2-8bbe-3888a75233c8","input_summary":{"subagent_type":"general-purpose"},"timestamp":"2026-03-27T20:17:17.802047+00:00"}
+{"context":"non_des_task","event":"HOOK_PRE_TOOL_USE_ALLOWED","hook_id":"635a153c-3e70-47d2-8bbe-3888a75233c8","timestamp":"2026-03-27T20:17:17.803234+00:00"}
+{"decision":"allow","duration_ms":1.945125,"event":"HOOK_COMPLETED","exit_code":0,"handler":"pre_tool_use","hook_id":"635a153c-3e70-47d2-8bbe-3888a75233c8","timestamp":"2026-03-27T20:17:17.803494+00:00"}

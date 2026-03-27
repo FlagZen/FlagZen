@@ -95,12 +95,12 @@ When no variant specifies `order`, the proxy behaves identically to M0:
 
 The processor validates that predicate types match the feature's declared type:
 
-| `@Feature(type=...)` | Required predicate interface              |
-| --------------------- | ----------------------------------------- |
-| `STRING` (default)    | `java.util.function.Predicate<String>`    |
-| `INT`                 | `java.util.function.IntPredicate`         |
-| `LONG`                | `java.util.function.LongPredicate`        |
-| `DOUBLE`              | `java.util.function.DoublePredicate`      |
+| `@Feature(type=...)` |      Required predicate interface      |
+| -------------------- | -------------------------------------- |
+| `STRING` (default)   | `java.util.function.Predicate<String>` |
+| `INT`                | `java.util.function.IntPredicate`      |
+| `LONG`               | `java.util.function.LongPredicate`     |
+| `DOUBLE`             | `java.util.function.DoublePredicate`   |
 
 ## 6. Annotation Changes
 
@@ -108,10 +108,10 @@ The processor validates that predicate types match the feature's declared type:
 
 A nested annotation type used exclusively within `@Variant(when = ...)`.
 
-| Attribute    |    Type    |                                                  Description                                                  |
-| ------------ | ---------- | ------------------------------------------------------------------------------------------------------------- |
-| `matches`    | `Class<?>` | The predicate class to evaluate. Must implement the JDK predicate type matching `@Feature(type=...)`.         |
-| `notMatches` | `Class<?>` | Negation predicate (mutually exclusive with `matches`). Same type constraints apply.                          |
+|  Attribute   |    Type    |                                              Description                                              |
+| ------------ | ---------- | ----------------------------------------------------------------------------------------------------- |
+| `matches`    | `Class<?>` | The predicate class to evaluate. Must implement the JDK predicate type matching `@Feature(type=...)`. |
+| `notMatches` | `Class<?>` | Negation predicate (mutually exclusive with `matches`). Same type constraints apply.                  |
 
 Retention: `CLASS` (needed by annotation processor, not at runtime).
 
@@ -159,12 +159,12 @@ The processor's `FeatureModel` gains awareness of ordered dispatch. The `Variant
 
 ### Proxy Structure by Strategy
 
-|       Aspect       |                   Value-based (no order)                 |                           Unified ordered dispatch                            |
-| ------------------ | -------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Constructor params | `FlagProvider`, variant map, default variant              | `FlagProvider`, ordered entries, default variant                              |
-| Fields             | `flagProvider`, `variants` map, `defaultVariant`          | `flagProvider`, ordered entry array, `defaultVariant`                         |
-| Resolve method     | Query FlagProvider, map lookup                            | Query FlagProvider, iterate entries (exact match or predicate), first wins    |
-| FlagProvider       | Used on every call                                        | Used on every call (flag value needed for both exact match and predicate)     |
+|       Aspect       |              Value-based (no order)              |                          Unified ordered dispatch                          |
+| ------------------ | ------------------------------------------------ | -------------------------------------------------------------------------- |
+| Constructor params | `FlagProvider`, variant map, default variant     | `FlagProvider`, ordered entries, default variant                           |
+| Fields             | `flagProvider`, `variants` map, `defaultVariant` | `flagProvider`, ordered entry array, `defaultVariant`                      |
+| Resolve method     | Query FlagProvider, map lookup                   | Query FlagProvider, iterate entries (exact match or predicate), first wins |
+| FlagProvider       | Used on every call                               | Used on every call (flag value needed for both exact match and predicate)  |
 
 ### Generated Code Properties
 
@@ -178,7 +178,7 @@ The processor's `FeatureModel` gains awareness of ordered dispatch. The `Variant
 
 Condition-based features reuse the existing `FallbackStrategy` enum with adapted semantics:
 
-|  Strategy   |            Value-based (M0)            |                               With conditions                                    |
+|  Strategy   |            Value-based (M0)            |                                 With conditions                                  |
 | ----------- | -------------------------------------- | -------------------------------------------------------------------------------- |
 | `REQUIRED`  | Enum coverage verified at compile time | `@DefaultVariant` required at compile time (predicate completeness unverifiable) |
 | `EXCEPTION` | `UnmatchedVariantException` at runtime | `UnmatchedVariantException` at runtime (message includes predicate list)         |
@@ -201,10 +201,10 @@ This is deferred until M4 (flagzen-spring) is available. It extends flagzen-spri
 
 ## 11. Thread Safety
 
-|             Component             |                                                     Strategy                                                     |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Generated proxies (ordered)       | Immutable after construction. Entry array and variant instances are `final`.                                      |
-| Predicate instances               | User responsibility. FlagZen documents that predicates must be thread-safe if the application is multi-threaded.  |
+|          Component          |                                                     Strategy                                                     |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Generated proxies (ordered) | Immutable after construction. Entry array and variant instances are `final`.                                     |
+| Predicate instances         | User responsibility. FlagZen documents that predicates must be thread-safe if the application is multi-threaded. |
 
 ## 12. Quality Attribute Impact
 
@@ -239,16 +239,16 @@ This is deferred until M4 (flagzen-spring) is available. It extends flagzen-spri
 
 Existing ArchUnit rules apply unchanged. One additional rule recommended:
 
-|                                    Rule                                    |   Tool   |                                                           Enforcement                                                           |
-| -------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| No `java.lang.reflect` in flagzen-core                                     | ArchUnit | Existing rule covers new code                                                                                                   |
-| `com.flagzen.internal` classes not public                                  | ArchUnit | Existing rule covers new code                                                                                                   |
-| No cycles in `com.flagzen.(*)..` slices                                    | ArchUnit | Existing rule covers new code                                                                                                   |
+|                   Rule                    |   Tool   |          Enforcement          |
+| ----------------------------------------- | -------- | ----------------------------- |
+| No `java.lang.reflect` in flagzen-core    | ArchUnit | Existing rule covers new code |
+| `com.flagzen.internal` classes not public | ArchUnit | Existing rule covers new code |
+| No cycles in `com.flagzen.(*)..` slices   | ArchUnit | Existing rule covers new code |
 
 ## 14. ADR Index
 
-|                                  ADR                                  |                   Title                                     |  Status   |
-| --------------------------------------------------------------------- | ----------------------------------------------------------- | --------- |
-| [ADR-008](../../../adrs/ADR-008-unified-ordered-dispatch.md)          | Unified Ordered Dispatch (replaces Mutually Exclusive Modes)| Accepted  |
-| [ADR-009](../../../adrs/ADR-009-predicate-instantiation-strategy.md)  | Predicate Instantiation Strategy                            | Accepted  |
-| [ADR-010](../../../adrs/ADR-010-condition-annotation-nesting.md)      | @Condition Annotation Nesting in @Variant                   | Accepted  |
+|                                 ADR                                  |                            Title                             |  Status  |
+| -------------------------------------------------------------------- | ------------------------------------------------------------ | -------- |
+| [ADR-008](../../../adrs/ADR-008-unified-ordered-dispatch.md)         | Unified Ordered Dispatch (replaces Mutually Exclusive Modes) | Accepted |
+| [ADR-009](../../../adrs/ADR-009-predicate-instantiation-strategy.md) | Predicate Instantiation Strategy                             | Accepted |
+| [ADR-010](../../../adrs/ADR-010-condition-annotation-nesting.md)     | @Condition Annotation Nesting in @Variant                    | Accepted |

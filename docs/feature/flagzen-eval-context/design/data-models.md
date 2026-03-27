@@ -10,9 +10,9 @@ This document details the data models introduced or modified by the evaluation c
 
 Carries contextual information for targeted flag resolution (A/B testing, user segmentation, tenant-scoped features).
 
-|    Field     |        Type         |                   Description                    |
-| ------------ | ------------------- | ------------------------------------------------ |
-| targetingKey | String (nullable)   | Primary identifier (user ID, session ID, tenant) |
+| Field        | Type                  | Description                                      |
+| ------------ | --------------------- | ------------------------------------------------ |
+| targetingKey | String (nullable)     | Primary identifier (user ID, session ID, tenant) |
 | attributes   | `Map<String, Object>` | Custom attributes for targeting rules            |
 
 **Constraints**:
@@ -27,7 +27,7 @@ Carries contextual information for targeted flag resolution (A/B testing, user s
 
 **Construction**: Builder pattern via `EvaluationContext.builder()`.
 
-|           Builder Method            |             Description             |
+| Builder Method                      | Description                         |
 | ----------------------------------- | ----------------------------------- |
 | `targetingKey(String)`              | Sets the targeting key (nullable)   |
 | `attribute(String key, Object val)` | Adds a single attribute             |
@@ -40,7 +40,7 @@ Carries contextual information for targeted flag resolution (A/B testing, user s
 
 Provides block-scoped evaluation context to avoid parameter drilling through call stacks.
 
-|    Aspect    |                            Description                             |
+| Aspect       | Description                                                        |
 | ------------ | ------------------------------------------------------------------ |
 | Type         | Final class with static methods only (no instantiation)            |
 | Storage (R1) | `ThreadLocal<EvaluationContext>`                                   |
@@ -48,7 +48,7 @@ Provides block-scoped evaluation context to avoid parameter drilling through cal
 
 **Static methods**:
 
-|                   Method                    |                       Description                        |
+| Method                                      | Description                                              |
 | ------------------------------------------- | -------------------------------------------------------- |
 | `run(EvaluationContext, Runnable)`          | Scopes context to block, cleans up on exit               |
 | `<T> T run(EvaluationContext, Supplier<T>)` | Scopes context to block, returns result, cleans up       |
@@ -65,12 +65,12 @@ Provides block-scoped evaluation context to avoid parameter drilling through cal
 
 Encapsulates the resolution chain logic. Not part of the public API.
 
-|     Field      |               Type               |             Description             |
+| Field          | Type                             | Description                         |
 | -------------- | -------------------------------- | ----------------------------------- |
 | accessors      | `List<ContextAccessor>` (sorted) | Immutable, sorted by priority       |
 | defaultContext | `EvaluationContext` (nullable)   | Fallback context from configuration |
 
-|                  Method                  |                      Description                       |
+| Method                                   | Description                                            |
 | ---------------------------------------- | ------------------------------------------------------ |
 | `resolve(EvaluationContext explicitCtx)` | Returns resolved context or null following chain order |
 
@@ -125,7 +125,7 @@ public interface FeatureDispatcher {
 
 ### FlagZenConfiguration (Modified)
 
-|     Field      |             Type             |              Description              |
+| Field          | Type                         | Description                           |
 | -------------- | ---------------------------- | ------------------------------------- |
 | provider       | FlagProvider                 | The configured flag source (existing) |
 | defaultContext | EvaluationContext (nullable) | Default context for resolution chain  |
@@ -145,7 +145,7 @@ For each method on the @Feature interface, the proxy's `resolveVariant()` method
 
 ### Proxy Class Shape -- Unchanged
 
-|    Aspect    |                                  Value                                  |
+| Aspect       | Value                                                                   |
 | ------------ | ----------------------------------------------------------------------- |
 | Class name   | `{FeatureSimpleName}_FlagZenProxy`                                      |
 | Package      | Same as @Feature interface                                              |
