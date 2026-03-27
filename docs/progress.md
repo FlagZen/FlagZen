@@ -8,20 +8,20 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 
 | Release | Milestones | Theme |
 |---------|------------|-------|
-| **v1.0.0** | M0, M1, M2, M3, M4, M5 (partial) | Core library with typed dispatch, eval context, Spring, env provider, one external provider |
-| **v1.1.0** | M5 (remaining), M6, M8, M11 | Condition predicates, remaining providers, hooks, cross-module |
-| **v1.2.0** | M7, M9 | Reactive context, extended testing |
-| **v1.3.0** | M10 | CDI/Quarkus integration |
+| **v1.1.0** | M0, M1, M2, M3, M4, M5 (partial) | Core library with typed dispatch, eval context, Spring, env provider, one external provider |
+| **v1.2.0** | M5 (remaining), M6, M8, M11 | Condition predicates, remaining providers, hooks, cross-module |
+| **v1.3.0** | M7, M9 | Reactive context, extended testing |
+| **v1.4.0** | M10 | CDI/Quarkus integration |
 
 M12 (Documentation) is continuous — Javadoc and docs are updated with every release.
 
 ---
 
-## v1.0.0 — Core Library
+## v1.1.0 — Core Library
 
 ### M0: Core Polymorphic Dispatch — `flagzen`
 
-**Status: DONE** | **Release: v1.0.0** | [Artifacts](feature/flagzen/)
+**Status: DONE** | **Release: v1.1.0** | [Artifacts](feature/flagzen/)
 
 - [x] `@Feature` annotation on interfaces
 - [x] `@Variant` annotation on implementation classes
@@ -60,7 +60,7 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 
 ### M1: Evaluation Context — `flagzen-eval-context`
 
-**Status: DISCUSS DONE** | **Release: v1.0.0** | [Artifacts](feature/flagzen-eval-context/)
+**Status: DISCUSS DONE** | **Release: v1.1.0** | [Artifacts](feature/flagzen-eval-context/)
 
 - [ ] `EvaluationContext` model (targeting key + attributes)
 - [ ] Explicit context parameter on `resolve()`
@@ -71,7 +71,7 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 
 ### M2: Typed Variants and Conditional API — `flagzen-typed-variants`
 
-**Status: NOT STARTED** | **Release: v1.0.0** | Depends on: M0
+**Status: NOT STARTED** | **Release: v1.1.0** | Depends on: M0
 
 #### Typed Polymorphic Dispatch
 
@@ -95,7 +95,7 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 
 ### M3: Environment Variable Provider — `flagzen-env`
 
-**Status: NOT STARTED** | **Release: v1.0.0** | Depends on: M0
+**Status: NOT STARTED** | **Release: v1.1.0** | Depends on: M0
 
 - [ ] `EnvironmentVariableFlagProvider` implementing `FlagProvider`
 - [ ] Key-to-env-var mapping convention (e.g., `checkout-flow` -> `FLAGZEN_CHECKOUT_FLOW`)
@@ -103,7 +103,7 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 
 ### M4: Spring Integration — `flagzen-spring`
 
-**Status: NOT STARTED** | **Release: v1.0.0** | Depends on: M0
+**Status: NOT STARTED** | **Release: v1.1.0** | Depends on: M0
 
 - [ ] `FlagZenAutoConfiguration` (Spring Boot auto-config)
 - [ ] `FeatureFactoryBean` for `@Autowired` injection of `@Feature` proxies
@@ -113,11 +113,11 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 
 ### M5: Provider Adapters — `flagzen-providers`
 
-**Status: NOT STARTED** | **Release: v1.0.0 (partial), v1.1.0 (remaining)** | Depends on: M0
+**Status: NOT STARTED** | **Release: v1.1.0 (partial), v1.2.0 (remaining)** | Depends on: M0
 
-- [ ] `flagzen-openfeature` (OpenFeature SDK adapter) — **v1.0.0** (vendor-neutral, proves SPI)
-- [ ] `flagzen-launchdarkly` (LaunchDarkly SDK adapter) — v1.1.0
-- [ ] `flagzen-togglz` (Togglz adapter) — v1.1.0
+- [ ] `flagzen-openfeature` (OpenFeature SDK adapter) — **v1.1.0** (vendor-neutral, proves SPI)
+- [ ] `flagzen-launchdarkly` (LaunchDarkly SDK adapter) — v1.2.0
+- [ ] `flagzen-togglz` (Togglz adapter) — v1.2.0
 
 ### M12: Documentation — `flagzen-docs`
 
@@ -135,11 +135,11 @@ Documentation is updated with every release. Each release adds docs for its new 
 
 ---
 
-## v1.1.0 — Extended Dispatch and Providers
+## v1.2.0 — Extended Dispatch and Providers
 
 ### M6: Condition Predicates — `flagzen-conditions`
 
-**Status: DESIGN DONE** | **Release: v1.1.0** | Depends on: M1 | [Artifacts](feature/flagzen-conditions/)
+**Status: DESIGN DONE** | **Release: v1.2.0** | Depends on: M1 | [Artifacts](feature/flagzen-conditions/)
 
 > **Note**: When the flag provider supports server-side targeting rules (LaunchDarkly, OpenFeature, Togglz), those are the preferred way to do conditional dispatch. Condition predicates are for pure in-code feature switching where no external flag service is involved — a declarative Strategy pattern selector evaluated against the `EvaluationContext`.
 
@@ -156,7 +156,7 @@ Documentation is updated with every release. Each release adds docs for its new 
 
 ### M8: Hooks and Observability — `flagzen-hooks`
 
-**Status: NOT STARTED** | **Release: v1.1.0** | Depends on: M0
+**Status: NOT STARTED** | **Release: v1.2.0** | Depends on: M0
 
 - [ ] Hook SPI for dispatch events (metrics, structured logging)
 - [ ] Flag usage statistics collection
@@ -166,25 +166,25 @@ Documentation is updated with every release. Each release adds docs for its new 
 
 ### M11: Cross-Module and Edge Cases — `flagzen-cross-module`
 
-**Status: NOT STARTED** | **Release: v1.1.0** | Depends on: M0
+**Status: NOT STARTED** | **Release: v1.2.0** | Depends on: M0
 
 - [ ] Cross-module variant discovery at runtime
 - [ ] Package-private variant class support
 
 ---
 
-## v1.2.0 — Reactive and Extended Testing
+## v1.3.0 — Reactive and Extended Testing
 
 ### M7: Reactive Context Propagation — `flagzen-reactive`
 
-**Status: NOT STARTED** | **Release: v1.2.0** | Depends on: M1
+**Status: NOT STARTED** | **Release: v1.3.0** | Depends on: M1
 
 - [ ] `flagzen-reactor` (Reactor `Context` for Spring WebFlux)
 - [ ] `flagzen-mutiny` (Mutiny `Context` for Quarkus Reactive)
 
 ### M9: Extended Testing Support — `flagzen-test-extras`
 
-**Status: NOT STARTED** | **Release: v1.2.0** | Depends on: M0
+**Status: NOT STARTED** | **Release: v1.3.0** | Depends on: M0
 
 - [ ] `@FlagSource` for JSON format
 - [ ] `@FlagSource` for YAML format
@@ -194,11 +194,11 @@ Documentation is updated with every release. Each release adds docs for its new 
 
 ---
 
-## v1.3.0 — Ecosystem Expansion
+## v1.4.0 — Ecosystem Expansion
 
 ### M10: Additional DI Frameworks — `flagzen-cdi`
 
-**Status: NOT STARTED** | **Release: v1.3.0** | Depends on: M4
+**Status: NOT STARTED** | **Release: v1.4.0** | Depends on: M4
 
 - [ ] CDI integration
 - [ ] Quarkus integration

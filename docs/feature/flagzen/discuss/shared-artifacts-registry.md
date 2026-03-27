@@ -14,7 +14,7 @@
 ### library_version
 
 - **Source of truth**: `gradle.properties` (single version property)
-- **Value**: `${flagzenVersion}` (e.g., `1.0.0`)
+- **Value**: `${flagzenVersion}` (e.g., `1.1.0`)
 - **Consumers**: README, build.gradle examples, all submodule POMs, Maven Central, documentation
 - **Owner**: Root project
 - **Integration risk**: HIGH -- version mismatch between modules breaks resolution

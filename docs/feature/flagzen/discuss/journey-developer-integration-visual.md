@@ -328,7 +328,7 @@ Curious ──> Intrigued ──> Impressed ──> Confident ──> Delighted 
 |                                                                        |
 |  Quick fixes:                                                          |
 |    1. Add flagzen-env for environment variable flags:                  |
-|       implementation("com.flagzen:flagzen-env:1.0.0")                  |
+|       implementation("com.flagzen:flagzen-env:1.1.0")                  |
 |    2. Configure a custom provider:                                     |
 |       FlagZen.configure(provider -> provider.add(myProvider))          |
 |                                                                        |

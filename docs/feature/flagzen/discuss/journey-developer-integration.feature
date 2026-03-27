@@ -19,9 +19,9 @@ Feature: Java Developer Integrates FlagZen
   # Step 2: Add Dependency
   Scenario: Developer adds FlagZen to a Gradle project
     Given Marco has a Gradle-based Java 17+ project
-    When he adds "com.flagzen:flagzen-core:1.0.0" to implementation dependencies
-    And he adds "com.flagzen:flagzen-core:1.0.0" to annotationProcessor dependencies
-    And he adds "com.flagzen:flagzen-test:1.0.0" to testImplementation dependencies
+    When he adds "com.flagzen:flagzen-core:1.1.0" to implementation dependencies
+    And he adds "com.flagzen:flagzen-core:1.1.0" to annotationProcessor dependencies
+    And he adds "com.flagzen:flagzen-test:1.1.0" to testImplementation dependencies
     Then the project compiles without errors
     And the annotation processor is discovered via META-INF/services
 
@@ -166,7 +166,7 @@ Feature: Java Developer Integrates FlagZen
   # Step 7: Spring Boot Integration
   Scenario: Developer uses FlagZen with Spring Boot auto-configuration
     Given Marco has a Spring Boot application
-    And "com.flagzen:flagzen-spring:1.0.0" is on the classpath
+    And "com.flagzen:flagzen-spring:1.1.0" is on the classpath
     When he @Autowires a CheckoutFlow field in a @Service bean
     Then Spring injects the FlagZen proxy
     And the proxy resolves to the active variant based on the configured FlagProvider bean
