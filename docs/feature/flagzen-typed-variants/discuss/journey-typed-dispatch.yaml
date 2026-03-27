@@ -1,41 +1,61 @@
 journey:
   name: "Typed Polymorphic Dispatch and Conditional API"
-  goal: "Dispatch on integer and boolean flag values with compile-time type safety, and access typed flag values directly via FlagProvider"
-  persona: "Kenji Tanaka -- Java backend developer using FlagZen for polymorphic dispatch"
+  goal: "Dispatch on integer, boolean, long, and double flag values with compile-time type safety, and access typed flag values directly via FlagProvider"
+  persona: "Carlos Mendes -- Senior Java developer using FlagZen for polymorphic dispatch; Mei Chen -- Java developer with boolean/double flags"
 
   emotional_arc:
-    start: "Curious -- wants typed dispatch instead of string encoding"
-    middle: "Focused/Confident -- familiar annotation pattern, processor catches errors"
-    end: "Satisfied -- cleaner code, no parsing hacks"
+    start: "Intentional -- developer declares the flag type they expect"
+    middle: "Confident -- processor catches type mismatches with actionable messages"
+    end: "Trusting -- proxy dispatches on typed values without manual parsing"
 
 steps:
   - id: 1
-    name: "Discover Typed Dispatch"
-    action: "Developer reads documentation for typed @Feature and @Variant annotations"
+    name: "Define Feature with Type"
+    action: "Developer adds @Feature(type = FeatureType.X) to declare expected flag type"
 
     shared_artifacts:
       - name: "feature_type_enum"
         source: "com.flagzen.FeatureType"
-        displayed_as: "FeatureType.STRING | FeatureType.INT | FeatureType.BOOLEAN"
+        displayed_as: "FeatureType.STRING | INT | LONG | BOOLEAN | DOUBLE"
         consumers:
           - "@Feature annotation type attribute"
           - "Annotation processor validation"
-          - "Proxy generator dispatch logic"
+          - "ProxyGenerator dispatch logic selection"
 
     emotional_state:
-      entry: "Curious -- wondering if FlagZen supports non-string dispatch"
-      exit: "Hopeful -- sees typed dispatch is supported"
+      entry: "Intentional -- choosing the right type for the flag"
+      exit: "Clear -- annotation model supports the actual flag type"
 
     gherkin: |
-      Scenario: Developer discovers typed feature annotation
-        Given Kenji reviews the FlagZen documentation
-        When he looks up the @Feature annotation API
-        Then he sees the type attribute accepting FeatureType.STRING, INT, or BOOLEAN
-        And STRING is the default for backward compatibility
+      Scenario: Feature with INT type compiles
+        Given Carlos annotates RetryStrategy with @Feature(value = "max-retries", type = FeatureType.INT)
+        When the project compiles
+        Then the annotation processor records featureType as INT
+
+      Scenario: Feature with LONG type compiles
+        Given Carlos annotates RateLimiter with @Feature(value = "rate-limit", type = FeatureType.LONG)
+        When the project compiles
+        Then the annotation processor records featureType as LONG
+
+      Scenario: Feature with DOUBLE type compiles
+        Given Mei Chen annotates SamplingStrategy with @Feature(value = "sampling-ratio", type = FeatureType.DOUBLE)
+        When the project compiles
+        Then the annotation processor records featureType as DOUBLE
+
+      Scenario: Feature with BOOLEAN type compiles
+        Given Mei Chen annotates DarkMode with @Feature(value = "dark-mode", type = FeatureType.BOOLEAN)
+        When the project compiles
+        Then the annotation processor records featureType as BOOLEAN
+
+      Scenario: Feature without type defaults to STRING
+        Given Carlos has existing @Feature("checkout-flow") without type attribute
+        When the project compiles
+        Then the FeatureModel records featureType as STRING
+        And proxy generation behavior is unchanged
 
   - id: 2
-    name: "Annotate Feature with Typed Variants"
-    action: "Developer adds @Feature(type=INT) and @Variant(intValue=N) annotations"
+    name: "Annotate Variants with Typed Values"
+    action: "Developer annotates variants with intValue, booleanValue, longValue, or doubleValue attributes"
 
     shared_artifacts:
       - name: "variant_int_value"
@@ -43,96 +63,248 @@ steps:
         displayed_as: "@Variant(intValue = 42)"
         consumers:
           - "Annotation processor validation"
-          - "Generated proxy variant map (Map<Integer, Supplier<T>>)"
+          - "Generated proxy Map<Integer, Supplier<T>>"
+
       - name: "variant_boolean_value"
         source: "@Variant annotation booleanValue attribute"
         displayed_as: "@Variant(booleanValue = true)"
         consumers:
           - "Annotation processor validation"
-          - "Generated proxy variant map (Map<Boolean, Supplier<T>>)"
+          - "Generated proxy Map<Boolean, Supplier<T>>"
+
+      - name: "variant_long_value"
+        source: "@Variant annotation longValue attribute"
+        displayed_as: "@Variant(longValue = 1000)"
+        consumers:
+          - "Annotation processor validation"
+          - "Generated proxy Map<Long, Supplier<T>>"
+
+      - name: "variant_double_value"
+        source: "@Variant annotation doubleValue attribute with @CloseTo"
+        displayed_as: "@Variant(doubleValue = @CloseTo(value = 0.3, delta = 1e-10))"
+        consumers:
+          - "Annotation processor validation"
+          - "Generated proxy approximate matching loop"
+
+      - name: "when_true_false_annotations"
+        source: "@WhenTrue and @WhenFalse annotation definitions"
+        displayed_as: "@WhenTrue / @WhenFalse / @WhenTrue(of = X.class)"
+        consumers:
+          - "Annotation processor (treats as @Variant(booleanValue = ...))"
+          - "Multi-feature classes via of= attribute"
+
+      - name: "close_to_annotation"
+        source: "@CloseTo annotation definition"
+        displayed_as: "@CloseTo(value = 0.3, delta = 1e-10)"
+        consumers:
+          - "@Variant(doubleValue = @CloseTo(...))"
+          - "Generated proxy Math.abs comparison"
 
     emotional_state:
-      entry: "Focused -- applying familiar annotation pattern with new attributes"
-      exit: "Confident -- code looks clean and intention-revealing"
+      entry: "Expressive -- typed attributes match developer intent"
+      exit: "Confident -- code is intention-revealing and type-safe"
 
     gherkin: |
-      Scenario: Developer annotates integer-typed feature
-        Given Kenji has a RetryStrategy interface with two implementations
-        When he annotates the interface with @Feature(value = "max-retries", type = FeatureType.INT)
-        And annotates ConservativeRetry with @Variant(intValue = 3)
-        And annotates AggressiveRetry with @Variant(intValue = 10)
-        Then the code compiles successfully
-        And the annotation processor generates a typed proxy
+      Scenario: Variant with intValue compiles
+        Given Carlos annotates ConservativeRetry with @Variant(intValue = 3)
+        When the project compiles
+        Then VariantModel records the variant value as integer 3
+
+      Scenario: Variant with longValue compiles
+        Given Carlos annotates StandardLimit with @Variant(longValue = 1000)
+        When the project compiles
+        Then VariantModel records the variant value as long 1000
+
+      Scenario: Variant with doubleValue and @CloseTo compiles
+        Given Mei Chen annotates LowSampling with @Variant(doubleValue = @CloseTo(value = 0.1))
+        When the project compiles
+        Then VariantModel records the variant value as double 0.1 with delta 1e-10
+
+      Scenario: Variant with @CloseTo explicit delta compiles
+        Given Mei Chen annotates MediumSampling with @Variant(doubleValue = @CloseTo(value = 0.5, delta = 0.01))
+        When the project compiles
+        Then VariantModel records the variant value as double 0.5 with delta 0.01
+
+      Scenario: @WhenTrue is equivalent to @Variant(booleanValue = true)
+        Given Mei Chen annotates DarkModeOn with @WhenTrue
+        When the annotation processor runs
+        Then the processor treats it identically to @Variant(booleanValue = true)
+
+      Scenario: @WhenFalse is equivalent to @Variant(booleanValue = false)
+        Given Mei Chen annotates DarkModeOff with @WhenFalse
+        When the annotation processor runs
+        Then the processor treats it identically to @Variant(booleanValue = false)
+
+      Scenario: @WhenTrue with of= for multi-feature class
+        Given Carlos annotates DarkOnMaintenanceOff with @WhenTrue(of = DarkMode.class) and @WhenFalse(of = MaintenanceMode.class)
+        When the annotation processor runs
+        Then the processor registers booleanValue true for DarkMode and booleanValue false for MaintenanceMode
 
   - id: 3
-    name: "Compile-Time Validation"
-    action: "Annotation processor validates type consistency across feature and variants"
+    name: "Compile-Time Type Validation"
+    action: "Annotation processor validates type consistency, attribute matching, and completeness"
 
     emotional_state:
-      entry: "Neutral -- expecting compilation to work"
+      entry: "Neutral -- expecting compilation to succeed"
       exit: "Confident -- processor catches mismatches with actionable messages"
 
     integration_checkpoint: |
       All @Variant annotations for a @Feature must use the matching type attribute:
         - FeatureType.STRING --> @Variant(value = "...")
         - FeatureType.INT --> @Variant(intValue = ...)
-        - FeatureType.BOOLEAN --> @Variant(booleanValue = ...)
-      Boolean REQUIRED features must have exactly 2 variants (true + false).
+        - FeatureType.BOOLEAN --> @Variant(booleanValue = ...) or @WhenTrue/@WhenFalse
+        - FeatureType.LONG --> @Variant(longValue = ...)
+        - FeatureType.DOUBLE --> @Variant(doubleValue = @CloseTo(...))
+      Boolean REQUIRED features must have exactly 2 variants (true + false) or DefaultVariant.
+      Duplicate typed values across variants of the same feature are rejected.
 
     gherkin: |
-      Scenario: Type mismatch detected at compile time
-        Given Kenji has @Feature(value = "max-retries", type = FeatureType.INT)
-        And a variant annotated with @Variant(value = "3") instead of @Variant(intValue = 3)
+      Scenario: Attribute mismatch -- booleanValue on INT feature
+        Given Carlos has @Feature(value = "max-retries", type = FeatureType.INT)
+        And a variant annotated with @Variant(booleanValue = true)
         When the annotation processor runs
-        Then compilation fails with an error message
-        And the message explains the type mismatch and suggests using intValue
+        Then compilation fails
+        And the error message includes "type INT" and "booleanValue" and "Use @Variant(intValue = ...)"
 
-      Scenario: Mixed variant types detected
-        Given Kenji has @Feature(value = "max-retries", type = FeatureType.INT)
-        And one variant uses @Variant(intValue = 3)
-        And another variant uses @Variant(value = "fast")
+      Scenario: Attribute mismatch -- string value on INT feature
+        Given Carlos has @Feature(value = "max-retries", type = FeatureType.INT)
+        And a variant annotated with @Variant(value = "3")
         When the annotation processor runs
-        Then compilation fails listing all inconsistent variants
+        Then compilation fails
+        And the error suggests using @Variant(intValue = 3)
 
-      Scenario: Boolean REQUIRED completeness
-        Given Kenji has @Feature(value = "dark-mode", type = FeatureType.BOOLEAN, fallback = REQUIRED)
-        And only a variant with @Variant(booleanValue = true)
+      Scenario: Mixed variant types within same feature
+        Given Carlos has @Feature(value = "max-retries", type = FeatureType.INT)
+        And ConservativeRetry with @Variant(intValue = 3)
+        And AggressiveRetry with @Variant(value = "fast")
         When the annotation processor runs
-        Then compilation fails stating "boolean feature requires both true and false variants"
+        Then compilation fails identifying AggressiveRetry as using the wrong attribute
+
+      Scenario: Duplicate intValue rejected
+        Given Carlos has two variants both declaring @Variant(intValue = 3) for the same INT feature
+        When the annotation processor runs
+        Then compilation fails with duplicate variant value error for intValue 3
+
+      Scenario: Duplicate longValue rejected
+        Given Carlos has two variants both declaring @Variant(longValue = 1000) for the same LONG feature
+        When the annotation processor runs
+        Then compilation fails with duplicate variant value error for longValue 1000
+
+      Scenario: Boolean REQUIRED incomplete -- missing false variant
+        Given @Feature(value = "dark-mode", type = FeatureType.BOOLEAN, fallback = REQUIRED)
+        And only DarkModeOn annotated with @WhenTrue
+        And no variant for false and no @DefaultVariant
+        When the annotation processor runs
+        Then compilation fails requiring both true and false variants
+
+      Scenario: Boolean REQUIRED satisfied by DefaultVariant
+        Given @Feature(value = "dark-mode", type = FeatureType.BOOLEAN, fallback = REQUIRED)
+        And DarkModeOn with @WhenTrue
+        And FallbackDarkMode with @DefaultVariant
+        When the annotation processor runs
+        Then compilation succeeds
 
   - id: 4
-    name: "Runtime Typed Dispatch"
-    action: "Generated proxy uses FlagProvider.getInt/getBoolean for typed resolution"
+    name: "Runtime Typed Proxy Dispatch"
+    action: "Generated proxy calls typed FlagProvider method and dispatches to correct variant"
 
     shared_artifacts:
       - name: "flag_provider_typed_methods"
         source: "com.flagzen.spi.FlagProvider"
-        displayed_as: "getInt(String key), getBoolean(String key)"
+        displayed_as: "getInt(), getLong(), getDouble(), getBoolean()"
         consumers:
-          - "Generated proxies for INT/BOOLEAN features"
+          - "Generated proxies for typed features"
           - "Conditional API users (non-polymorphic)"
           - "Provider adapter implementations"
 
     emotional_state:
       entry: "Expectant -- proxy should resolve correctly"
-      exit: "Satisfied -- typed dispatch works without parsing hacks"
+      exit: "Trusting -- typed dispatch works without parsing hacks"
 
     gherkin: |
-      Scenario: Integer feature resolves via getInt
-        Given the FlagProvider returns 3 for flag "max-retries"
-        And RetryStrategy is configured with FeatureType.INT
-        When Kenji resolves RetryStrategy via FeatureDispatcher
-        Then the ConservativeRetry variant is returned
+      Scenario: INT proxy dispatches via getInt map lookup
+        Given RetryStrategy with FeatureType.INT and variants for intValue 3 and 10
+        And the FlagProvider returns OptionalInt.of(3) for getInt("max-retries")
+        When Carlos resolves RetryStrategy via FeatureDispatcher
+        Then ConservativeRetry is selected
 
-      Scenario: Boolean feature resolves via getBoolean
-        Given the FlagProvider returns true for flag "dark-mode"
-        And DarkMode is configured with FeatureType.BOOLEAN
-        When Kenji resolves DarkMode via FeatureDispatcher
-        Then the DarkModeOn variant is returned
+      Scenario: LONG proxy dispatches via getLong map lookup
+        Given RateLimiter with FeatureType.LONG and variants for longValue 1000 and 50000
+        And the FlagProvider returns OptionalLong.of(50000) for getLong("rate-limit")
+        When Carlos resolves RateLimiter
+        Then HighVolumeLimit is selected
+
+      Scenario: BOOLEAN proxy dispatches via getBoolean map lookup
+        Given DarkMode with FeatureType.BOOLEAN and variants for true and false
+        And the FlagProvider returns Optional.of(true) for getBoolean("dark-mode")
+        When Mei Chen resolves DarkMode
+        Then DarkModeOn is selected
+
+      Scenario: DOUBLE proxy dispatches via approximate matching
+        Given SamplingStrategy with FeatureType.DOUBLE and variants 0.1 (delta 1e-10) and 0.5 (delta 0.01)
+        And the FlagProvider returns OptionalDouble.of(0.0999999999) for getDouble("sampling-ratio")
+        When Mei Chen resolves SamplingStrategy
+        Then LowSampling is selected because Math.abs(0.0999999999 - 0.1) <= 1e-10
+
+      Scenario: DOUBLE proxy matches variant with explicit delta
+        Given SamplingStrategy with variant 0.5 and delta 0.01
+        And the FlagProvider returns OptionalDouble.of(0.505)
+        When Mei Chen resolves SamplingStrategy
+        Then MediumSampling is selected because Math.abs(0.505 - 0.5) <= 0.01
+
+      Scenario: Proxy re-evaluates on each method call (dynamic dispatch)
+        Given RetryStrategy proxy with INT dispatch
+        And the FlagProvider initially returns 3 for getInt("max-retries")
+        When the flag value changes to 10
+        And Carlos calls a method on the proxy
+        Then AggressiveRetry handles the call
+
+      Scenario: Unmatched typed value triggers fallback strategy
+        Given RetryStrategy with fallback EXCEPTION
+        And the FlagProvider returns OptionalInt.of(99) for getInt("max-retries")
+        When Carlos resolves RetryStrategy
+        Then UnmatchedVariantException is thrown listing known values [3, 10]
 
   - id: 5
+    name: "Typed Dispatch with Evaluation Context"
+    action: "Typed dispatch integrates with M1 evaluation context resolution chain"
+
+    emotional_state:
+      entry: "Confident -- expecting context to work as with string dispatch"
+      exit: "Assured -- typed dispatch and context combine seamlessly"
+
+    gherkin: |
+      Scenario: INT dispatch with explicit EvaluationContext
+        Given a context-aware FlagProvider returning 3 for plan "free" and 10 for plan "enterprise"
+        And Carlos resolves RetryStrategy with explicit context targeting plan "enterprise"
+        Then AggressiveRetry is selected
+
+      Scenario: BOOLEAN dispatch with explicit context
+        Given a context-aware FlagProvider returning true for preference "dark" and false otherwise
+        When Mei Chen resolves DarkMode with context attribute preference "dark"
+        Then DarkModeOn is selected
+
+      Scenario: Typed dispatch with block-scoped context
+        Given a context-aware FlagProvider for "max-retries" (3 for free, 10 for enterprise)
+        When Carlos runs FlagContext.run with context targeting plan "enterprise"
+        And resolves RetryStrategy inside the block
+        Then AggressiveRetry is selected
+        And after the block exits the scoped context is cleared
+
+      Scenario: Explicit context overrides scoped context for typed features
+        Given a scoped context block with plan "free"
+        And Carlos resolves RetryStrategy with explicit context targeting plan "enterprise"
+        Then the explicit context wins and AggressiveRetry is selected
+
+      Scenario: Typed dispatch with context accessor
+        Given a ContextAccessor providing context with plan "enterprise"
+        And a context-aware FlagProvider for "max-retries"
+        When Carlos resolves RetryStrategy without explicit context
+        Then the accessor-provided context is used and AggressiveRetry is selected
+
+  - id: 6
     name: "Conditional API (Non-Polymorphic)"
-    action: "Developer uses typed accessors on FlagProvider for simple flag checks"
+    action: "Developer uses typed accessor methods on FlagProvider for simple flag checks"
 
     shared_artifacts:
       - name: "conditional_api_methods"
@@ -141,37 +313,62 @@ steps:
         consumers:
           - "Application code for conditional flag checks"
           - "Tests via TestFlagContext"
+          - "Provider adapter implementations"
 
     emotional_state:
       entry: "Pragmatic -- sometimes needs simple flag check without polymorphism"
-      exit: "Satisfied -- clean API, consistent with typed dispatch"
+      exit: "Satisfied -- clean API, no manual parsing"
 
     gherkin: |
-      Scenario: Boolean conditional check
-        Given the FlagProvider has flag "feature-x" with string value "true"
-        When Kenji calls flags.getBoolean("feature-x")
+      Scenario: getBoolean returns parsed boolean
+        Given the FlagProvider has flag "maintenance-mode" with string value "true"
+        When Carlos calls flags.getBoolean("maintenance-mode")
         Then Optional.of(true) is returned
 
-      Scenario: Integer conditional check
-        Given the FlagProvider has flag "max-items" with string value "100"
-        When Kenji calls flags.getInt("max-items")
-        Then Optional.of(100) is returned
+      Scenario: getInt returns parsed integer
+        Given the FlagProvider has flag "max-items" with string value "200"
+        When Carlos calls flags.getInt("max-items")
+        Then OptionalInt.of(200) is returned
+
+      Scenario: getLong returns parsed long
+        Given the FlagProvider has flag "rate-limit" with string value "5000000000"
+        When Carlos calls flags.getLong("rate-limit")
+        Then OptionalLong.of(5000000000L) is returned
+
+      Scenario: getDouble returns parsed double
+        Given the FlagProvider has flag "sampling-ratio" with string value "0.75"
+        When Carlos calls flags.getDouble("sampling-ratio")
+        Then OptionalDouble.of(0.75) is returned
 
       Scenario: Unparseable value returns empty
         Given the FlagProvider has flag "max-items" with string value "abc"
-        When Kenji calls flags.getInt("max-items")
-        Then Optional.empty() is returned
+        When Carlos calls flags.getInt("max-items")
+        Then OptionalInt.empty() is returned
+
+      Scenario: Context-aware conditional check
+        Given the FlagProvider has context-dependent flag "max-items"
+        And for targeting key "premium-user" the value is "500"
+        When Carlos calls flags.getInt("max-items", context) with targeting key "premium-user"
+        Then OptionalInt.of(500) is returned
 
 integration_validation:
   shared_artifact_consistency:
     - artifact: "feature_type_enum"
       must_match_across: [1, 2, 3, 4]
-      failure_message: "FeatureType enum values must be consistent across annotation, processor, and proxy generator"
+      failure_message: "FeatureType enum values (STRING, INT, LONG, BOOLEAN, DOUBLE) must be consistent across annotation definition, processor validation, and proxy code generation"
 
     - artifact: "flag_provider_typed_methods"
-      must_match_across: [4, 5]
-      failure_message: "FlagProvider typed methods used by both polymorphic proxies and conditional API must have identical signatures"
+      must_match_across: [4, 5, 6]
+      failure_message: "FlagProvider typed methods must have identical signatures across polymorphic proxy dispatch, context-aware dispatch, and conditional API"
 
-    - artifact: "variant_int_value"
+    - artifact: "variant_typed_attributes"
       must_match_across: [2, 3]
-      failure_message: "intValue attribute on @Variant must be validated by processor and used in proxy generation"
+      failure_message: "Typed @Variant attributes must be validated by processor and consumed by proxy generator"
+
+    - artifact: "when_true_false_annotations"
+      must_match_across: [2, 3]
+      failure_message: "@WhenTrue/@WhenFalse must be treated identically to @Variant(booleanValue=...) by processor"
+
+    - artifact: "close_to_annotation"
+      must_match_across: [2, 3, 4]
+      failure_message: "@CloseTo value and delta must flow from annotation through processor to proxy approximate matching"
