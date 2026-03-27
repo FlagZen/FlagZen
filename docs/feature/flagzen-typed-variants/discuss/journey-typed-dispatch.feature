@@ -179,3 +179,52 @@ Feature: Typed FlagProvider Methods (Conditional API)
     And for user "kenji-123" the value is "50"
     When Kenji calls flags.getInt("max-items", context) with targeting key "kenji-123"
     Then Optional.of(50) is returned
+
+
+Feature: Typed Dispatch with Evaluation Context
+  As a Java developer using FlagZen with both typed dispatch and evaluation context
+  I want typed polymorphic dispatch to respect evaluation context
+  So that the same typed feature resolves to different variants per user or tenant
+
+  Scenario: Integer dispatch with explicit evaluation context
+    Given Kenji has a compiled RetryStrategy with FeatureType.INT
+    And a context-aware FlagProvider that returns 3 for "max-retries" when plan is "free" and 10 when plan is "enterprise"
+    When Kenji resolves RetryStrategy with evaluation context targeting plan "enterprise"
+    Then AggressiveRetry is selected
+
+  Scenario: Integer dispatch changes with different evaluation context
+    Given a context-aware FlagProvider for "max-retries" (3 for free, 10 for enterprise)
+    When Kenji resolves RetryStrategy with evaluation context targeting plan "free"
+    Then ConservativeRetry is selected
+    When Kenji resolves RetryStrategy with evaluation context targeting plan "enterprise"
+    Then AggressiveRetry is selected
+
+  Scenario: Boolean dispatch with evaluation context
+    Given Mei Chen has a compiled DarkMode with FeatureType.BOOLEAN
+    And a context-aware FlagProvider that returns true for "dark-mode" when preference is "dark" and false otherwise
+    When Mei Chen resolves DarkMode with evaluation context attribute preference "dark"
+    Then DarkModeOn is selected
+
+  Scenario: Typed dispatch with block-scoped context
+    Given a context-aware FlagProvider for "max-retries" (3 for free, 10 for enterprise)
+    When Kenji runs a FlagContext.run block with evaluation context targeting plan "enterprise"
+    And resolves RetryStrategy inside the block
+    Then AggressiveRetry is selected
+    And after the block exits, the scoped context is cleared
+
+  Scenario: Typed dispatch with explicit context overriding scoped context
+    Given a context-aware FlagProvider for "max-retries" (3 for free, 10 for enterprise)
+    And a scoped context block with plan "free"
+    When Kenji resolves RetryStrategy with explicit context targeting plan "enterprise" inside the block
+    Then the explicit context wins and AggressiveRetry is selected
+
+  Scenario: Typed dispatch with context accessor
+    Given a ContextAccessor providing evaluation context with plan "enterprise"
+    And a context-aware FlagProvider for "max-retries" (3 for free, 10 for enterprise)
+    When Kenji resolves RetryStrategy without explicit context
+    Then the accessor-provided context is used and AggressiveRetry is selected
+
+  Scenario: Typed dispatch with no context falls back to default resolution
+    Given a FlagProvider that returns 3 for getInt("max-retries") regardless of context
+    When Kenji resolves RetryStrategy without any evaluation context
+    Then ConservativeRetry is selected based on the contextless flag value
