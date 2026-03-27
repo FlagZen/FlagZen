@@ -125,6 +125,35 @@ abstraction over existing flagging libraries.
   class DefaultTheme implements Theme { ... }
   ```
 
+- Condition predicates for in-code variant selection without external flag providers
+
+  ```java
+  // Predicate-based dispatch: evaluated in order, first match wins
+  @Feature("pricing-tier")
+  interface PricingStrategy { Money calculate(Order order); }
+
+  @Variant(when = @Condition(on = IsEnterprise.class, order = 1))
+  class EnterprisePricing implements PricingStrategy { ... }
+
+  @Variant(when = @Condition(on = IsStartup.class, order = 2))
+  class StartupPricing implements PricingStrategy { ... }
+
+  @DefaultVariant
+  class StandardPricing implements PricingStrategy { ... }
+
+  // Predicate interface
+  class IsEnterprise implements FeaturePredicate {
+    public boolean test(EvaluationContext ctx) {
+      return "enterprise".equals(ctx.attribute("plan"));
+    }
+  }
+  ```
+
+  Note: when the flag provider supports server-side targeting rules
+  (LaunchDarkly, OpenFeature, Togglz), those are the preferred way.
+  Condition predicates are for pure in-code feature switching — a
+  declarative Strategy pattern selector evaluated against the
+  EvaluationContext.
 - Compile-time annotation processing
 - Spring, CDI, Quarkus, ... integration
   

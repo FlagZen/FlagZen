@@ -104,14 +104,31 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 - [ ] `flagzen-togglz` (Togglz adapter)
 - [ ] `flagzen-openfeature` (OpenFeature SDK adapter)
 
-## M6: Reactive Context Propagation — `flagzen-reactive`
+## M6: Condition Predicates — `flagzen-conditions`
+
+**Status: NOT STARTED** | Depends on: M1
+
+> **Note**: When the flag provider supports server-side targeting rules (LaunchDarkly, OpenFeature, Togglz), those are the preferred way to do conditional dispatch. Condition predicates are for pure in-code feature switching where no external flag service is involved — a declarative Strategy pattern selector evaluated against the `EvaluationContext`.
+
+- [ ] `@Condition` annotation (`on = Predicate.class`, `order = int`)
+- [ ] `@Variant(when = @Condition(on = IsEnterprise.class, order = 1))` syntax
+- [ ] `FeaturePredicate<EvaluationContext>` functional interface
+- [ ] Predicates evaluated in `order` sequence; first match wins
+- [ ] Compile-time validation: predicate class implements `FeaturePredicate`
+- [ ] Compile-time validation: predicate type safety (predicate input matches `EvaluationContext`)
+- [ ] Fallback to `@DefaultVariant` when no predicate matches
+- [ ] Interaction with `FallbackStrategy` when no predicate matches and no default
+- [ ] Proxy generation for predicate-based dispatch (alongside value-based dispatch)
+- [ ] Predicates instantiated via no-arg constructor (or DI when Spring module present)
+
+## M7: Reactive Context Propagation — `flagzen-reactive`
 
 **Status: NOT STARTED** | Depends on: M1
 
 - [ ] `flagzen-reactor` (Reactor `Context` for Spring WebFlux)
 - [ ] `flagzen-mutiny` (Mutiny `Context` for Quarkus Reactive)
 
-## M7: Hooks and Observability — `flagzen-hooks`
+## M8: Hooks and Observability — `flagzen-hooks`
 
 **Status: NOT STARTED** | Depends on: M0
 
@@ -121,7 +138,7 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 - [ ] Compile-time warnings for unused variants
 - [ ] Hotspot analysis
 
-## M8: Extended Testing Support — `flagzen-test-extras`
+## M9: Extended Testing Support — `flagzen-test-extras`
 
 **Status: NOT STARTED** | Depends on: M0
 
@@ -131,21 +148,21 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 - [ ] TestNG extension
 - [ ] Test fixtures / helpers
 
-## M9: Additional DI Frameworks — `flagzen-cdi`
+## M10: Additional DI Frameworks — `flagzen-cdi`
 
 **Status: NOT STARTED** | Depends on: M4
 
 - [ ] CDI integration
 - [ ] Quarkus integration
 
-## M10: Cross-Module and Edge Cases — `flagzen-cross-module`
+## M11: Cross-Module and Edge Cases — `flagzen-cross-module`
 
 **Status: NOT STARTED** | Depends on: M0
 
 - [ ] Cross-module variant discovery at runtime
 - [ ] Package-private variant class support
 
-## M11: Documentation — `flagzen-docs`
+## M12: Documentation — `flagzen-docs`
 
 **Status: NOT STARTED** | Depends on: M0-M5
 
