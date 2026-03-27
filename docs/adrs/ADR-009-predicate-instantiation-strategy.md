@@ -2,66 +2,76 @@
 
 ## Status
 
-Accepted
+Accepted (updated: predicates use JDK functional interfaces, not custom FeaturePredicate)
 
 ## Context
 
-Condition-based dispatch requires instantiating user-defined `FeaturePredicate` implementations inside the generated proxy. The proxy is constructed at `FeatureDispatcher.resolve()` time and lives as a singleton for the lifetime of the dispatcher. The instantiation strategy must satisfy three constraints:
+Condition-based dispatch requires instantiating user-defined predicates inside the generated proxy. The predicates test **flag values** (not EvaluationContext) — e.g., "is this integer above 5?" or "does this string start with v2?". The instantiation strategy must satisfy three constraints:
 
 1. **Zero runtime reflection in flagzen-core** (architectural invariant since M0)
-2. **Compile-time safety** -- invalid predicates caught before runtime
-3. **Extensibility** -- Spring DI support as an extension module (not in core)
+2. **Compile-time safety** — invalid predicates caught before runtime
+3. **Extensibility** — Spring DI support as an extension module (not in core)
 
 ## Decision
 
-Core module instantiates predicates via **no-arg constructor** called directly in generated code (e.g., `new IsEnterprise()`). The annotation processor validates that the predicate class:
+### Predicate types: JDK functional interfaces
 
-- Implements `FeaturePredicate`
+Predicates use the standard `java.util.function` predicate types — no custom `FeaturePredicate` interface:
+
+| Feature type | Predicate interface | Example |
+|---|---|---|
+| STRING | `Predicate<String>` | `class StartsWithV2 implements Predicate<String>` |
+| INT | `IntPredicate` | `class HighRetryRange implements IntPredicate` |
+| LONG | `LongPredicate` | `class AboveRateLimit implements LongPredicate` |
+| DOUBLE | `DoublePredicate` | `class HighSamplingRate implements DoublePredicate` |
+| BOOLEAN | — | Only two values, use exact match |
+
+The annotation processor validates that the class referenced in `@Condition(matches = X.class)` implements the correct predicate type for the feature's declared `FeatureType`.
+
+### Instantiation: no-arg constructor
+
+Core module instantiates predicates via **no-arg constructor** called directly in generated code (e.g., `new HighRetryRange()`). The annotation processor validates that the predicate class:
+
+- Implements the correct JDK predicate interface for the feature type
 - Is not abstract
 - Has an accessible no-arg constructor
 
 Predicate instances are created once at proxy construction time and stored as `final` fields. They are reused across all method invocations.
 
-Spring DI support (US-CP-08, deferred) will extend flagzen-spring to resolve `@Component`-annotated predicates from the `ApplicationContext`. When flagzen-spring is present, the compile-time no-arg constructor check is relaxed for classes bearing Spring stereotype annotations. This is an extension of the existing flagzen-spring module.
+Spring DI support (deferred) will extend flagzen-spring to resolve `@Component`-annotated predicates from the `ApplicationContext`.
 
 ## Alternatives Considered
 
-### 1. ServiceLoader-based predicate discovery
+### 1. Custom `FeaturePredicate` interface
 
-Register `FeaturePredicate` implementations via `META-INF/services/`. The proxy discovers them at runtime.
+Define `com.flagzen.FeaturePredicate` as the single predicate type, with `boolean test(EvaluationContext ctx)`.
 
-**Rejected because**: ServiceLoader discovery is runtime, not compile-time. The processor cannot validate that the referenced predicate class exists and is registered. Also introduces indirection between the `@Condition(on = X.class)` annotation and the actual instance -- the class reference in the annotation would become a key rather than a direct type reference. Adds unnecessary complexity for a problem that direct instantiation solves.
+**Rejected because**: (a) Predicates test flag values, not EvaluationContext — context-based targeting belongs in the flag provider. (b) Introduces a new interface when the JDK already provides `Predicate<T>`, `IntPredicate`, `LongPredicate`, `DoublePredicate`. (c) Developers already know the JDK predicates — zero new abstractions to learn.
 
 ### 2. Reflection-based instantiation
 
 Use `Class.forName(name).getDeclaredConstructor().newInstance()` in the generated proxy.
 
-**Rejected because**: Violates the zero-runtime-reflection invariant of flagzen-core (ADR-001). Reflection is slower, produces less helpful error messages, and is not compatible with GraalVM native image without additional configuration. Direct constructor call is simpler, faster, and AOT-friendly.
+**Rejected because**: Violates the zero-runtime-reflection invariant (ADR-001). Direct constructor call is simpler, faster, and AOT-friendly.
 
-### 3. Factory method pattern
+### 3. ServiceLoader-based predicate discovery
 
-Require predicates to expose a `static FeaturePredicate create()` factory method instead of a no-arg constructor.
+Register predicate implementations via `META-INF/services/`.
 
-**Rejected because**: Adds ceremony without benefit. A no-arg constructor is the simplest instantiation contract. Java developers expect `new X()`. A factory method would require additional annotation attributes or conventions to specify the method name, and the processor validation becomes more complex. If a predicate needs complex initialization, it can do so in its constructor body.
-
-### 4. Predicate instances passed to proxy externally
-
-Instead of the proxy instantiating predicates, `FeatureDispatcher` creates them and passes them to the proxy constructor. This centralizes instantiation and allows the dispatcher to use different strategies.
-
-**Rejected because**: This shifts instantiation responsibility to the runtime API layer (FeatureDispatcher/FeatureMetadata), which means the generated metadata must know about predicate classes. This is viable but deferred -- it may be the approach used when Spring DI support is added. For core (no-DI) usage, direct instantiation in the proxy is simpler and self-contained.
+**Rejected because**: Runtime discovery, not compile-time. Cannot validate predicate existence or type compatibility at compile time.
 
 ## Consequences
 
 ### Positive
 
-- Zero reflection -- generated code calls `new IsEnterprise()` directly
-- Compile-time validation -- processor catches invalid predicate classes before runtime
-- AOT/native-image friendly -- no reflective access needed
-- Simple mental model -- predicates are POJOs with no-arg constructors
-- Consistent with how variant classes are already instantiated in M0 proxies
+- Zero new abstractions — uses JDK's own predicate interfaces
+- Zero reflection — generated code calls `new HighRetryRange()` directly
+- Compile-time validation — processor validates correct predicate type per feature type
+- Type-safe — INT feature requires `IntPredicate`, STRING requires `Predicate<String>`
+- AOT/native-image friendly
 
 ### Negative
 
 - Predicates cannot have constructor dependencies in core (no DI)
-- Developers needing DI must wait for flagzen-spring extension or use service locator workarounds
-- Predicate instances are shared across threads (user responsibility for thread safety)
+- Predicate instances are shared across threads (user must ensure thread safety)
+- `Predicate<String>` uses generics which are erased — processor validates via type hierarchy analysis, not runtime type checking

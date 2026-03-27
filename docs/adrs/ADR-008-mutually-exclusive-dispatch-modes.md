@@ -1,62 +1,76 @@
-# ADR-008: Mutually Exclusive Dispatch Modes
+# ADR-008: Unified Ordered Dispatch Model
 
 ## Status
 
-Accepted
+Accepted (supersedes original "Mutually Exclusive Dispatch Modes")
 
 ## Context
 
-FlagZen M0 supports value-based dispatch: a `FlagProvider` returns a string, and the proxy looks up the corresponding `@Variant` in a map. M6 introduces condition-based dispatch: user-defined predicates evaluate an `EvaluationContext` and select a variant.
+FlagZen M0 supports value-based dispatch: a `FlagProvider` returns a value, and the proxy looks up the corresponding `@Variant` in a map. M6 introduces condition-based dispatch: user-defined predicates evaluate the flag value and select a variant (e.g., range matching on integers).
 
-A `@Feature` interface could theoretically support both modes simultaneously -- some variants selected by flag value, others by predicate. However, this creates ambiguous dispatch semantics:
-
-- Which mode takes priority?
-- What happens when both a flag value and a predicate match?
-- How does `FallbackStrategy` behave when one mode matches but the other does not?
-- How does the developer reason about which variant will be selected?
-
-The annotation processor must decide whether to allow, reject, or mediate mixed dispatch modes per `@Feature`.
+The original design (mutually exclusive modes) forced each `@Feature` to be either value-based OR condition-based, never both. This was a simplification that prevented valid use cases like: "use SpecialOfferPricing when the flag value is exactly 'SPECIAL_OFFER', use EnterprisePricing when the integer value is above a threshold, otherwise use StandardPricing."
 
 ## Decision
 
-A `@Feature` interface uses exactly one dispatch mode: value-based OR condition-based, never both. The annotation processor rejects any `@Feature` that mixes `@Variant("value")` with `@Variant(when = @Condition(...))`.
+Value-based and condition-based variants can coexist on the same `@Feature`. Dispatch order is controlled by an optional `order` attribute on `@Variant`:
 
-`@DefaultVariant` is compatible with both modes and is not counted as either.
+```java
+@Feature("pricing")
+interface Pricing { Money calculate(Order order); }
 
-Different `@Feature` interfaces may use different modes. Mode is a per-feature decision, not a global one.
+@Variant(value = "SPECIAL_OFFER", order = 1)          // exact match, checked first
+@Variant(when = @Condition(matches = HighValue.class), order = 2)  // condition, checked second
+@Variant(value = "STANDARD", order = 3)                // exact match, checked third
+
+@DefaultVariant                                        // no order needed, always last
+class FallbackPricing implements Pricing { ... }
+```
+
+Dispatch evaluates variants in `order` sequence. Exact match checks the flag value. Condition evaluates the predicate against the flag value. First match wins. `@DefaultVariant` is always last.
+
+### When `order` is required
+
+- **Only exact matches, no conditions**: `order` optional — existing map-lookup behavior, order is irrelevant (values are unique by validation)
+- **Only one condition + optional default**: `order` optional — only one thing to evaluate
+- **Mixed exact matches and conditions, or multiple conditions**: `order` mandatory on every `@Variant` — processor enforces at compile time
+
+### Proxy generation strategy
+
+- When no `order` is present: O(1) map lookup (existing behavior, no regression)
+- When `order` is present: ordered list of `(matcher, supplier)` pairs evaluated sequentially (O(n), n typically 2-5 variants)
 
 ## Alternatives Considered
 
-### 1. Allow mixed modes with flag-value priority
+### 1. Mutually exclusive dispatch modes (original ADR-008)
 
-Value-based dispatch runs first. If no flag value matches, condition-based dispatch runs. This creates a fallback chain: flag provider > predicates > @DefaultVariant > FallbackStrategy.
+A `@Feature` uses exactly one dispatch mode: value-based OR condition-based, never both. The processor rejects mixing.
 
-**Rejected because**: The dispatch order is implicit and surprising. Developers must reason about two dispatch paths to predict behavior. Debugging "why did this variant get selected?" becomes significantly harder. The mental model is no longer "one feature, one dispatch mechanism."
+**Superseded because**: Prevents valid use cases (exact match + range fallback). Forces developers to decompose into separate `@Feature` interfaces for what is conceptually one feature. The unified model is strictly more expressive with no additional complexity for the simple case (no `order` = same behavior as before).
 
-### 2. Allow mixed modes with explicit priority annotation
+### 2. Implicit ordering by annotation source order
 
-Add a `@DispatchPriority` annotation or attribute to control which mode runs first. Developers declare the precedence explicitly.
+Use the order annotations appear in the source file rather than an explicit `order` attribute.
 
-**Rejected because**: Over-engineering for a scenario with no demonstrated need. Adds annotation surface area, processor complexity, and cognitive load. If a developer needs both flag-based and predicate-based selection, they can decompose into two `@Feature` interfaces with clear responsibilities.
+**Rejected because**: Java annotation ordering in source code is not guaranteed to be preserved by all compilers. Explicit `order` is deterministic and portable. Also allows reordering without moving code.
 
-### 3. Implicit mode detection from variant annotations (no mixing rejection)
+### 3. Priority-based dispatch with separate attribute
 
-If all variants have `@Condition`, use condition mode. If all have values, use value mode. If mixed, emit a warning but compile anyway.
+A `@DispatchPriority` annotation or a `priority` attribute separate from `order`.
 
-**Rejected because**: Warnings are ignored. Allowing mixed modes without clear semantics guarantees confusion. Compile errors are the only reliable way to enforce architectural intent.
+**Rejected because**: Adding another annotation or attribute creates redundancy. `order` on `@Variant` is sufficient and keeps all dispatch metadata in one place.
 
 ## Consequences
 
 ### Positive
 
-- Clear mental model: one feature, one dispatch mechanism
-- Simpler processor logic: partition variants, reject if both non-empty
-- Simpler generated proxy: each proxy uses exactly one dispatch path
-- Debuggable: variant selection is explainable from one mechanism
-- Two features can still collaborate (one value-based, one condition-based) if the domain requires both
+- Unified mental model: one feature, ordered dispatch, first match wins
+- Simple case unchanged: no `order` = map lookup (zero regression)
+- Mixed dispatch enables "exact match with condition fallback" patterns
+- Compile-time enforcement: processor requires `order` when ambiguity exists
+- `@DefaultVariant` always last — no need to assign it an order
 
 ### Negative
 
-- Cannot express "check flag value first, fall back to predicate" in a single @Feature
-- Developers must decompose complex selection into separate @Feature interfaces
-- If a feature needs to migrate from value-based to condition-based, all variants must change simultaneously (but this is a compile-time check, so the migration is safe)
+- Ordered dispatch is O(n) per method call (acceptable for typical variant counts)
+- `order` attribute adds to `@Variant`'s surface area
+- Developers must think about evaluation order when mixing modes

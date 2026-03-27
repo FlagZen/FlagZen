@@ -1,57 +1,78 @@
-# ADR-010: @Condition Annotation Nesting in @Variant
+# ADR-010: @Condition Annotation Design
 
 ## Status
 
-Accepted
+Accepted (updated: `matches`/`notMatches` attributes, `order` moved to `@Variant`)
 
 ## Context
 
-M6 introduces `@Condition` to bind a `FeaturePredicate` to a `@Variant`. The annotation must reference the predicate class and specify evaluation order. The design question is where `@Condition` lives syntactically relative to `@Variant`.
+M6 introduces `@Condition` to bind a predicate to a `@Variant`. The annotation must reference the predicate class. The design questions are: (1) where `@Condition` lives syntactically, (2) what its attributes are named, and (3) where dispatch order is specified.
 
 ## Decision
 
-`@Condition` is a nested annotation used exclusively inside `@Variant(when = @Condition(on = IsEnterprise.class, order = 1))`. It is not a standalone annotation applied directly to classes.
+### Nesting and syntax
 
-`@Variant` gains a `when` attribute of type `@Condition` with a sentinel default value representing "no condition."
+`@Condition` is a nested annotation used inside `@Variant(when = @Condition(matches = X.class))`. It is not a standalone annotation.
+
+```java
+@Variant(when = @Condition(matches = HighRetryRange.class), order = 2)
+class AggressiveRetry implements RetryStrategy { ... }
+```
+
+### Attributes
+
+- `matches` — the predicate class (required). Must implement the correct JDK predicate type for the feature's `FeatureType` (see ADR-009).
+- `notMatches` — the predicate class for negation (optional). Variant is selected when the predicate does NOT match.
+- `matches` and `notMatches` are **mutually exclusive** — the processor rejects annotations that set both. This keeps usage readable: either "when condition matches X" or "when condition not matches X."
+
+### Order on @Variant, not @Condition
+
+`order` is an attribute of `@Variant`, not `@Condition`. This enables unified ordering across exact-match and condition-based variants (see ADR-008):
+
+```java
+@Variant(value = "SPECIAL", order = 1)                                    // exact match
+@Variant(when = @Condition(matches = HighValue.class), order = 2)          // condition
+@Variant(value = "STANDARD", order = 3)                                    // exact match
+```
 
 ## Alternatives Considered
 
-### 1. Standalone @Condition annotation on the variant class
+### 1. `on` attribute instead of `matches`
 
-`@Condition(on = IsEnterprise.class, order = 1)` applied directly alongside `@Variant` on the class.
+`@Condition(on = IsEnterprise.class)` — the original design.
 
-```java
-@Variant(of = PricingStrategy.class)
-@Condition(on = IsEnterprise.class, order = 1)
-public class EnterprisePricing implements PricingStrategy { ... }
-```
+**Superseded because**: `matches` reads better as English: "when condition matches Enterprise." Also enables `notMatches` as a natural pair. With `on`, the negation would be `notOn` which is awkward.
 
-**Rejected because**: Cross-annotation matching is error-prone. The processor must correlate `@Condition` with `@Variant` -- but which `@Variant` does the `@Condition` belong to when a class has `@Repeatable` `@Variant` for multiple features? The nesting approach makes the binding explicit: each `@Variant(when = ...)` owns its condition.
+### 2. `is` / `isNot` attributes
 
-### 2. @Condition as a separate annotation with explicit feature binding
+`@Condition(is = Enterprise.class)` — reads fluently for single predicates.
 
-`@Condition(feature = PricingStrategy.class, on = IsEnterprise.class, order = 1)` -- standalone with its own feature reference.
+**Rejected because**: Scaling to arrays (`is = {A.class, B.class}`) reads poorly — "condition is A and B" is ambiguous (AND or OR?). `matches`/`notMatches` avoid this problem by being explicitly single-valued and mutually exclusive.
 
-**Rejected because**: Duplicates the `@Variant(of = ...)` feature binding. The developer declares the feature twice (once in `@Variant`, once in `@Condition`), creating a consistency risk. If they disagree, the processor must detect and report the conflict. Nesting eliminates this entire class of errors.
+### 3. `order` inside @Condition
 
-### 3. Predicate class reference directly in @Variant
+`@Condition(matches = X.class, order = 1)` — keeps order with the condition.
 
-No separate `@Condition` annotation. Instead: `@Variant(predicate = IsEnterprise.class, order = 1)`.
+**Rejected because**: `order` applies to the `@Variant` as a whole, not just to the condition. Exact-match variants also need ordering when mixed with conditions. Placing `order` on `@Variant` enables the unified ordered dispatch model (ADR-008).
 
-**Rejected because**: Pollutes `@Variant` with condition-specific attributes that are meaningless for value-based variants. The `when = @Condition(...)` pattern cleanly separates value-based attributes (`value`) from condition-based attributes (`on`, `order`). It also reads well as English: "variant when condition on IsEnterprise."
+### 4. Standalone @Condition annotation on the variant class
+
+`@Condition(matches = X.class)` applied directly alongside `@Variant` on the class.
+
+**Rejected because**: Cross-annotation matching is error-prone with `@Repeatable` `@Variant` for multi-feature classes. Nesting makes the binding explicit.
 
 ## Consequences
 
 ### Positive
 
+- Reads as English: `@Variant(when = @Condition(matches = X.class), order = 2)`
+- `matches`/`notMatches` are clear and mutually exclusive — no ambiguity
+- `order` on `@Variant` enables mixed exact-match + condition dispatch (ADR-008)
 - Self-contained variant declarations: all dispatch metadata in one annotation
-- No cross-annotation correlation needed in the processor
-- Reads naturally: `@Variant(when = @Condition(on = IsEnterprise.class, order = 1))`
-- Clean separation: `@Variant.value` for value-based, `@Variant.when` for condition-based
-- Multi-feature classes with `@Repeatable` `@Variant` each carry their own condition unambiguously
+- Negation without writing wrapper predicates
 
 ### Negative
 
-- Slightly verbose syntax for simple cases (one `@Condition` nested inside `@Variant`)
-- Sentinel default for `@Variant.when` requires a sentinel class (minor implementation detail)
-- Annotation nesting is a less common Java pattern -- some developers may find it unfamiliar
+- Slightly verbose syntax for simple cases
+- Sentinel default for `@Variant.when` requires a sentinel class
+- `notMatches` is not "not matches" in English — but `doesNotMatch` is too long, and `notMatching` changes the tense
