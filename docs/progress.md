@@ -82,6 +82,7 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 - [ ] `@Feature(type = FeatureType.INT)` attribute (default STRING for backward compat)
 - [ ] `@Variant(intValue = 42)` for int-typed features
 - [ ] `@Variant(booleanValue = true)` for boolean-typed features
+- [ ] `@WhenTrue` / `@WhenFalse` convenience annotations (with `of` for multi-feature)
 - [ ] Compile-time validation: all variants of a feature use the same type
 - [ ] Compile-time validation: `@Variant` attribute matches `@Feature(type = ...)`
 - [ ] Proxy dispatches on typed value (int/boolean lookup instead of string)

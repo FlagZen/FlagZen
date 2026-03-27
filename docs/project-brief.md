@@ -58,11 +58,23 @@ abstraction over existing flagging libraries.
   @Feature(value = "dark-mode", type = FeatureType.BOOLEAN)
   interface DarkMode { void apply(UI ui); }
 
-  @Variant(booleanValue = true)
+  @Variant(booleanValue = true)  // or @WhenTrue
   class DarkModeOn implements DarkMode { ... }
 
-  @Variant(booleanValue = false)
+  @Variant(booleanValue = false)  // or @WhenFalse
   class DarkModeOff implements DarkMode { ... }
+
+  // Convenience annotations for boolean features
+  @WhenTrue
+  class DarkModeOn implements DarkMode { ... }
+
+  @WhenFalse
+  class DarkModeOff implements DarkMode { ... }
+
+  // Multi-feature boolean (with of= argument)
+  @WhenTrue(of = DarkMode.class)
+  @WhenFalse(of = MaintenanceMode.class)
+  class DarkOnMaintenanceOff implements DarkMode, MaintenanceMode { ... }
   ```
 
   Supported types: STRING (default), INT, BOOLEAN. The processor validates

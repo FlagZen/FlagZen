@@ -87,7 +87,7 @@ Add `intValue` and `booleanValue` attributes to the `@Variant` annotation. Exact
 
 #### 1: Integer variant -- Kenji annotates ConservativeRetry with `@Variant(intValue = 3)` and AggressiveRetry with `@Variant(intValue = 10)` for his max-retries feature.
 
-#### 2: Boolean variant -- Mei Chen annotates DarkModeOn with `@Variant(booleanValue = true)` and DarkModeOff with `@Variant(booleanValue = false)` for her dark-mode feature.
+#### 2: Boolean variant -- Mei Chen annotates DarkModeOn with `@Variant(booleanValue = true)` and DarkModeOff with `@Variant(booleanValue = false)` for her dark-mode feature. Alternatively, she uses the convenience annotations `@WhenTrue` and `@WhenFalse`.
 
 #### 3: String variant unchanged -- Kenji's existing `@Variant("CLASSIC")` on ClassicCheckout continues to work for string-typed features.
 
@@ -124,6 +124,9 @@ And only intValue is treated as the active attribute
 
 - [ ] @Variant annotation has `intValue()` attribute with appropriate default sentinel
 - [ ] @Variant annotation has `booleanValue()` attribute with appropriate default sentinel
+- [ ] `@WhenTrue` convenience annotation (retention CLASS, target TYPE) — equivalent to `@Variant(booleanValue = true)`
+- [ ] `@WhenFalse` convenience annotation (retention CLASS, target TYPE) — equivalent to `@Variant(booleanValue = false)`
+- [ ] `@WhenTrue(of = ...)` and `@WhenFalse(of = ...)` for multi-feature classes
 - [ ] VariantModel can store typed values (integer, boolean) alongside string value
 - [ ] Existing @Variant(value = "...") annotations compile and work as before
 - [ ] Annotation attribute defaults allow the processor to detect which attribute was explicitly set
@@ -346,9 +349,11 @@ The proxy generator produces dispatch logic that calls `FlagProvider.getBoolean(
 
 #### 1: Boolean dispatch -- Mei Chen's flag provider returns `true` for "dark-mode". Proxy selects DarkModeOn.
 
-#### 2: Boolean REQUIRED satisfied -- Both `@Variant(booleanValue = true)` and `@Variant(booleanValue = false)` exist. REQUIRED strategy is satisfied. Compiles.
+#### 2: Boolean with convenience annotations -- Mei Chen uses `@WhenTrue` on DarkModeOn and `@WhenFalse` on DarkModeOff instead of `@Variant(booleanValue = ...)`. Both are syntactic sugar processed identically.
 
-#### 3: DefaultVariant covers boolean gap -- Only `@Variant(booleanValue = true)` exists, but `@DefaultVariant` covers the false case. REQUIRED is satisfied.
+#### 3: Boolean REQUIRED satisfied -- Both `@Variant(booleanValue = true)` and `@Variant(booleanValue = false)` (or `@WhenTrue`/`@WhenFalse`) exist. REQUIRED strategy is satisfied. Compiles.
+
+#### 4: DefaultVariant covers boolean gap -- Only `@WhenTrue` exists, but `@DefaultVariant` covers the false case. REQUIRED is satisfied.
 
 ### UAT Scenarios (BDD)
 
