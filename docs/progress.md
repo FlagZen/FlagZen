@@ -8,7 +8,7 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 
 |  Release   |            Milestones            |                                            Theme                                            |
 | ---------- | -------------------------------- | ------------------------------------------------------------------------------------------- |
-| **v1.1.0** | M0, M1, M2, M3, M4, M5 (partial) | Core library with typed dispatch, eval context, Spring, env provider, one external provider |
+| **v1.1.0** | M0, M1, M2, M3, M13, M4, M5 (partial) | Core library with typed dispatch, eval context, multi-value, Spring, env provider, one external provider |
 | **v1.2.0** | M5 (remaining), M6, M8, M11      | Condition predicates, remaining providers, hooks, cross-module                              |
 | **v1.3.0** | M7, M9                           | Reactive context, extended testing                                                          |
 | **v1.4.0** | M10                              | CDI/Quarkus integration                                                                     |
@@ -108,6 +108,17 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 - [ ] `EnvironmentVariableFlagProvider` implementing `FlagProvider`
 - [ ] Key-to-env-var mapping convention (e.g., `checkout-flow` -> `FLAGZEN_CHECKOUT_FLOW`)
 - [ ] ServiceLoader registration
+
+### M13: Multi-Value Variant Mapping — `flagzen-multi-value-variant`
+
+**Status: NOT STARTED** | **Release: v1.1.0** | Depends on: M0
+
+- [ ] `@Variant(value = {"CLASSIC", "LEGACY"})` — `String[] value()` on @Variant (non-breaking: single string still works)
+- [ ] `@Variant(intValue = {3, 5})` — `int[] intValue()` for multi-value int dispatch
+- [ ] Repeated `@Variant` annotations on same class also supported (existing `@Repeatable`)
+- [ ] Processor registers implementation class under all specified values
+- [ ] Compile-time duplicate detection across multi-value arrays
+- [ ] Both syntaxes composable: array values + repeated annotations
 
 ### M4: Spring Integration — `flagzen-spring`
 
