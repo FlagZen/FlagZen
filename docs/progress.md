@@ -144,13 +144,31 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 
 Documentation is updated with every release. Each release adds docs for its new features.
 
-- [ ] README with quick start guide
-- [ ] Javadoc on all public API types
-- [ ] GitHub Pages site (submodule)
+#### Documentation Site
+
+- [ ] GitHub Pages site hosted at flagzen.com (custom domain)
+- [ ] Documentation repository/submodule with static site generator
 - [ ] Getting started tutorial
 - [ ] API reference
 - [ ] Architecture guide
 - [ ] Provider integration guides
+
+#### In-Repo Documentation
+
+- [ ] README with quick start guide
+- [ ] Javadoc on all public API types
+
+#### Examples Module — `flagzen-examples`
+
+- [ ] `flagzen-examples` Gradle submodule (not published to Maven Central)
+- [ ] Example: basic polymorphic dispatch (`@Feature` + `@Variant` + `FeatureDispatcher`)
+- [ ] Example: typed dispatch (INT, BOOLEAN, LONG, DOUBLE with `@CloseTo`)
+- [ ] Example: evaluation context (explicit, block-scoped, accessor)
+- [ ] Example: testing with `@PinFlag`, `@FlagSource`, `TestFlagContext`
+- [ ] Example: Spring Boot integration (`@Autowired` feature injection)
+- [ ] Example: custom `FlagProvider` implementation
+- [ ] Example: condition predicates (`@Condition` + `FeaturePredicate`)
+- [ ] Every example has a corresponding test that compiles and runs
 
 ---
 
