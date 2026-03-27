@@ -4,9 +4,24 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 
 ---
 
-## M0: Core Polymorphic Dispatch — `flagzen`
+## Release Plan
 
-**Status: DONE** | [Artifacts](feature/flagzen/)
+| Release | Milestones | Theme |
+|---------|------------|-------|
+| **v1.0.0** | M0, M1, M2, M3, M4, M5 (partial) | Core library with typed dispatch, eval context, Spring, env provider, one external provider |
+| **v1.1.0** | M5 (remaining), M6, M8, M11 | Condition predicates, remaining providers, hooks, cross-module |
+| **v1.2.0** | M7, M9 | Reactive context, extended testing |
+| **v1.3.0** | M10 | CDI/Quarkus integration |
+
+M12 (Documentation) is continuous — Javadoc and docs are updated with every release.
+
+---
+
+## v1.0.0 — Core Library
+
+### M0: Core Polymorphic Dispatch — `flagzen`
+
+**Status: DONE** | **Release: v1.0.0** | [Artifacts](feature/flagzen/)
 
 - [x] `@Feature` annotation on interfaces
 - [x] `@Variant` annotation on implementation classes
@@ -43,9 +58,9 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 - [x] Priority: `@PinFlag` > `@FlagSource` > provider
 - [x] Gradle monorepo, CI/CD, Maven Central publishing, PITest
 
-## M1: Evaluation Context — `flagzen-eval-context`
+### M1: Evaluation Context — `flagzen-eval-context`
 
-**Status: NOT STARTED** | Depends on: M0
+**Status: DISCUSS DONE** | **Release: v1.0.0** | [Artifacts](feature/flagzen-eval-context/)
 
 - [ ] `EvaluationContext` model (targeting key + attributes)
 - [ ] Explicit context parameter on `resolve()`
@@ -54,11 +69,11 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 - [ ] `ContextAccessor` SPI implementation
 - [ ] Resolution order: explicit > reactive > scoped > default
 
-## M2: Typed Variants and Conditional API — `flagzen-typed-variants`
+### M2: Typed Variants and Conditional API — `flagzen-typed-variants`
 
-**Status: NOT STARTED** | Depends on: M0
+**Status: NOT STARTED** | **Release: v1.0.0** | Depends on: M0
 
-### Typed Polymorphic Dispatch
+#### Typed Polymorphic Dispatch
 
 - [ ] `FeatureType` enum (STRING, INT, BOOLEAN) — or inferred from `@Variant` attribute used
 - [ ] `@Feature(type = FeatureType.INT)` attribute (default STRING for backward compat)
@@ -70,7 +85,7 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 - [ ] `FlagProvider.getInt(String key)` and `FlagProvider.getBoolean(String key)` for typed resolution
 - [ ] REQUIRED strategy works with boolean features (exactly 2 variants: true + false)
 
-### Conditional API (Non-Polymorphic)
+#### Conditional API (Non-Polymorphic)
 
 - [ ] `FlagProvider.getBoolean(String key)` default method
 - [ ] `FlagProvider.getInt(String key)` default method
@@ -78,17 +93,17 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 - [ ] `FlagProvider.getDouble(String key)` default method
 - [ ] `FlagProvider.getString(String key)` remains the primitive (typed methods delegate + parse)
 
-## M3: Environment Variable Provider — `flagzen-env`
+### M3: Environment Variable Provider — `flagzen-env`
 
-**Status: NOT STARTED** | Depends on: M0
+**Status: NOT STARTED** | **Release: v1.0.0** | Depends on: M0
 
 - [ ] `EnvironmentVariableFlagProvider` implementing `FlagProvider`
 - [ ] Key-to-env-var mapping convention (e.g., `checkout-flow` -> `FLAGZEN_CHECKOUT_FLOW`)
 - [ ] ServiceLoader registration
 
-## M4: Spring Integration — `flagzen-spring`
+### M4: Spring Integration — `flagzen-spring`
 
-**Status: NOT STARTED** | Depends on: M0
+**Status: NOT STARTED** | **Release: v1.0.0** | Depends on: M0
 
 - [ ] `FlagZenAutoConfiguration` (Spring Boot auto-config)
 - [ ] `FeatureFactoryBean` for `@Autowired` injection of `@Feature` proxies
@@ -96,41 +111,52 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 - [ ] `@Variant` + `@Component` classes participate in Spring DI
 - [ ] Conditional annotations (`@ConditionalOnMissingBean`)
 
-## M5: Provider Adapters — `flagzen-providers`
+### M5: Provider Adapters — `flagzen-providers`
 
-**Status: NOT STARTED** | Depends on: M0
+**Status: NOT STARTED** | **Release: v1.0.0 (partial), v1.1.0 (remaining)** | Depends on: M0
 
-- [ ] `flagzen-launchdarkly` (LaunchDarkly SDK adapter)
-- [ ] `flagzen-togglz` (Togglz adapter)
-- [ ] `flagzen-openfeature` (OpenFeature SDK adapter)
+- [ ] `flagzen-openfeature` (OpenFeature SDK adapter) — **v1.0.0** (vendor-neutral, proves SPI)
+- [ ] `flagzen-launchdarkly` (LaunchDarkly SDK adapter) — v1.1.0
+- [ ] `flagzen-togglz` (Togglz adapter) — v1.1.0
 
-## M6: Condition Predicates — `flagzen-conditions`
+### M12: Documentation — `flagzen-docs`
 
-**Status: NOT STARTED** | Depends on: M1
+**Status: NOT STARTED** | **Release: continuous** | Depends on: M0
+
+Documentation is updated with every release. Each release adds docs for its new features.
+
+- [ ] README with quick start guide
+- [ ] Javadoc on all public API types
+- [ ] GitHub Pages site (submodule)
+- [ ] Getting started tutorial
+- [ ] API reference
+- [ ] Architecture guide
+- [ ] Provider integration guides
+
+---
+
+## v1.1.0 — Extended Dispatch and Providers
+
+### M6: Condition Predicates — `flagzen-conditions`
+
+**Status: DESIGN DONE** | **Release: v1.1.0** | Depends on: M1 | [Artifacts](feature/flagzen-conditions/)
 
 > **Note**: When the flag provider supports server-side targeting rules (LaunchDarkly, OpenFeature, Togglz), those are the preferred way to do conditional dispatch. Condition predicates are for pure in-code feature switching where no external flag service is involved — a declarative Strategy pattern selector evaluated against the `EvaluationContext`.
 
 - [ ] `@Condition` annotation (`on = Predicate.class`, `order = int`)
 - [ ] `@Variant(when = @Condition(on = IsEnterprise.class, order = 1))` syntax
-- [ ] `FeaturePredicate<EvaluationContext>` functional interface
+- [ ] `FeaturePredicate` functional interface (`boolean test(EvaluationContext)`)
 - [ ] Predicates evaluated in `order` sequence; first match wins
 - [ ] Compile-time validation: predicate class implements `FeaturePredicate`
-- [ ] Compile-time validation: predicate type safety (predicate input matches `EvaluationContext`)
+- [ ] Compile-time validation: mutually exclusive dispatch modes (value-based OR condition-based)
 - [ ] Fallback to `@DefaultVariant` when no predicate matches
 - [ ] Interaction with `FallbackStrategy` when no predicate matches and no default
-- [ ] Proxy generation for predicate-based dispatch (alongside value-based dispatch)
+- [ ] Proxy generation for predicate-based dispatch
 - [ ] Predicates instantiated via no-arg constructor (or DI when Spring module present)
 
-## M7: Reactive Context Propagation — `flagzen-reactive`
+### M8: Hooks and Observability — `flagzen-hooks`
 
-**Status: NOT STARTED** | Depends on: M1
-
-- [ ] `flagzen-reactor` (Reactor `Context` for Spring WebFlux)
-- [ ] `flagzen-mutiny` (Mutiny `Context` for Quarkus Reactive)
-
-## M8: Hooks and Observability — `flagzen-hooks`
-
-**Status: NOT STARTED** | Depends on: M0
+**Status: NOT STARTED** | **Release: v1.1.0** | Depends on: M0
 
 - [ ] Hook SPI for dispatch events (metrics, structured logging)
 - [ ] Flag usage statistics collection
@@ -138,9 +164,27 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 - [ ] Compile-time warnings for unused variants
 - [ ] Hotspot analysis
 
-## M9: Extended Testing Support — `flagzen-test-extras`
+### M11: Cross-Module and Edge Cases — `flagzen-cross-module`
 
-**Status: NOT STARTED** | Depends on: M0
+**Status: NOT STARTED** | **Release: v1.1.0** | Depends on: M0
+
+- [ ] Cross-module variant discovery at runtime
+- [ ] Package-private variant class support
+
+---
+
+## v1.2.0 — Reactive and Extended Testing
+
+### M7: Reactive Context Propagation — `flagzen-reactive`
+
+**Status: NOT STARTED** | **Release: v1.2.0** | Depends on: M1
+
+- [ ] `flagzen-reactor` (Reactor `Context` for Spring WebFlux)
+- [ ] `flagzen-mutiny` (Mutiny `Context` for Quarkus Reactive)
+
+### M9: Extended Testing Support — `flagzen-test-extras`
+
+**Status: NOT STARTED** | **Release: v1.2.0** | Depends on: M0
 
 - [ ] `@FlagSource` for JSON format
 - [ ] `@FlagSource` for YAML format
@@ -148,26 +192,13 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 - [ ] TestNG extension
 - [ ] Test fixtures / helpers
 
-## M10: Additional DI Frameworks — `flagzen-cdi`
+---
 
-**Status: NOT STARTED** | Depends on: M4
+## v1.3.0 — Ecosystem Expansion
+
+### M10: Additional DI Frameworks — `flagzen-cdi`
+
+**Status: NOT STARTED** | **Release: v1.3.0** | Depends on: M4
 
 - [ ] CDI integration
 - [ ] Quarkus integration
-
-## M11: Cross-Module and Edge Cases — `flagzen-cross-module`
-
-**Status: NOT STARTED** | Depends on: M0
-
-- [ ] Cross-module variant discovery at runtime
-- [ ] Package-private variant class support
-
-## M12: Documentation — `flagzen-docs`
-
-**Status: NOT STARTED** | Depends on: M0-M5
-
-- [ ] GitHub Pages site (submodule)
-- [ ] Getting started tutorial
-- [ ] API reference
-- [ ] Architecture guide
-- [ ] Provider integration guides
