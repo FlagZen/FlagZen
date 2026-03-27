@@ -32,16 +32,16 @@ Kenji creates `HighThresholdRange implements DoublePredicate`. The `test` method
 
 ### UAT Scenarios (BDD)
 
-#### Scenario: Predicate<String> returns true for matching flag value
+#### Scenario: `Predicate<String>` returns true for matching flag value
 
-Given Kenji creates Enterprise implementing Predicate<String>
+Given Kenji creates Enterprise implementing `Predicate<String>`
 And a flag value "enterprise"
 When he calls enterprise.test(value)
 Then it returns true
 
-#### Scenario: Predicate<String> returns false for non-matching flag value
+#### Scenario: `Predicate<String>` returns false for non-matching flag value
 
-Given Kenji creates Enterprise implementing Predicate<String>
+Given Kenji creates Enterprise implementing `Predicate<String>`
 And a flag value "startup"
 When he calls enterprise.test(value)
 Then it returns false
@@ -55,7 +55,7 @@ Then it returns true
 
 #### Scenario: Predicate handles null value gracefully
 
-Given Kenji creates Enterprise implementing Predicate<String>
+Given Kenji creates Enterprise implementing `Predicate<String>`
 And a null flag value
 When he calls enterprise.test(null)
 Then it returns false without throwing an exception
@@ -135,7 +135,7 @@ Then it behaves identically to M0 (value-based dispatch)
 
 ### Acceptance Criteria
 
-- [ ] @Condition annotation with `matches` (Class<? extends Predicate/IntPredicate/etc.>) attribute
+- [ ] @Condition annotation with `matches` (`Class<? extends Predicate/IntPredicate/etc.>`) attribute
 - [ ] @Condition annotation with `notMatches` as negation (mutually exclusive with `matches`)
 - [ ] @Condition is used inside @Variant's `when` attribute
 - [ ] `order` attribute on @Variant, not on @Condition
@@ -262,7 +262,7 @@ The annotation processor validates that the class referenced by `@Condition(matc
 
 ### Domain Examples
 
-#### 1: Valid predicate -- Enterprise implements Predicate<String>
+#### 1: Valid predicate -- Enterprise implements `Predicate<String>`
 
 Kenji's `Enterprise implements Predicate<String>` is referenced in `@Condition(matches = Enterprise.class)`. The processor verifies the implements relationship. Compilation succeeds.
 
@@ -278,7 +278,7 @@ Kenji's `DatabasePredicate` has only `DatabasePredicate(DataSource ds)`. Without
 
 #### Scenario: Valid predicate compiles successfully
 
-Given @Condition(matches = Enterprise.class) where Enterprise implements Predicate<String>
+Given @Condition(matches = Enterprise.class) where Enterprise implements `Predicate<String>`
 When the annotation processor runs
 Then no errors are emitted for Enterprise
 

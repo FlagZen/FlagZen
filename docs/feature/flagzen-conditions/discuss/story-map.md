@@ -17,7 +17,7 @@
 
 The thinnest end-to-end slice connecting all core activities:
 
-- **US-CP-01**: JDK predicate interface contract (Predicate<String>, IntPredicate, etc.)
+- **US-CP-01**: JDK predicate interface contract (`Predicate<String>`, IntPredicate, etc.)
 - **US-CP-02**: @Condition annotation definition with `matches`/`notMatches`
 - **US-CP-04**: Compile-time validation (predicate implements JDK predicate interface)
 - **US-CP-06**: Proxy generation and runtime predicate dispatch

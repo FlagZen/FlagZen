@@ -25,6 +25,13 @@ Gradle monorepo with submodules:
 - No runtime reflection in flagzen-core
 - All public API types must have Javadoc
 
+## Markdown Style
+
+This project uses markdownlint (config in `.markdownlint-cli2.jsonc`). When writing or editing `.md` files:
+- Wrap Java generic types in backticks: `Predicate<String>`, `Map<String, Object>`, `Class<?>` — bare angle brackets are parsed as HTML (MD033)
+- Check `.markdownlint-cli2.jsonc` for disabled rules before "fixing" something that's intentionally allowed
+- Tables must have consistent column alignment
+
 ## Commit Discipline
 
 When creating a commit, always check `git status` for the entire repo and include all related changes — not just the files you directly edited. In particular, watch for:

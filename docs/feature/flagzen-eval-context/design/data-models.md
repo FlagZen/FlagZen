@@ -13,7 +13,7 @@ Carries contextual information for targeted flag resolution (A/B testing, user s
 |    Field     |        Type         |                   Description                    |
 | ------------ | ------------------- | ------------------------------------------------ |
 | targetingKey | String (nullable)   | Primary identifier (user ID, session ID, tenant) |
-| attributes   | Map<String, Object> | Custom attributes for targeting rules            |
+| attributes   | `Map<String, Object>` | Custom attributes for targeting rules            |
 
 **Constraints**:
 
