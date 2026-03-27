@@ -60,14 +60,17 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 
 ### M1: Evaluation Context — `flagzen-eval-context`
 
-**Status: DISCUSS DONE** | **Release: v1.1.0** | [Artifacts](feature/flagzen-eval-context/)
+**Status: DONE** | **Release: v1.1.0** | [Artifacts](feature/flagzen-eval-context/)
 
-- [ ] `EvaluationContext` model (targeting key + attributes)
-- [ ] Explicit context parameter on `resolve()`
-- [ ] Block-scoped context (`FlagContext.run(ctx, () -> ...)`)
-- [ ] ScopedValue (Java 21+) with ThreadLocal fallback
-- [ ] `ContextAccessor` SPI implementation
-- [ ] Resolution order: explicit > reactive > scoped > default
+- [x] `EvaluationContext` model (targeting key + attributes)
+- [x] Explicit context parameter on `resolve()`
+- [x] Block-scoped context (`FlagContext.run(ctx, () -> ...)`)
+- [x] ThreadLocal carrier (ScopedValue deferred to R2)
+- [x] `ContextAccessor` SPI implementation
+- [x] Resolution order: explicit > accessor > scoped > default
+- [x] Default context via `FlagZen.configure()`
+- [x] Programmatic accessor registration
+- [x] Null context rejection in `FlagContext.run()`
 
 ### M2: Typed Variants and Conditional API — `flagzen-typed-variants`
 

@@ -74,6 +74,43 @@ class FlagContextTest {
      * Behavior 4: Nested run() overrides context; outer context restored after inner exits.
      */
     @Test
+    void clearRemovesCurrentContext() {
+        EvaluationContext context = EvaluationContext.builder()
+                .targetingKey("user-42")
+                .build();
+
+        FlagContext.set(context);
+        assertThat(FlagContext.current()).isSameAs(context);
+
+        FlagContext.clear();
+        assertThat(FlagContext.current()).isNull();
+    }
+
+    @Test
+    void supplierRunRestoresPreviousContextWhenNested() {
+        EvaluationContext outer = EvaluationContext.builder()
+                .targetingKey("outer")
+                .build();
+        EvaluationContext inner = EvaluationContext.builder()
+                .targetingKey("inner")
+                .build();
+
+        AtomicReference<String> innerResult = new AtomicReference<>();
+
+        FlagContext.run(outer, () -> {
+            String result = FlagContext.run(inner, () -> {
+                assertThat(FlagContext.current()).isSameAs(inner);
+                return "from-inner";
+            });
+            innerResult.set(result);
+            assertThat(FlagContext.current()).isSameAs(outer);
+        });
+
+        assertThat(innerResult.get()).isEqualTo("from-inner");
+        assertThat(FlagContext.current()).isNull();
+    }
+
+    @Test
     void nestedRunRestoresOuterContext() {
         EvaluationContext outer = EvaluationContext.builder()
                 .targetingKey("outer-user")
