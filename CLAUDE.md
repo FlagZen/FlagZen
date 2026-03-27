@@ -25,6 +25,16 @@ Gradle monorepo with submodules:
 - No runtime reflection in flagzen-core
 - All public API types must have Javadoc
 
+## Commit Discipline
+
+When creating a commit, always check `git status` for the entire repo and include all related changes — not just the files you directly edited. In particular, watch for:
+- `.nwave/des/logs/` (DES audit logs)
+- `docs/feature/*/deliver/` (execution logs, progress files)
+- `docs/progress.md` (if milestone status changed)
+- Any other files modified as side effects (linter fixes, generated files, config changes)
+
+Do not leave tracked files with pending changes out of a commit. If unrelated changes exist, commit them separately with an appropriate message rather than leaving them dangling.
+
 ## Architecture
 
 See `docs/feature/flagzen/design/architecture-design.md` for full architecture.
