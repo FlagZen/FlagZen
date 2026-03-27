@@ -16,4 +16,15 @@ public interface FeatureDispatcher {
      * @return a proxy that dispatches to the active variant
      */
     <T> T resolve(Class<T> featureType);
+
+    /**
+     * Resolves the given feature type to a dispatch proxy using the provided evaluation context.
+     * The context is made available to the flag provider for targeted resolution.
+     *
+     * @param featureType the feature interface class
+     * @param context the evaluation context for targeted resolution
+     * @param <T> the feature type
+     * @return a proxy that dispatches to the active variant
+     */
+    <T> T resolve(Class<T> featureType, EvaluationContext context);
 }

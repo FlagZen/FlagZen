@@ -1,6 +1,8 @@
 package com.flagzen.processor;
 
+import com.flagzen.EvaluationContext;
 import com.flagzen.FallbackStrategy;
+import com.flagzen.FlagContext;
 import com.flagzen.UnmatchedVariantException;
 import com.flagzen.spi.FeatureMetadata;
 import com.flagzen.spi.FlagProvider;
@@ -147,8 +149,9 @@ final class ProxyGenerator {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
                 .addModifiers(Modifier.PRIVATE)
                 .returns(interfaceType)
-                .addStatement("$T<$T> flagValue = flagProvider.getString($S)",
-                        Optional.class, String.class, model.flagKey())
+                .addStatement("$T context = $T.current()", EvaluationContext.class, FlagContext.class)
+                .addStatement("$T<$T> flagValue = (context != null) ? flagProvider.getString($S, context) : flagProvider.getString($S)",
+                        Optional.class, String.class, model.flagKey(), model.flagKey())
                 .addStatement("$T value = flagValue.orElse(null)", String.class)
                 .beginControlFlow("if (value != null)")
                 .addStatement("$T supplier = variants.get(value)", supplierType)

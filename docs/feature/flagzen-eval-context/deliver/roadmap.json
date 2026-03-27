@@ -1,0 +1,297 @@
+{
+  "roadmap": {
+    "project_id": "flagzen-eval-context",
+    "created_at": "2026-03-27T12:24:41Z",
+    "total_steps": 35,
+    "phases": 4
+  },
+  "phases": [
+    {
+      "id": "01",
+      "name": "Walking Skeleton",
+      "steps": [
+        {
+          "id": "01-01",
+          "name": "Explicit evaluation context passed through flag resolution",
+          "criteria": "A developer can build an EvaluationContext with a targeting key and attributes, resolve a feature with that context, and the flag provider receives the context and resolves accordingly.",
+          "test_file": "tests/acceptance/flagzen-eval-context/walking-skeleton.feature",
+          "scenario_name": "Developer resolves a feature with per-user evaluation context"
+        },
+        {
+          "id": "01-02",
+          "name": "Block-scoped context applies to multiple resolve calls",
+          "criteria": "A developer can wrap multiple resolve calls inside a FlagContext scoped block, and all resolve calls within that block share the same evaluation context.",
+          "test_file": "tests/acceptance/flagzen-eval-context/walking-skeleton.feature",
+          "scenario_name": "Developer scopes evaluation context to a block of code"
+        },
+        {
+          "id": "01-03",
+          "name": "Explicit context takes precedence over all other sources",
+          "criteria": "When explicit context, scoped context, and a context accessor are all active, explicit context wins and the accessor is not consulted.",
+          "test_file": "tests/acceptance/flagzen-eval-context/walking-skeleton.feature",
+          "scenario_name": "Explicit context takes precedence over all other context sources"
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "Context Model",
+      "steps": [
+        {
+          "id": "02-01",
+          "name": "Build evaluation context with targeting key and attributes",
+          "criteria": "EvaluationContext can be built with a targeting key and a map of string attributes; both are retrievable after construction.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-1-context-model.feature",
+          "scenario_name": "Build evaluation context with targeting key and attributes"
+        },
+        {
+          "id": "02-02",
+          "name": "Build evaluation context without targeting key",
+          "criteria": "EvaluationContext can be built with attributes only; targeting key is absent.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-1-context-model.feature",
+          "scenario_name": "Build evaluation context without targeting key"
+        },
+        {
+          "id": "02-03",
+          "name": "Build evaluation context with targeting key only",
+          "criteria": "EvaluationContext can be built with a targeting key and no attributes; attributes collection is empty.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-1-context-model.feature",
+          "scenario_name": "Build evaluation context with targeting key only"
+        },
+        {
+          "id": "02-04",
+          "name": "Context attributes collection is never null",
+          "criteria": "When EvaluationContext is built with no attributes, the attributes collection is empty, never null.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-1-context-model.feature",
+          "scenario_name": "Context attributes collection is never null"
+        },
+        {
+          "id": "02-05",
+          "name": "Explicit context forwarded to flag provider",
+          "criteria": "When a developer resolves a feature with an explicit evaluation context, the flag provider receives that context and uses its attributes for resolution.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-1-context-model.feature",
+          "scenario_name": "Explicit context is forwarded to flag provider"
+        },
+        {
+          "id": "02-06",
+          "name": "Resolve without context remains backward compatible",
+          "criteria": "Resolving a feature without an evaluation context behaves identically to pre-context FlagZen.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-1-context-model.feature",
+          "scenario_name": "Resolve without context remains backward compatible"
+        },
+        {
+          "id": "02-07",
+          "name": "Null context treated as no context",
+          "criteria": "Passing null as evaluation context to resolve is treated as a contextless flag lookup.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-1-context-model.feature",
+          "scenario_name": "Null context is treated as no context"
+        },
+        {
+          "id": "02-08",
+          "name": "Existing flag provider ignores context via default method",
+          "criteria": "A flag provider that does not implement the context-aware overload ignores context and returns its normal value.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-1-context-model.feature",
+          "scenario_name": "Existing flag provider ignores context via default method"
+        },
+        {
+          "id": "02-09",
+          "name": "Context-aware flag provider uses context for resolution",
+          "criteria": "A flag provider that implements the context-aware overload uses context attributes to determine the flag value.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-1-context-model.feature",
+          "scenario_name": "Context-aware flag provider uses context for resolution"
+        },
+        {
+          "id": "02-10",
+          "name": "Context-aware flag provider falls back when attribute missing",
+          "criteria": "When the expected attribute is not present in the context, the context-aware provider falls back to the default variant.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-1-context-model.feature",
+          "scenario_name": "Context-aware flag provider falls back when attribute missing"
+        },
+        {
+          "id": "02-11",
+          "name": "Generated proxy forwards context to flag provider",
+          "criteria": "The generated proxy passes both the flag key and the evaluation context to the flag provider.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-1-context-model.feature",
+          "scenario_name": "Generated proxy forwards context to flag provider"
+        },
+        {
+          "id": "02-12",
+          "name": "Generated proxy works without context",
+          "criteria": "The generated proxy can resolve a feature without evaluation context, passing only the flag key to the provider.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-1-context-model.feature",
+          "scenario_name": "Generated proxy works without context"
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "name": "Block-Scoped Context",
+      "steps": [
+        {
+          "id": "03-01",
+          "name": "Scoped context applies to all resolve calls within block",
+          "criteria": "All resolve calls inside a FlagContext.run() block receive the scoped evaluation context.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-2-block-scoped-context.feature",
+          "scenario_name": "Scoped context applies to all resolve calls within block"
+        },
+        {
+          "id": "03-02",
+          "name": "Context cleared after scoped block exits",
+          "criteria": "After a scoped context block completes, subsequent resolve calls do not see the scoped context.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-2-block-scoped-context.feature",
+          "scenario_name": "Context is cleared after scoped block exits"
+        },
+        {
+          "id": "03-03",
+          "name": "Nested scoped context uses innermost context",
+          "criteria": "When scoped context blocks are nested, the innermost context is used for resolve calls within the inner block.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-2-block-scoped-context.feature",
+          "scenario_name": "Nested scoped context uses innermost context"
+        },
+        {
+          "id": "03-04",
+          "name": "Outer context restored after inner scoped block exits",
+          "criteria": "After exiting the inner scoped block, resolve calls in the outer block use the outer context.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-2-block-scoped-context.feature",
+          "scenario_name": "Outer context restored after inner scoped block exits"
+        },
+        {
+          "id": "03-05",
+          "name": "Scoped context with supplier returns the result",
+          "criteria": "FlagContext.run() with a supplier block returns the result of the supplier, with the context scoped to the block.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-2-block-scoped-context.feature",
+          "scenario_name": "Scoped context with supplier returns the result"
+        },
+        {
+          "id": "03-06",
+          "name": "Exception in scoped block cleans up context",
+          "criteria": "If an exception is thrown inside a scoped context block, the exception propagates and the context is cleaned up.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-2-block-scoped-context.feature",
+          "scenario_name": "Exception in scoped block still cleans up context"
+        },
+        {
+          "id": "03-07",
+          "name": "Null context in scoped block is rejected",
+          "criteria": "Attempting to run a scoped block with null context is rejected with a clear error message.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-2-block-scoped-context.feature",
+          "scenario_name": "Null context in scoped block is rejected"
+        },
+        {
+          "id": "03-08",
+          "name": "Scoped context behavior identical regardless of runtime version",
+          "criteria": "Scoped context block behavior is identical whether the carrier is ThreadLocal or ScopedValue.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-2-block-scoped-context.feature",
+          "scenario_name": "Scoped context behavior is identical regardless of runtime version"
+        },
+        {
+          "id": "03-09",
+          "name": "Each thread sees only its own scoped context",
+          "criteria": "When multiple threads run scoped context blocks concurrently with different targeting keys, each thread sees only its own context with no cross-thread leakage.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-2-block-scoped-context.feature",
+          "scenario_name": "Each thread sees only its own scoped context"
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "name": "Context Resolution",
+      "steps": [
+        {
+          "id": "04-01",
+          "name": "Context accessor provides context when no explicit context given",
+          "criteria": "A registered ContextAccessor provides evaluation context when the developer resolves without explicit context.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-3-context-resolution.feature",
+          "scenario_name": "Context accessor provides context when no explicit context given"
+        },
+        {
+          "id": "04-02",
+          "name": "Lower priority accessor is consulted first",
+          "criteria": "When multiple context accessors are registered, the one with the lowest priority number is consulted first.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-3-context-resolution.feature",
+          "scenario_name": "Lower priority accessor is consulted first"
+        },
+        {
+          "id": "04-03",
+          "name": "Accessor returning empty is skipped",
+          "criteria": "A context accessor returning empty is skipped and the next accessor by priority is consulted.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-3-context-resolution.feature",
+          "scenario_name": "Accessor returning empty is skipped"
+        },
+        {
+          "id": "04-04",
+          "name": "No accessor registered handled gracefully",
+          "criteria": "When no context accessors are registered, the accessor step is skipped without error and resolution falls through.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-3-context-resolution.feature",
+          "scenario_name": "No accessor registered is handled gracefully"
+        },
+        {
+          "id": "04-05",
+          "name": "Explicit context beats all other sources",
+          "criteria": "When all four context sources are active, explicit context wins.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-3-context-resolution.feature",
+          "scenario_name": "Explicit context beats all other sources"
+        },
+        {
+          "id": "04-06",
+          "name": "Accessor beats scoped and default when no explicit context",
+          "criteria": "When no explicit context is given, the context accessor result takes precedence over scoped and default contexts.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-3-context-resolution.feature",
+          "scenario_name": "Accessor beats scoped and default when no explicit context"
+        },
+        {
+          "id": "04-07",
+          "name": "Scoped context beats default when no explicit or accessor",
+          "criteria": "When no explicit context or accessor is present, scoped context takes precedence over default context.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-3-context-resolution.feature",
+          "scenario_name": "Scoped context beats default when no explicit or accessor"
+        },
+        {
+          "id": "04-08",
+          "name": "Default context used as last resort",
+          "criteria": "When no explicit context, accessor, or scoped context is active, the default context is used.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-3-context-resolution.feature",
+          "scenario_name": "Default context is used as last resort"
+        },
+        {
+          "id": "04-09",
+          "name": "No context at all preserves pre-context behavior",
+          "criteria": "When no context source is active at all, the flag provider receives a contextless lookup and resolves normally.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-3-context-resolution.feature",
+          "scenario_name": "No context at all preserves pre-context behavior"
+        },
+        {
+          "id": "04-10",
+          "name": "Explicit context overrides scoped context within a block",
+          "criteria": "When explicit context is passed to resolve inside a scoped block, the explicit context overrides the scoped context.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-3-context-resolution.feature",
+          "scenario_name": "Explicit context overrides scoped context within a block"
+        },
+        {
+          "id": "04-11",
+          "name": "Resolution order is deterministic regardless of registration order",
+          "criteria": "The resolution order is always: explicit, then accessor, then scoped, then default -- regardless of how or when sources are registered.",
+          "test_file": "tests/acceptance/flagzen-eval-context/milestone-3-context-resolution.feature",
+          "scenario_name": "Resolution order is deterministic regardless of registration order"
+        }
+      ]
+    }
+  ],
+  "implementation_scope": {
+    "source_directories": [
+      "flagzen-core/src/main/java"
+    ],
+    "test_directories": [
+      "flagzen-core/src/test/java",
+      "tests/acceptance/flagzen-eval-context"
+    ],
+    "excluded_patterns": [
+      "*.class",
+      "build/**"
+    ]
+  },
+  "validation": {
+    "status": "pending",
+    "reviewer": "nw-acceptance-designer-reviewer",
+    "approved_at": null
+  }
+}

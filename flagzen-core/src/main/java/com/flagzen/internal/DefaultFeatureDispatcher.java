@@ -1,6 +1,8 @@
 package com.flagzen.internal;
 
+import com.flagzen.EvaluationContext;
 import com.flagzen.FeatureDispatcher;
+import com.flagzen.FlagContext;
 import com.flagzen.FlagZenException;
 import com.flagzen.spi.FeatureMetadata;
 import com.flagzen.spi.FlagProvider;
@@ -31,6 +33,12 @@ public class DefaultFeatureDispatcher implements FeatureDispatcher {
     @SuppressWarnings("unchecked")
     public <T> T resolve(Class<T> featureType) {
         return (T) proxyCache.computeIfAbsent(featureType, this::createProxy);
+    }
+
+    @Override
+    public <T> T resolve(Class<T> featureType, EvaluationContext context) {
+        FlagContext.set(context);
+        return resolve(featureType);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
