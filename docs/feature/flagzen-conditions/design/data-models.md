@@ -6,28 +6,6 @@ This document describes the new and modified data models for condition-based pre
 
 ## 1. New Public API Types
 
-### FeaturePredicate
-
-Functional interface in `com.flagzen`. The contract for all condition predicates.
-
-|     Aspect      |              Value               |
-| --------------- | -------------------------------- |
-| Package         | `com.flagzen`                    |
-| Kind            | `@FunctionalInterface` interface |
-| Type parameters | None (not generic)               |
-| Depends on      | `EvaluationContext` (M1)         |
-
-| Method | Return Type |       Parameters        |                    Description                    |
-| ------ | ----------- | ----------------------- | ------------------------------------------------- |
-| `test` | `boolean`   | `EvaluationContext ctx` | Evaluates the predicate against the given context |
-
-Design decisions:
-
-- Not `Predicate<T>` -- always takes `EvaluationContext`, keeping the contract simple and annotation processor validation straightforward
-- `@FunctionalInterface` annotation enables lambda and method reference usage
-- Implementations must be thread-safe if used in multi-threaded applications (documented contract)
-- Implementations should be fast (sub-millisecond) -- FlagZen evaluates predicates on every method call
-
 ### @Condition
 
 Nested annotation type used exclusively within `@Variant(when = ...)`.
@@ -40,24 +18,38 @@ Nested annotation type used exclusively within `@Variant(when = ...)`.
 | Target           | Implicitly scoped via `@Variant` (applies to `TYPE`)             |
 | Standalone usage | Not supported -- used only as `@Variant(when = @Condition(...))` |
 
-| Attribute |                Type                 |             Default             |                             Description                              |
-| --------- | ----------------------------------- | ------------------------------- | -------------------------------------------------------------------- |
-| `on`      | `Class<? extends FeaturePredicate>` | (required -- see sentinel note) | The predicate class to evaluate                                      |
-| `order`   | `int`                               | `0`                             | Evaluation sequence (ascending). Must be unique within the @Feature. |
+| Attribute    |       Type        |             Default             |                                                  Description                                                  |
+| ------------ | ----------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `matches`    | `Class<?>`        | (required -- see sentinel note) | The predicate class to evaluate. Must match `@Feature(type=...)`: `Predicate<String>`, `IntPredicate`, etc.   |
+| `notMatches` | `Class<?>`        | sentinel                        | Negation predicate (mutually exclusive with `matches`). Same type constraints apply.                          |
 
-Sentinel handling: `@Condition` needs a default value for `on` to serve as the sentinel for `@Variant.when`. A package-private or nested sentinel class (e.g., `FeaturePredicate.None`) that implements `FeaturePredicate` can serve this purpose. The processor detects this sentinel to distinguish "no condition" from a real condition.
+`matches` and `notMatches` are mutually exclusive. The processor emits a compile error if both are specified on the same `@Condition`.
+
+Predicate type constraints -- the processor validates that the predicate class matches the feature's declared type:
+
+| `@Feature(type=...)` | Required predicate type       |
+| --------------------- | ----------------------------- |
+| `STRING` (default)    | `java.util.function.Predicate<String>` |
+| `INT`                 | `java.util.function.IntPredicate`      |
+| `LONG`                | `java.util.function.LongPredicate`     |
+| `DOUBLE`              | `java.util.function.DoublePredicate`   |
+
+Sentinel handling: `@Condition` needs a default value for `matches` to serve as the sentinel for `@Variant.when`. A package-private or nested sentinel class can serve this purpose. The processor detects this sentinel to distinguish "no condition" from a real condition.
 
 ## 2. Modified Annotation Types
 
 ### @Variant (modified)
 
-New `when` attribute added. Existing attributes unchanged.
+New `when` and `order` attributes added. Existing attributes unchanged.
 
-| Attribute |     Type     |        Default        |                      Status                      |              Description               |
-| --------- | ------------ | --------------------- | ------------------------------------------------ | -------------------------------------- |
-| `value`   | `String`     | `""`                  | Existing (default changed from required to `""`) | Variant value for value-based dispatch |
-| `of`      | `Class<?>`   | `void.class`          | Existing (unchanged)                             | Target @Feature interface              |
-| `when`    | `@Condition` | sentinel `@Condition` | **New**                                          | Condition for predicate-based dispatch |
+| Attribute |     Type     |        Default        |                      Status                      |                   Description                    |
+| --------- | ------------ | --------------------- | ------------------------------------------------ | ------------------------------------------------ |
+| `value`   | `String`     | `""`                  | Existing (default changed from required to `""`) | Variant value for value-based dispatch           |
+| `of`      | `Class<?>`   | `void.class`          | Existing (unchanged)                             | Target @Feature interface                        |
+| `when`    | `@Condition` | sentinel `@Condition` | **New**                                          | Condition for predicate-based dispatch           |
+| `order`   | `int`        | `Integer.MAX_VALUE`   | **New**                                          | Evaluation sequence (ascending, first match wins)|
+
+`order` controls the evaluation sequence for variants with conditions. When no `order` is specified on any variant, the proxy uses map-based O(1) lookup (no performance regression for value-based features). When `order` is present, variants are evaluated as an ordered list; the first match wins.
 
 Backward compatibility: The `value` attribute default changes from required to `""`. For value-based variants, `value` must be non-empty (processor validates). For condition-based variants, `value` is ignored. The processor determines dispatch mode from the `when` attribute.
 
@@ -67,26 +59,27 @@ Backward compatibility: The `value` attribute default changes from required to `
 
 Represents a processed `@Condition` annotation. Internal to the processor, not part of the public API.
 
-|     Field      |     Type     |                       Description                        |
-| -------------- | ------------ | -------------------------------------------------------- |
-| predicateClass | `TypeMirror` | Fully qualified type of the FeaturePredicate implementor |
-| order          | `int`        | Evaluation sequence value                                |
+|     Field      |     Type      |                       Description                        |
+| -------------- | ------------- | -------------------------------------------------------- |
+| predicateClass | `TypeMirror`  | Fully qualified type of the predicate implementor        |
+| negated        | `boolean`     | `true` if declared via `notMatches`, `false` for `matches` |
 
 ### VariantModel (modified)
 
-Extended with optional condition metadata.
+Extended with optional condition metadata and order.
 
 |       Field        |            Type             |  Status  |                     Description                      |
 | ------------------ | --------------------------- | -------- | ---------------------------------------------------- |
 | qualifiedClassName | `String` (qualified name)   | Existing | Fully qualified name of the @Variant class           |
 | variantValue       | `String`                    | Existing | Variant value from `@Variant("VALUE")`               |
 | condition          | `ConditionModel` (nullable) | **New**  | Condition metadata, or null for value-based variants |
+| order              | `int`                       | **New**  | Evaluation sequence from `@Variant(order = N)`       |
 
 A variant is condition-based if `condition != null`. A variant is value-based if `condition == null` and `variantValue` is non-empty.
 
 ### FeatureModel (modified)
 
-Gains awareness of dispatch mode.
+Extended with unified ordered dispatch awareness.
 
 |          Field          |         Type         |  Status  |                     Description                     |
 | ----------------------- | -------------------- | -------- | --------------------------------------------------- |
@@ -97,71 +90,61 @@ Gains awareness of dispatch mode.
 | methods                 | `List<MethodModel>`  | Existing | Methods declared on the interface                   |
 | variants                | `List<VariantModel>` | Existing | All variant models (value-based or condition-based) |
 | defaultVariantClassName | `String` (nullable)  | Existing | Qualified name of @DefaultVariant class             |
-| dispatchMode            | `DispatchMode`       | **New**  | `VALUE_BASED` or `CONDITION_BASED`                  |
+| hasOrderedDispatch      | `boolean`            | **New**  | `true` if any variant specifies `order`             |
 
-### DispatchMode (new, processor-internal)
+Note: Exact matches and conditions can coexist on the same `@Feature`. The `order` attribute on `@Variant` determines evaluation sequence. When `hasOrderedDispatch` is `false`, the proxy uses map-based O(1) lookup. When `true`, variants are evaluated as an ordered list.
 
-Enum representing the dispatch mode of a feature.
+## 4. Generated Proxy Structure
 
-|     Constant      |                 Description                  |
-| ----------------- | -------------------------------------------- |
-| `VALUE_BASED`     | Dispatch via FlagProvider string lookup (M0) |
-| `CONDITION_BASED` | Dispatch via predicate evaluation (M6)       |
+### Unified Ordered Dispatch
 
-Determined by the processor after collecting all variants: if any variant has a non-sentinel `@Condition`, the feature is `CONDITION_BASED`. If all variants have `value` attributes, the feature is `VALUE_BASED`. Mixed = compile error.
+Exact-match variants and condition-based variants can coexist on the same `@Feature`. The proxy generation strategy depends on whether `order` is present:
 
-## 4. Generated Proxy Structure (condition-based)
+**No `order` on any variant (value-based only)**: Map-based O(1) lookup, identical to M0. No performance regression.
 
-For condition-based features, the generated proxy has a different internal structure than value-based proxies.
+**`order` present on any variant**: Ordered list evaluation, first match wins. The proxy stores an ordered list of evaluation entries:
 
-### Proxy Internal State (condition-based)
+|       Field       |                     Type                      |                          Description                           |
+| ----------------- | --------------------------------------------- | -------------------------------------------------------------- |
+| entries           | Ordered evaluation entry array (final)        | Entries sorted by order (ascending), mixing exact + conditions |
+| defaultVariant    | Feature interface instance (nullable, final)  | @DefaultVariant instance, if any                               |
+| fallbackStrategy  | `FallbackStrategy` (final)                    | Configured strategy                                            |
+| flagProvider      | `FlagProvider` (final, if exact matches exist) | Used for exact-match entries that need flag value               |
 
-|       Field       |                     Type                     |                          Description                           |
-| ----------------- | -------------------------------------------- | -------------------------------------------------------------- |
-| predicates        | `FeaturePredicate[]` (final)                 | Predicate instances, sorted by order (ascending)               |
-| conditionVariants | Feature interface array (final)              | Variant instances corresponding to each predicate (same index) |
-| defaultVariant    | Feature interface instance (nullable, final) | @DefaultVariant instance, if any                               |
-| fallbackStrategy  | `FallbackStrategy` (final)                   | Configured strategy                                            |
+Each evaluation entry is either:
+- **Exact match**: compares the flag value (from FlagProvider) against a known string
+- **Condition match**: evaluates a predicate against the flag value
 
-### Proxy Constructor (condition-based)
+### Proxy Constructor
 
 Parameters:
 
-- Predicate-variant pairs (or parallel arrays), sorted by order
+- Evaluation entries (sorted by order)
+- FlagProvider (if any exact-match variants exist)
 - Default variant instance (nullable)
 - FallbackStrategy
 
-No `FlagProvider` parameter -- condition-based proxies do not query flag providers.
+### Proxy Dispatch Logic (ordered, per method)
 
-### Proxy Dispatch Logic (condition-based, per method)
+1. Obtain the flag value from `FlagProvider.getString(key)`
+2. If flag value is absent: delegate to default variant or apply fallback
+3. For each entry in order:
+   - **Exact match entry**: compare flag value to entry's expected value; if equal, delegate and return
+   - **Condition entry**: convert flag value to the feature's type, call `predicate.test(value)`; if true, delegate and return
+4. If no entry matched: delegate to default variant or apply fallback
 
-1. Obtain `EvaluationContext` from resolution chain
-2. If context is null: delegate to default variant or apply fallback
-3. For each predicate in order:
-   - Call `predicate.test(ctx)`
-   - If true: delegate method call to corresponding variant, return
-4. If no predicate matched: delegate to default variant or apply fallback
+## 5. Generated Metadata
 
-## 5. Generated Metadata (condition-based)
-
-The `{Feature}_FlagZenMetadata` class for condition-based features must provide condition-aware factory methods. The `FeatureMetadata` SPI may need extension or the metadata class may use a condition-specific approach to construct the proxy.
-
-Design consideration: The existing `FeatureMetadata.createProxy()` signature takes `FlagProvider` and a variant map -- neither is needed for condition-based dispatch. Options:
-
-1. **Overloaded createProxy**: Add a condition-specific factory method to `FeatureMetadata`
-2. **Unified factory**: Pass condition metadata through the existing map parameter with a convention
-3. **Separate SPI**: A `ConditionFeatureMetadata` interface extending `FeatureMetadata`
-
-The crafter will determine the internal approach. The architecture requires that the metadata SPI continues to support `ServiceLoader` discovery and that the `FeatureDispatcher` can construct both value-based and condition-based proxies through it.
+The `{Feature}_FlagZenMetadata` class must support both dispatch strategies. The crafter determines the internal approach. The architecture requires that the metadata SPI continues to support `ServiceLoader` discovery and that the `FeatureDispatcher` can construct proxies through it.
 
 ## 6. Exception Changes
 
 ### UnmatchedVariantException (modified message)
 
-For condition-based features, the exception message includes predicate information:
+For features with conditions, the exception message includes predicate information:
 
-- Value-based: `"No variant matched for flag key 'checkout-flow' with value 'UNKNOWN'. Known variants: [CLASSIC, STREAMLINED]"`
-- Condition-based: `"No condition matched for flag key 'pricing-tier'. Predicates evaluated: [IsEnterprise(order=1), IsStartup(order=2)]"`
+- Value-based only: `"No variant matched for flag key 'checkout-flow' with value 'UNKNOWN'. Known variants: [CLASSIC, STREAMLINED]"`
+- With conditions: `"No variant matched for flag key 'pricing-tier' with value 'enterprise'. Predicates evaluated: [Enterprise(order=1), Startup(order=2)]"`
 
 No new exception types are introduced.
 
@@ -169,22 +152,20 @@ No new exception types are introduced.
 
 ### New types
 
-|        Type        |         Package         |               Kind               | Public API |
-| ------------------ | ----------------------- | -------------------------------- | ---------- |
-| `FeaturePredicate` | `com.flagzen`           | `@FunctionalInterface` interface | Yes        |
-| `@Condition`       | `com.flagzen`           | Annotation type                  | Yes        |
-| `ConditionModel`   | `com.flagzen.processor` | Record (processor-internal)      | No         |
-| `DispatchMode`     | `com.flagzen.processor` | Enum (processor-internal)        | No         |
+|        Type        |         Package         |          Kind          | Public API |
+| ------------------ | ----------------------- | ---------------------- | ---------- |
+| `@Condition`       | `com.flagzen`           | Annotation type        | Yes        |
+| `ConditionModel`   | `com.flagzen.processor` | Record (processor-internal) | No    |
 
 ### Modified types
 
 |            Type             |                             Change                              |
 | --------------------------- | --------------------------------------------------------------- |
-| `@Variant`                  | New `when` attribute, `value` default changed to `""`           |
-| `VariantModel`              | New `condition` field (nullable)                                |
-| `FeatureModel`              | New `dispatchMode` field                                        |
-| `FlagZenProcessor`          | Condition validation, dispatch mode detection, mixing rejection |
-| `ProxyGenerator`            | Condition-based proxy generation path                           |
+| `@Variant`                  | New `when` and `order` attributes, `value` default changed to `""` |
+| `VariantModel`              | New `condition` field (nullable), new `order` field             |
+| `FeatureModel`              | New `hasOrderedDispatch` field                                  |
+| `FlagZenProcessor`          | Condition validation, predicate type matching, order-based dispatch |
+| `ProxyGenerator`            | Unified ordered dispatch generation path                        |
 | `UnmatchedVariantException` | Condition-aware error messages                                  |
 
 ### Unchanged types
