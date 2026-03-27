@@ -6,14 +6,15 @@ GitHub Flow is the selected branching model. Single long-lived branch (`main`), 
 
 ### Why GitHub Flow
 
-| Factor | Assessment |
-|--------|-----------|
-| Team size | Solo (scaling to small team) |
-| Release cadence | Per-feature, not scheduled |
-| Risk profile | Low (library, not service) |
-| Maturity | Greenfield, establishing patterns |
+|     Factor      |            Assessment             |
+| --------------- | --------------------------------- |
+| Team size       | Solo (scaling to small team)      |
+| Release cadence | Per-feature, not scheduled        |
+| Risk profile    | Low (library, not service)        |
+| Maturity        | Greenfield, establishing patterns |
 
 Rejected alternatives:
+
 - **Trunk-based**: Viable but PR review discipline is valuable even for solo work (self-review, CI gate enforcement).
 - **GitFlow**: Overhead of develop/release branches is unjustified for a library with single supported version.
 - **Release branching**: Only needed when supporting multiple major versions simultaneously (future concern, not Release 1).
@@ -46,15 +47,16 @@ Rejected alternatives:
 
 ## Pipeline Triggers
 
-| Event | Branch/Tag | Workflow | Jobs |
-|-------|-----------|----------|------|
-| push | main | ci.yml | build (matrix), pitest |
-| pull_request | main | ci.yml | build (matrix), pitest |
-| push tag | v* | release.yml | build, pitest, publish, GitHub Release |
+|    Event     | Branch/Tag |  Workflow   |                  Jobs                  |
+| ------------ | ---------- | ----------- | -------------------------------------- |
+| push         | main       | ci.yml      | build (matrix), pitest                 |
+| pull_request | main       | ci.yml      | build (matrix), pitest                 |
+| push tag     | v*         | release.yml | build, pitest, publish, GitHub Release |
 
 ## Versioning
 
 Semantic versioning (SemVer):
+
 - **MAJOR**: Breaking API changes (annotation contract, SPI contract, FeatureDispatcher API)
 - **MINOR**: New features, new modules, backward-compatible additions
 - **PATCH**: Bug fixes, documentation, dependency updates
@@ -66,6 +68,7 @@ Development versions use `-SNAPSHOT` suffix. Release versions drop the suffix.
 ## Conventional Commits
 
 All commits follow Conventional Commits specification:
+
 - `feat:` -- new feature
 - `fix:` -- bug fix
 - `chore:` -- maintenance, CI, dependencies

@@ -14,8 +14,8 @@ PR / push to main                              Tag v*
       |                                          |
       v                                          v
   build (matrix)                         validate tag version
-  Java 17, 21, 25                                |
-      |                                          v
+  | Java 17, 21, 25 |
+  | v               |
       v                                    build + test
   pitest (after build)                           |
   kill rate >= 80%                               v
@@ -46,33 +46,33 @@ PR / push to main                              Tag v*
 
 Runs in parallel across Java 17, 21, and 25.
 
-| Step | Description | Gate |
-|------|-------------|------|
-| Checkout | Clone repository | -- |
-| Setup Java | Temurin distribution, matrix version | -- |
-| Setup Gradle | gradle/actions/setup-gradle@v4 (caches dependencies) | -- |
-| Build and test | `./gradlew build` (compile, unit tests, acceptance tests) | All tests pass |
-| Upload test reports | Artifact upload, 14-day retention | -- |
+|        Step         |                        Description                        |      Gate      |
+| ------------------- | --------------------------------------------------------- | -------------- |
+| Checkout            | Clone repository                                          | --             |
+| Setup Java          | Temurin distribution, matrix version                      | --             |
+| Setup Gradle        | gradle/actions/setup-gradle@v4 (caches dependencies)      | --             |
+| Build and test      | `./gradlew build` (compile, unit tests, acceptance tests) | All tests pass |
+| Upload test reports | Artifact upload, 14-day retention                         | --             |
 
 #### 2. pitest (depends on build)
 
 Runs after all matrix builds succeed. Uses Java 25.
 
-| Step | Description | Gate |
-|------|-------------|------|
-| Run PITest | `./gradlew :flagzen-core:pitest` | -- |
-| Check kill rate | Parse report, verify >= 80% | Kill rate >= 80% |
-| Upload PITest report | Artifact upload, 14-day retention | -- |
+|         Step         |            Description            |       Gate       |
+| -------------------- | --------------------------------- | ---------------- |
+| Run PITest           | `./gradlew :flagzen-core:pitest`  | --               |
+| Check kill rate      | Parse report, verify >= 80%       | Kill rate >= 80% |
+| Upload PITest report | Artifact upload, 14-day retention | --               |
 
 ### Quality Gates
 
-| Gate | Type | Threshold | Stage |
-|------|------|-----------|-------|
-| Compilation | Blocking | Zero errors | build |
-| Unit tests | Blocking | 100% pass | build |
-| Acceptance tests | Blocking | 100% pass | build |
-| Multi-version compat | Blocking | Pass on Java 17, 21, 25 | build |
-| Mutation kill rate | Blocking | >= 80% | pitest |
+|         Gate         |   Type   |        Threshold        | Stage  |
+| -------------------- | -------- | ----------------------- | ------ |
+| Compilation          | Blocking | Zero errors             | build  |
+| Unit tests           | Blocking | 100% pass               | build  |
+| Acceptance tests     | Blocking | 100% pass               | build  |
+| Multi-version compat | Blocking | Pass on Java 17, 21, 25 | build  |
+| Mutation kill rate   | Blocking | >= 80%                  | pitest |
 
 ## Release Workflow (.github/workflows/release.yml)
 
@@ -82,24 +82,24 @@ Runs after all matrix builds succeed. Uses Java 25.
 
 ### Steps
 
-| Step | Description | Gate |
-|------|-------------|------|
-| Tag validation | Verify tag version matches `gradle.properties` | Versions must match |
-| Build and test | Full `./gradlew build` | All tests pass |
-| PITest | Mutation testing on flagzen-core | Kill rate >= 80% |
-| GPG import | Import signing key from secrets | -- |
-| Publish | `publishToSonatype closeAndReleaseSonatypeStagingRepository` | Sonatype staging passes |
-| Changelog | Generate from conventional commits since last tag | -- |
-| GitHub Release | Create release with changelog and Maven coordinates | -- |
+|      Step      |                         Description                          |          Gate           |
+| -------------- | ------------------------------------------------------------ | ----------------------- |
+| Tag validation | Verify tag version matches `gradle.properties`               | Versions must match     |
+| Build and test | Full `./gradlew build`                                       | All tests pass          |
+| PITest         | Mutation testing on flagzen-core                             | Kill rate >= 80%        |
+| GPG import     | Import signing key from secrets                              | --                      |
+| Publish        | `publishToSonatype closeAndReleaseSonatypeStagingRepository` | Sonatype staging passes |
+| Changelog      | Generate from conventional commits since last tag            | --                      |
+| GitHub Release | Create release with changelog and Maven coordinates          | --                      |
 
 ### Required Secrets
 
-| Secret | Purpose |
-|--------|---------|
-| `SONATYPE_USERNAME` | Maven Central publishing authentication |
-| `SONATYPE_PASSWORD` | Maven Central publishing authentication |
-| `GPG_PRIVATE_KEY` | Artifact signing (Maven Central requirement) |
-| `GPG_PASSPHRASE` | GPG key passphrase |
+|       Secret        |                   Purpose                    |
+| ------------------- | -------------------------------------------- |
+| `SONATYPE_USERNAME` | Maven Central publishing authentication      |
+| `SONATYPE_PASSWORD` | Maven Central publishing authentication      |
+| `GPG_PRIVATE_KEY`   | Artifact signing (Maven Central requirement) |
+| `GPG_PASSPHRASE`    | GPG key passphrase                           |
 
 ## Gradle Publishing Configuration
 
@@ -124,9 +124,9 @@ Signing uses in-memory key from environment variables (CI-friendly, no keyring r
 
 ## DORA Metrics Targets
 
-| Metric | Target | Rationale |
-|--------|--------|-----------|
-| Deployment frequency | Per feature (tag-based) | Library releases are deliberate, not continuous |
-| Lead time for changes | < 1 day (merge to release) | Tag push triggers automated publish |
-| Change failure rate | < 5% | Multi-version matrix + mutation testing catch regressions |
-| Time to restore | < 1 hour | Yank from Maven Central + hotfix tag |
+|        Metric         |           Target           |                         Rationale                         |
+| --------------------- | -------------------------- | --------------------------------------------------------- |
+| Deployment frequency  | Per feature (tag-based)    | Library releases are deliberate, not continuous           |
+| Lead time for changes | < 1 day (merge to release) | Tag push triggers automated publish                       |
+| Change failure rate   | < 5%                       | Multi-version matrix + mutation testing catch regressions |
+| Time to restore       | < 1 hour                   | Yank from Maven Central + hotfix tag                      |

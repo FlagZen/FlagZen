@@ -6,18 +6,18 @@ Feature flagzen-conditions (M6) is ready for DESIGN wave. All 8 stories pass the
 
 ## Artifacts Produced
 
-| Artifact | Path | Purpose |
-|----------|------|---------|
-| Journey Visual | `docs/feature/flagzen-conditions/discuss/journey-condition-predicates-visual.md` | ASCII flow + emotional arc + error paths |
-| Journey YAML | `docs/feature/flagzen-conditions/discuss/journey-condition-predicates.yaml` | Structured journey schema |
-| Journey Gherkin | `docs/feature/flagzen-conditions/discuss/journey-condition-predicates.feature` | Testable acceptance scenarios (22 scenarios) |
-| Story Map | `docs/feature/flagzen-conditions/discuss/story-map.md` | Backbone + walking skeleton + release slices |
-| Prioritization | `docs/feature/flagzen-conditions/discuss/prioritization.md` | Release priority + backlog suggestions |
-| User Stories | `docs/feature/flagzen-conditions/discuss/user-stories.md` | 8 LeanUX stories with BDD scenarios |
-| Shared Artifacts | `docs/feature/flagzen-conditions/discuss/shared-artifacts-registry.md` | Integration points + consistency validation |
-| Outcome KPIs | `docs/feature/flagzen-conditions/discuss/outcome-kpis.md` | Measurable outcomes per story |
-| DoR Validation | `docs/feature/flagzen-conditions/discuss/dor-validation.md` | All 8 stories PASSED |
-| Peer Review | `docs/feature/flagzen-conditions/discuss/peer-review.md` | Approved (iteration 2) |
+|     Artifact     |                                       Path                                       |                   Purpose                    |
+| ---------------- | -------------------------------------------------------------------------------- | -------------------------------------------- |
+| Journey Visual   | `docs/feature/flagzen-conditions/discuss/journey-condition-predicates-visual.md` | ASCII flow + emotional arc + error paths     |
+| Journey YAML     | `docs/feature/flagzen-conditions/discuss/journey-condition-predicates.yaml`      | Structured journey schema                    |
+| Journey Gherkin  | `docs/feature/flagzen-conditions/discuss/journey-condition-predicates.feature`   | Testable acceptance scenarios (22 scenarios) |
+| Story Map        | `docs/feature/flagzen-conditions/discuss/story-map.md`                           | Backbone + walking skeleton + release slices |
+| Prioritization   | `docs/feature/flagzen-conditions/discuss/prioritization.md`                      | Release priority + backlog suggestions       |
+| User Stories     | `docs/feature/flagzen-conditions/discuss/user-stories.md`                        | 8 LeanUX stories with BDD scenarios          |
+| Shared Artifacts | `docs/feature/flagzen-conditions/discuss/shared-artifacts-registry.md`           | Integration points + consistency validation  |
+| Outcome KPIs     | `docs/feature/flagzen-conditions/discuss/outcome-kpis.md`                        | Measurable outcomes per story                |
+| DoR Validation   | `docs/feature/flagzen-conditions/discuss/dor-validation.md`                      | All 8 stories PASSED                         |
+| Peer Review      | `docs/feature/flagzen-conditions/discuss/peer-review.md`                         | Approved (iteration 2)                       |
 
 ## Key Design Decisions for Solution Architect
 
@@ -51,22 +51,22 @@ Predicates are user code. FlagZen does not catch or wrap exceptions from `test()
 
 ## Dependencies
 
-| Dependency | Status | Impact |
-|-----------|--------|--------|
+|            Dependency            |   Status    |                           Impact                            |
+| -------------------------------- | ----------- | ----------------------------------------------------------- |
 | M1: EvaluationContext (US-EC-01) | NOT STARTED | BLOCKING -- FeaturePredicate.test() takes EvaluationContext |
-| M0: FallbackStrategy | DONE | NONE -- reused unchanged |
-| M0: Annotation Processor | DONE | EXTEND -- add @Condition processing |
-| M0: ProxyGenerator | DONE | EXTEND -- add predicate dispatch path |
-| M4: flagzen-spring | NOT STARTED | US-CP-08 only -- deferrable |
+| M0: FallbackStrategy             | DONE        | NONE -- reused unchanged                                    |
+| M0: Annotation Processor         | DONE        | EXTEND -- add @Condition processing                         |
+| M0: ProxyGenerator               | DONE        | EXTEND -- add predicate dispatch path                       |
+| M4: flagzen-spring               | NOT STARTED | US-CP-08 only -- deferrable                                 |
 
 ## Risk Assessment
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| M1 EvaluationContext API changes during M1 development | Medium | High | FeaturePredicate depends on EvaluationContext; coordinate M1 completion first |
-| Annotation processor complexity | Low | Medium | Condition processing is additive, not modifying existing validation |
-| Proxy generation complexity | Medium | Medium | Two dispatch modes in one proxy class; consider dispatching mode flag at construction time |
-| Performance of predicate evaluation | Low | Low | Predicates are user responsibility; document best practice |
+|                          Risk                          | Probability | Impact |                                         Mitigation                                         |
+| ------------------------------------------------------ | ----------- | ------ | ------------------------------------------------------------------------------------------ |
+| M1 EvaluationContext API changes during M1 development | Medium      | High   | FeaturePredicate depends on EvaluationContext; coordinate M1 completion first              |
+| Annotation processor complexity                        | Low         | Medium | Condition processing is additive, not modifying existing validation                        |
+| Proxy generation complexity                            | Medium      | Medium | Two dispatch modes in one proxy class; consider dispatching mode flag at construction time |
+| Performance of predicate evaluation                    | Low         | Low    | Predicates are user responsibility; document best practice                                 |
 
 ## Delivery Recommendation
 

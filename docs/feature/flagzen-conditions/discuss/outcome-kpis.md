@@ -6,13 +6,13 @@ Java developers using FlagZen can declaratively select variants based on runtime
 
 ## Outcome KPIs
 
-| # | Who | Does What | By How Much | Baseline | Measured By | Type |
-|---|-----|-----------|-------------|----------|-------------|------|
-| 1 | Java developers defining conditions | Express a variant selection rule in a single annotation | 100% -- one @Condition annotation per variant | Manual if/else chains outside FlagZen | API usage: @Variant(when = @Condition(...)) line count vs. manual dispatch | Leading |
-| 2 | Java developers compiling | Get compile-time error for invalid predicate configuration | 100% of invalid predicates caught at compile time | Runtime ClassCastException or silent failure | Annotation processor error test coverage | Leading |
-| 3 | Java developers at runtime | Dispatch to correct variant based on EvaluationContext predicates | Deterministic -- same context always selects same variant | No predicate dispatch exists | Unit tests with varied EvaluationContext inputs | Leading |
-| 4 | Java developers handling edge cases | Handle "no match" consistently with existing FallbackStrategy | Zero new concepts -- same 3 strategies | FallbackStrategy exists for value-based only | Fallback behavior tests mirror value-based tests | Leading |
-| 5 | Spring developers | Use constructor injection in predicates | Zero workarounds (no service locator patterns) | No-arg constructor only | Spring integration tests with injected predicates | Leading |
+|  #  |                 Who                 |                             Does What                             |                        By How Much                        |                   Baseline                   |                                Measured By                                 |  Type   |
+| --- | ----------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------- | ------- |
+| 1   | Java developers defining conditions | Express a variant selection rule in a single annotation           | 100% -- one @Condition annotation per variant             | Manual if/else chains outside FlagZen        | API usage: @Variant(when = @Condition(...)) line count vs. manual dispatch | Leading |
+| 2   | Java developers compiling           | Get compile-time error for invalid predicate configuration        | 100% of invalid predicates caught at compile time         | Runtime ClassCastException or silent failure | Annotation processor error test coverage                                   | Leading |
+| 3   | Java developers at runtime          | Dispatch to correct variant based on EvaluationContext predicates | Deterministic -- same context always selects same variant | No predicate dispatch exists                 | Unit tests with varied EvaluationContext inputs                            | Leading |
+| 4   | Java developers handling edge cases | Handle "no match" consistently with existing FallbackStrategy     | Zero new concepts -- same 3 strategies                    | FallbackStrategy exists for value-based only | Fallback behavior tests mirror value-based tests                           | Leading |
+| 5   | Spring developers                   | Use constructor injection in predicates                           | Zero workarounds (no service locator patterns)            | No-arg constructor only                      | Spring integration tests with injected predicates                          | Leading |
 
 ## Metric Hierarchy
 
@@ -22,13 +22,13 @@ Java developers using FlagZen can declaratively select variants based on runtime
 
 ## Measurement Plan
 
-| KPI | Data Source | Collection Method | Frequency | Owner |
-|-----|------------|-------------------|-----------|-------|
-| 1 | API design review | Count annotation attributes vs. manual code | Once at design | Product owner |
-| 2 | Processor error tests | Automated test suite | Per build (CI) | Developer |
-| 3 | Dispatch unit tests | Automated test suite with varied contexts | Per build (CI) | Developer |
-| 4 | Fallback tests | Automated test suite mirroring M0 tests | Per build (CI) | Developer |
-| 5 | Spring integration tests | Automated test suite with @Component predicates | Per build (CI) | Developer |
+| KPI |       Data Source        |                Collection Method                |   Frequency    |     Owner     |
+| --- | ------------------------ | ----------------------------------------------- | -------------- | ------------- |
+| 1   | API design review        | Count annotation attributes vs. manual code     | Once at design | Product owner |
+| 2   | Processor error tests    | Automated test suite                            | Per build (CI) | Developer     |
+| 3   | Dispatch unit tests      | Automated test suite with varied contexts       | Per build (CI) | Developer     |
+| 4   | Fallback tests           | Automated test suite mirroring M0 tests         | Per build (CI) | Developer     |
+| 5   | Spring integration tests | Automated test suite with @Component predicates | Per build (CI) | Developer     |
 
 ## Hypothesis
 

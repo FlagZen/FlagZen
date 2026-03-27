@@ -79,7 +79,7 @@ Then it returns false without throwing an exception
 
 - Must depend on EvaluationContext from M1 (US-EC-01)
 - @FunctionalInterface annotation for lambda support
-- No generic type parameter -- always takes EvaluationContext (not Predicate<T>)
+- No generic type parameter -- always takes EvaluationContext (not `Predicate<T>`)
 - Zero runtime dependencies beyond flagzen-core
 - Best practice: predicates should be fast (sub-millisecond). FlagZen evaluates predicates on every method call. Slow predicates degrade application performance -- this is the developer's responsibility, not FlagZen's concern.
 

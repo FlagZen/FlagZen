@@ -6,10 +6,10 @@
 
 ## Backbone
 
-| Define Predicate API | Declare Conditions | Compile-Time Validation | Runtime Dispatch | DI Integration |
-|---------------------|--------------------|------------------------|-----------------|----------------|
-| US-CP-01: FeaturePredicate interface | US-CP-03: @Condition annotation | US-CP-04: Predicate type validation | US-CP-06: Predicate dispatch in proxy | US-CP-08: Spring DI for predicates |
-| US-CP-02: @Condition annotation model | | US-CP-05: Order uniqueness & mixing validation | US-CP-07: Fallback behavior | |
+|         Define Predicate API          |       Declare Conditions        |            Compile-Time Validation             |           Runtime Dispatch            |           DI Integration           |
+| ------------------------------------- | ------------------------------- | ---------------------------------------------- | ------------------------------------- | ---------------------------------- |
+| US-CP-01: FeaturePredicate interface  | US-CP-03: @Condition annotation | US-CP-04: Predicate type validation            | US-CP-06: Predicate dispatch in proxy | US-CP-08: Spring DI for predicates |
+| US-CP-02: @Condition annotation model |                                 | US-CP-05: Order uniqueness & mixing validation | US-CP-07: Fallback behavior           |                                    |
 
 ---
 

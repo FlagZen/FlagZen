@@ -61,10 +61,10 @@ C4Component
 
 A `@Feature` interface uses exactly one dispatch mode, determined at compile time by the annotation processor:
 
-| Mode | Trigger | Dispatch Logic |
-|------|---------|---------------|
-| **Value-based** (M0) | `@Variant("VALUE")` -- `value` attribute set, no `when` | Query FlagProvider for string value, look up variant in map |
-| **Condition-based** (M6) | `@Variant(when = @Condition(...))` -- `when` attribute set | Evaluate predicates in order, delegate to first match |
+|           Mode           |                          Trigger                           |                       Dispatch Logic                        |
+| ------------------------ | ---------------------------------------------------------- | ----------------------------------------------------------- |
+| **Value-based** (M0)     | `@Variant("VALUE")` -- `value` attribute set, no `when`    | Query FlagProvider for string value, look up variant in map |
+| **Condition-based** (M6) | `@Variant(when = @Condition(...))` -- `when` attribute set | Evaluate predicates in order, delegate to first match       |
 
 The modes are mutually exclusive per `@Feature`. The processor rejects any `@Feature` that mixes both modes. `@DefaultVariant` is compatible with both modes.
 
@@ -92,10 +92,10 @@ For condition-based features, the generated proxy follows this dispatch flow on 
 
 A nested annotation type used exclusively within `@Variant(when = ...)`.
 
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `on` | `Class<? extends FeaturePredicate>` | The predicate class to evaluate |
-| `order` | `int` | Evaluation sequence (ascending). Must be unique within the @Feature. |
+| Attribute |                Type                 |                             Description                              |
+| --------- | ----------------------------------- | -------------------------------------------------------------------- |
+| `on`      | `Class<? extends FeaturePredicate>` | The predicate class to evaluate                                      |
+| `order`   | `int`                               | Evaluation sequence (ascending). Must be unique within the @Feature. |
 
 Retention: `CLASS` (needed by annotation processor, not at runtime).
 
@@ -103,11 +103,11 @@ Retention: `CLASS` (needed by annotation processor, not at runtime).
 
 A new `when` attribute is added to `@Variant`:
 
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `value` | `String` | `""` | Variant value for value-based dispatch (existing) |
-| `of` | `Class<?>` | `void.class` | Target @Feature interface (existing) |
-| `when` | `@Condition` | sentinel `@Condition` | Condition for predicate-based dispatch (new) |
+| Attribute |     Type     |        Default        |                    Description                    |
+| --------- | ------------ | --------------------- | ------------------------------------------------- |
+| `value`   | `String`     | `""`                  | Variant value for value-based dispatch (existing) |
+| `of`      | `Class<?>`   | `void.class`          | Target @Feature interface (existing)              |
+| `when`    | `@Condition` | sentinel `@Condition` | Condition for predicate-based dispatch (new)      |
 
 The `when` attribute defaults to a sentinel `@Condition` whose `on` attribute references a sentinel class (e.g., `FeaturePredicate.None.class` or a package-private `NoCondition.class`). The processor detects the sentinel to distinguish "no condition specified" from a real condition.
 
@@ -145,13 +145,13 @@ The processor's `FeatureModel` gains awareness of dispatch mode. The `VariantMod
 
 For condition-based features, the generated proxy differs from value-based proxies:
 
-| Aspect | Value-based (M0) | Condition-based (M6) |
-|--------|------------------|---------------------|
-| Constructor params | `FlagProvider`, variant map, default variant | Condition-variant pairs (sorted by order), default variant |
-| Fields | `flagProvider`, `variants` map, `defaultVariant` | `FeaturePredicate[]` + corresponding variant instances, `defaultVariant` |
-| Resolve method | Query FlagProvider, map lookup | Iterate predicates, call `test(ctx)`, return first match |
-| EvaluationContext | Not used in dispatch (may be passed to FlagProvider) | Required for predicate evaluation |
-| FlagProvider | Used on every call | Not used (predicates replace flag lookup) |
+|       Aspect       |                   Value-based (M0)                   |                           Condition-based (M6)                           |
+| ------------------ | ---------------------------------------------------- | ------------------------------------------------------------------------ |
+| Constructor params | `FlagProvider`, variant map, default variant         | Condition-variant pairs (sorted by order), default variant               |
+| Fields             | `flagProvider`, `variants` map, `defaultVariant`     | `FeaturePredicate[]` + corresponding variant instances, `defaultVariant` |
+| Resolve method     | Query FlagProvider, map lookup                       | Iterate predicates, call `test(ctx)`, return first match                 |
+| EvaluationContext  | Not used in dispatch (may be passed to FlagProvider) | Required for predicate evaluation                                        |
+| FlagProvider       | Used on every call                                   | Not used (predicates replace flag lookup)                                |
 
 ### Generated Code Properties
 
@@ -174,13 +174,14 @@ The generated proxy obtains `EvaluationContext` using the same resolution chain 
 
 Condition-based features reuse the existing `FallbackStrategy` enum with adapted semantics:
 
-| Strategy | Value-based (M0) | Condition-based (M6) |
-|----------|------------------|---------------------|
-| `REQUIRED` | Enum coverage verified at compile time | `@DefaultVariant` required at compile time (predicate completeness unverifiable) |
-| `EXCEPTION` | `UnmatchedVariantException` at runtime | `UnmatchedVariantException` at runtime (message includes predicate list) |
-| `NOOP` | Returns safe defaults | Returns safe defaults (same behavior) |
+|  Strategy   |            Value-based (M0)            |                               Condition-based (M6)                               |
+| ----------- | -------------------------------------- | -------------------------------------------------------------------------------- |
+| `REQUIRED`  | Enum coverage verified at compile time | `@DefaultVariant` required at compile time (predicate completeness unverifiable) |
+| `EXCEPTION` | `UnmatchedVariantException` at runtime | `UnmatchedVariantException` at runtime (message includes predicate list)         |
+| `NOOP`      | Returns safe defaults                  | Returns safe defaults (same behavior)                                            |
 
 When no `EvaluationContext` is available and the feature is condition-based:
+
 - If `@DefaultVariant` exists: use it
 - If no `@DefaultVariant`: apply `FallbackStrategy`
 
@@ -196,11 +197,11 @@ This is deferred until M4 (flagzen-spring) is available. It extends flagzen-spri
 
 ## 11. Thread Safety
 
-| Component | Strategy |
-|-----------|----------|
-| Generated condition-based proxies | Immutable after construction. Predicate array and variant instances are `final`. |
-| FeaturePredicate instances | User responsibility. FlagZen documents that predicates must be thread-safe if the application is multi-threaded. |
-| EvaluationContext | Immutable (M1 design). Safe to pass to predicates from any thread. |
+|             Component             |                                                     Strategy                                                     |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Generated condition-based proxies | Immutable after construction. Predicate array and variant instances are `final`.                                 |
+| FeaturePredicate instances        | User responsibility. FlagZen documents that predicates must be thread-safe if the application is multi-threaded. |
+| EvaluationContext                 | Immutable (M1 design). Safe to pass to predicates from any thread.                                               |
 
 ## 12. Quality Attribute Impact
 
@@ -235,17 +236,17 @@ This is deferred until M4 (flagzen-spring) is available. It extends flagzen-spri
 
 Existing ArchUnit rules apply unchanged. One additional rule recommended:
 
-| Rule | Tool | Enforcement |
-|------|------|-------------|
-| No `java.lang.reflect` in flagzen-core | ArchUnit | Existing rule covers new code |
-| `com.flagzen.internal` classes not public | ArchUnit | Existing rule covers new code |
-| No cycles in `com.flagzen.(*)..` slices | ArchUnit | Existing rule covers new code |
+|                                    Rule                                    |   Tool   |                                                           Enforcement                                                           |
+| -------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| No `java.lang.reflect` in flagzen-core                                     | ArchUnit | Existing rule covers new code                                                                                                   |
+| `com.flagzen.internal` classes not public                                  | ArchUnit | Existing rule covers new code                                                                                                   |
+| No cycles in `com.flagzen.(*)..` slices                                    | ArchUnit | Existing rule covers new code                                                                                                   |
 | `FeaturePredicate` implementations must not import `com.flagzen.processor` | ArchUnit | `noClasses().that().implement(FeaturePredicate.class).should().accessClassesThat().resideInAPackage("com.flagzen.processor..")` |
 
 ## 14. ADR Index
 
-| ADR | Title | Status |
-|-----|-------|--------|
-| [ADR-008](../../../adrs/ADR-008-mutually-exclusive-dispatch-modes.md) | Mutually Exclusive Dispatch Modes | Accepted |
-| [ADR-009](../../../adrs/ADR-009-predicate-instantiation-strategy.md) | Predicate Instantiation Strategy | Accepted |
-| [ADR-010](../../../adrs/ADR-010-condition-annotation-nesting.md) | @Condition Annotation Nesting in @Variant | Accepted |
+|                                  ADR                                  |                   Title                   |  Status  |
+| --------------------------------------------------------------------- | ----------------------------------------- | -------- |
+| [ADR-008](../../../adrs/ADR-008-mutually-exclusive-dispatch-modes.md) | Mutually Exclusive Dispatch Modes         | Accepted |
+| [ADR-009](../../../adrs/ADR-009-predicate-instantiation-strategy.md)  | Predicate Instantiation Strategy          | Accepted |
+| [ADR-010](../../../adrs/ADR-010-condition-annotation-nesting.md)      | @Condition Annotation Nesting in @Variant | Accepted |

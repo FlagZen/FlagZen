@@ -7,7 +7,7 @@
 | Problem statement clear | PASS   | "Kenji needs to resolve flags differently per user, but FlagZen has no model to carry targeting information" -- domain language, clear pain |
 | User/persona identified | PASS   | Kenji Tanaka, senior Java dev, SaaS company, uses FlagZen M0, needs per-user/tenant targeting                                               |
 | 3+ domain examples      | PASS   | 3 examples: A/B test targeting (enterprise plan), anonymous context (no targeting key), empty context (key only)                            |
-| UAT scenarios (3-7)     | PASS   | 4 scenarios: build with key+attrs, no targeting key, toString, equality. Immutability verified by unit test (architectural constraint).      |
+| UAT scenarios (3-7)     | PASS   | 4 scenarios: build with key+attrs, no targeting key, toString, equality. Immutability verified by unit test (architectural constraint).     |
 | AC derived from UAT     | PASS   | 6 ACs matching scenarios (no-setter design, builder, nullable key, empty map, toString/equals/hashCode, zero reflection)                    |
 | Right-sized             | PASS   | 1-2 days effort, 5 scenarios, single model class with builder                                                                               |
 | Technical notes         | PASS   | Record consideration, Object attribute values, thread safety, no validation on values                                                       |

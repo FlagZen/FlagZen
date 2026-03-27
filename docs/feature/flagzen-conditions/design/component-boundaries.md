@@ -12,37 +12,37 @@ All condition predicate types, annotation changes, processor extensions, and pro
 
 **New types in `com.flagzen`**:
 
-| Type | Kind | Responsibility |
-|------|------|---------------|
-| `FeaturePredicate` | `@FunctionalInterface` interface | Contract for user-defined condition predicates |
-| `@Condition` | Annotation type | Declares predicate binding and evaluation order within `@Variant` |
+|        Type        |               Kind               |                          Responsibility                           |
+| ------------------ | -------------------------------- | ----------------------------------------------------------------- |
+| `FeaturePredicate` | `@FunctionalInterface` interface | Contract for user-defined condition predicates                    |
+| `@Condition`       | Annotation type                  | Declares predicate binding and evaluation order within `@Variant` |
 
 **Modified types in `com.flagzen`**:
 
-| Type | Change |
-|------|--------|
+|    Type    |                   Change                   |
+| ---------- | ------------------------------------------ |
 | `@Variant` | New `when` attribute for condition binding |
 
 **New types in `com.flagzen.processor`**:
 
-| Type | Kind | Responsibility |
-|------|------|---------------|
-| `ConditionModel` | Record | Processor-internal model for @Condition metadata |
-| `DispatchMode` | Enum | `VALUE_BASED` or `CONDITION_BASED` (processor-internal) |
+|       Type       |  Kind  |                     Responsibility                      |
+| ---------------- | ------ | ------------------------------------------------------- |
+| `ConditionModel` | Record | Processor-internal model for @Condition metadata        |
+| `DispatchMode`   | Enum   | `VALUE_BASED` or `CONDITION_BASED` (processor-internal) |
 
 **Modified types in `com.flagzen.processor`**:
 
-| Type | Change |
-|------|--------|
-| `VariantModel` | New `condition` field (nullable ConditionModel) |
-| `FeatureModel` | New `dispatchMode` field |
+|        Type        |                                                                  Change                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `VariantModel`     | New `condition` field (nullable ConditionModel)                                                                                          |
+| `FeatureModel`     | New `dispatchMode` field                                                                                                                 |
 | `FlagZenProcessor` | Dispatch mode detection, condition validation (type check, constructor check, order uniqueness, mixing rejection, REQUIRED + conditions) |
-| `ProxyGenerator` | Condition-based proxy generation path alongside existing value-based path |
+| `ProxyGenerator`   | Condition-based proxy generation path alongside existing value-based path                                                                |
 
 **Modified types in `com.flagzen`**:
 
-| Type | Change |
-|------|--------|
+|            Type             |                                    Change                                     |
+| --------------------------- | ----------------------------------------------------------------------------- |
 | `UnmatchedVariantException` | Condition-aware error messages (predicate list instead of variant value list) |
 
 ### flagzen-test (unchanged)
@@ -129,10 +129,10 @@ flagzen-spring (future: resolves @Component predicates from ApplicationContext)
 
 ## Public API Surface Change
 
-| Before (M0) | After (M6) | Delta |
-|-------------|------------|-------|
+|       Before (M0)       |        After (M6)        |                 Delta                 |
+| ----------------------- | ------------------------ | ------------------------------------- |
 | 8 consumer-facing types | 10 consumer-facing types | +2 (`FeaturePredicate`, `@Condition`) |
-| 3 SPI types | 3 SPI types | 0 |
-| 4 test types | 4 test types | 0 |
+| 3 SPI types             | 3 SPI types              | 0                                     |
+| 4 test types            | 4 test types             | 0                                     |
 
 The public API surface remains minimal. Two new types, both in `com.flagzen`, both with clear single responsibilities.
