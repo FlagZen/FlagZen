@@ -153,35 +153,41 @@ abstraction over existing flagging libraries.
   class DefaultTheme implements Theme { ... }
   ```
 
-- Condition predicates for in-code variant selection without external flag providers
+- Condition predicates for flag-value-based variant selection
 
   ```java
-  // Predicate-based dispatch: evaluated in order, first match wins
-  @Feature("pricing-tier")
-  interface PricingStrategy { Money calculate(Order order); }
+  // Conditions test the flag VALUE, not EvaluationContext.
+  // Context-based targeting belongs in the flag provider.
+  @Feature(value = "max-retries", type = FeatureType.INT)
+  interface RetryStrategy { void execute(Request req); }
 
-  @Variant(when = @Condition(on = IsEnterprise.class, order = 1))
-  class EnterprisePricing implements PricingStrategy { ... }
+  @Variant(intValue = 3, order = 1)                                        // exact match
+  class ConservativeRetry implements RetryStrategy { ... }
 
-  @Variant(when = @Condition(on = IsStartup.class, order = 2))
-  class StartupPricing implements PricingStrategy { ... }
+  @Variant(when = @Condition(matches = HighRetryRange.class), order = 2)   // range match
+  class AggressiveRetry implements RetryStrategy { ... }
 
   @DefaultVariant
-  class StandardPricing implements PricingStrategy { ... }
+  class StandardRetry implements RetryStrategy { ... }
 
-  // Predicate interface
-  class IsEnterprise implements FeaturePredicate {
-    public boolean test(EvaluationContext ctx) {
-      return "enterprise".equals(ctx.attribute("plan"));
-    }
+  // Predicates use JDK functional interfaces (IntPredicate, Predicate<String>, etc.)
+  class HighRetryRange implements IntPredicate {
+    public boolean test(int value) { return value >= 7; }
   }
+
+  // Negation: @Condition(notMatches = ...) — mutually exclusive with matches
+  @Variant(when = @Condition(notMatches = LowValue.class), order = 1)
+  class PremiumPricing implements PricingStrategy { ... }
   ```
 
+  Exact matches and conditions can coexist on the same @Feature. Dispatch
+  evaluates variants in `order` sequence, first match wins. `order` is
+  optional when unambiguous (only exact matches, or only one condition).
+
   Note: when the flag provider supports server-side targeting rules
-  (LaunchDarkly, OpenFeature, Togglz), those are the preferred way.
-  Condition predicates are for pure in-code feature switching — a
-  declarative Strategy pattern selector evaluated against the
-  EvaluationContext.
+  (LaunchDarkly, OpenFeature, Togglz), those are the preferred way to do
+  context-based targeting. Condition predicates test the flag value itself
+  (ranges, thresholds, patterns), not the evaluation context.
 - Compile-time annotation processing
 - Spring, CDI, Quarkus, ... integration
   

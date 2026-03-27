@@ -167,7 +167,7 @@ Documentation is updated with every release. Each release adds docs for its new 
 - [ ] Example: testing with `@PinFlag`, `@FlagSource`, `TestFlagContext`
 - [ ] Example: Spring Boot integration (`@Autowired` feature injection)
 - [ ] Example: custom `FlagProvider` implementation
-- [ ] Example: condition predicates (`@Condition` + `FeaturePredicate`)
+- [ ] Example: condition predicates (`@Condition(matches = ...)` with JDK predicates)
 - [ ] Every example has a corresponding test that compiles and runs
 
 ---
@@ -178,17 +178,19 @@ Documentation is updated with every release. Each release adds docs for its new 
 
 **Status: DESIGN DONE** | **Release: v1.2.0** | Depends on: M1 | [Artifacts](feature/flagzen-conditions/)
 
-> **Note**: When the flag provider supports server-side targeting rules (LaunchDarkly, OpenFeature, Togglz), those are the preferred way to do conditional dispatch. Condition predicates are for pure in-code feature switching where no external flag service is involved — a declarative Strategy pattern selector evaluated against the `EvaluationContext`.
+> **Note**: Condition predicates test the **flag value** (ranges, thresholds, patterns), not the evaluation context. Context-based targeting belongs in the flag provider (LaunchDarkly, OpenFeature, Togglz).
 
-- [ ] `@Condition` annotation (`on = Predicate.class`, `order = int`)
-- [ ] `@Variant(when = @Condition(on = IsEnterprise.class, order = 1))` syntax
-- [ ] `FeaturePredicate` functional interface (`boolean test(EvaluationContext)`)
-- [ ] Predicates evaluated in `order` sequence; first match wins
-- [ ] Compile-time validation: predicate class implements `FeaturePredicate`
-- [ ] Compile-time validation: mutually exclusive dispatch modes (value-based OR condition-based)
-- [ ] Fallback to `@DefaultVariant` when no predicate matches
-- [ ] Interaction with `FallbackStrategy` when no predicate matches and no default
-- [ ] Proxy generation for predicate-based dispatch
+- [ ] `@Condition(matches = X.class)` — predicate class reference
+- [ ] `@Condition(notMatches = X.class)` — negated predicate (mutually exclusive with `matches`)
+- [ ] `@Variant(when = @Condition(matches = HighRange.class), order = 2)` syntax
+- [ ] `order` on `@Variant` (not `@Condition`) — enables mixed exact-match + condition dispatch
+- [ ] `order` optional when unambiguous, mandatory when mixed or multiple conditions
+- [ ] Predicates use JDK interfaces: `Predicate<String>`, `IntPredicate`, `LongPredicate`, `DoublePredicate`
+- [ ] Compile-time validation: predicate type matches `@Feature(type = ...)` (e.g., INT → `IntPredicate`)
+- [ ] Exact matches and conditions can coexist on same `@Feature` (unified ordered dispatch, ADR-008)
+- [ ] Fallback to `@DefaultVariant` when no match
+- [ ] Interaction with `FallbackStrategy` when no match and no default
+- [ ] Proxy generation: ordered list evaluation when `order` present, map lookup when absent
 - [ ] Predicates instantiated via no-arg constructor (or DI when Spring module present)
 
 ### M8: Hooks and Observability — `flagzen-hooks`
