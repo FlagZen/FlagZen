@@ -41,15 +41,33 @@ abstraction over existing flagging libraries.
 - Polymorphic dispatch is proxy-based to support flag value changes at runtime
   - So it doesn't move the conditionals to compile time. They will be present
     at runtime, just hidden, so developers don't have to write them.
-- Type-safe flag values
+- Type-safe flag values for polymorphic dispatch on non-string types
 
   ```java
-  @Variant(
-    value = "string value",
-    intValue = 42,
-    booleanValue = true
-  )
+  // Feature declares expected flag type
+  @Feature(value = "max-retries", type = FeatureType.INT)
+  interface RetryStrategy { void execute(Request req); }
+
+  @Variant(intValue = 3)
+  class ConservativeRetry implements RetryStrategy { ... }
+
+  @Variant(intValue = 10)
+  class AggressiveRetry implements RetryStrategy { ... }
+
+  // Boolean feature (exactly 2 variants)
+  @Feature(value = "dark-mode", type = FeatureType.BOOLEAN)
+  interface DarkMode { void apply(UI ui); }
+
+  @Variant(booleanValue = true)
+  class DarkModeOn implements DarkMode { ... }
+
+  @Variant(booleanValue = false)
+  class DarkModeOff implements DarkMode { ... }
   ```
+
+  Supported types: STRING (default), INT, BOOLEAN. The processor validates
+  type consistency: all @Variant annotations for a feature must use the
+  matching attribute (value/intValue/booleanValue).
 
 - Support for enum validation (if present)
 

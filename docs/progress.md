@@ -54,15 +54,29 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 - [ ] `ContextAccessor` SPI implementation
 - [ ] Resolution order: explicit > reactive > scoped > default
 
-## M2: Conditional API — `flagzen-conditional-api`
+## M2: Typed Variants and Conditional API — `flagzen-typed-variants`
 
 **Status: NOT STARTED** | Depends on: M0
 
-- [ ] `FlagProvider.getBoolean(String key)`
-- [ ] `FlagProvider.getInt(String key)`
-- [ ] `FlagProvider.getLong(String key)`
-- [ ] `FlagProvider.getDouble(String key)`
-- [ ] Type-safe flag values on `@Variant` (`intValue`, `booleanValue`)
+### Typed Polymorphic Dispatch
+
+- [ ] `FeatureType` enum (STRING, INT, BOOLEAN) — or inferred from `@Variant` attribute used
+- [ ] `@Feature(type = FeatureType.INT)` attribute (default STRING for backward compat)
+- [ ] `@Variant(intValue = 42)` for int-typed features
+- [ ] `@Variant(booleanValue = true)` for boolean-typed features
+- [ ] Compile-time validation: all variants of a feature use the same type
+- [ ] Compile-time validation: `@Variant` attribute matches `@Feature(type = ...)`
+- [ ] Proxy dispatches on typed value (int/boolean lookup instead of string)
+- [ ] `FlagProvider.getInt(String key)` and `FlagProvider.getBoolean(String key)` for typed resolution
+- [ ] REQUIRED strategy works with boolean features (exactly 2 variants: true + false)
+
+### Conditional API (Non-Polymorphic)
+
+- [ ] `FlagProvider.getBoolean(String key)` default method
+- [ ] `FlagProvider.getInt(String key)` default method
+- [ ] `FlagProvider.getLong(String key)` default method
+- [ ] `FlagProvider.getDouble(String key)` default method
+- [ ] `FlagProvider.getString(String key)` remains the primitive (typed methods delegate + parse)
 
 ## M3: Environment Variable Provider — `flagzen-env`
 
