@@ -28,6 +28,7 @@ Gradle monorepo with submodules:
 ## Markdown Style
 
 This project uses markdownlint (config in `.markdownlint-cli2.jsonc`). When writing or editing `.md` files:
+
 - Wrap Java generic types in backticks: `Predicate<String>`, `Map<String, Object>`, `Class<?>` — bare angle brackets are parsed as HTML (MD033)
 - Check `.markdownlint-cli2.jsonc` for disabled rules before "fixing" something that's intentionally allowed
 - Tables must have consistent column alignment
@@ -35,6 +36,7 @@ This project uses markdownlint (config in `.markdownlint-cli2.jsonc`). When writ
 ## Commit Discipline
 
 When creating a commit, always check `git status` for the entire repo and include all related changes — not just the files you directly edited. In particular, watch for:
+
 - `.nwave/des/logs/` (DES audit logs)
 - `docs/feature/*/deliver/` (execution logs, progress files)
 - `docs/progress.md` (if milestone status changed)
@@ -62,6 +64,7 @@ This project uses **per-feature** mutation testing. PITest runs in CI after the 
 ## Progress Tracking
 
 See `docs/progress.md` for milestone-based progress against the project brief. Each milestone has an nWave feature-id (e.g., `flagzen-eval-context`) for use with `/nw-deliver`, `/nw-design`, etc. Update `docs/progress.md` when:
+
 - A milestone item is completed (check the box)
 - A milestone status changes (NOT STARTED -> IN PROGRESS -> DONE)
 - New scope is added to the project brief
