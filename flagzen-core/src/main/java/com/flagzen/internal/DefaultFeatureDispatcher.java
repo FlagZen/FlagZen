@@ -28,9 +28,10 @@ public class DefaultFeatureDispatcher implements FeatureDispatcher {
     private final ConcurrentMap<Class<?>, Object> proxyCache = new ConcurrentHashMap<>();
     private final Map<Class<?>, FeatureMetadata<?>> metadataByType;
     private final List<ContextAccessor> contextAccessors;
+    private final EvaluationContext defaultContext;
 
     public DefaultFeatureDispatcher(FlagProvider flagProvider) {
-        this(flagProvider, List.of());
+        this(flagProvider, (EvaluationContext) null, List.of());
     }
 
     /**
@@ -40,11 +41,33 @@ public class DefaultFeatureDispatcher implements FeatureDispatcher {
      * @param contextAccessors the context accessors, consulted in priority order
      */
     public DefaultFeatureDispatcher(FlagProvider flagProvider, ContextAccessor... contextAccessors) {
-        this(flagProvider, List.of(contextAccessors));
+        this(flagProvider, (EvaluationContext) null, List.of(contextAccessors));
     }
 
-    private DefaultFeatureDispatcher(FlagProvider flagProvider, List<ContextAccessor> contextAccessors) {
+    /**
+     * Creates a dispatcher with a default evaluation context and no accessors.
+     *
+     * @param flagProvider the flag provider
+     * @param defaultContext the default evaluation context, used as last resort
+     */
+    public DefaultFeatureDispatcher(FlagProvider flagProvider, EvaluationContext defaultContext) {
+        this(flagProvider, defaultContext, List.of());
+    }
+
+    /**
+     * Creates a dispatcher with a default evaluation context and explicit context accessors.
+     *
+     * @param flagProvider the flag provider
+     * @param defaultContext the default evaluation context, used as last resort
+     * @param contextAccessors the context accessors, consulted in priority order
+     */
+    public DefaultFeatureDispatcher(FlagProvider flagProvider, EvaluationContext defaultContext, ContextAccessor... contextAccessors) {
+        this(flagProvider, defaultContext, List.of(contextAccessors));
+    }
+
+    private DefaultFeatureDispatcher(FlagProvider flagProvider, EvaluationContext defaultContext, List<ContextAccessor> contextAccessors) {
         this.flagProvider = flagProvider;
+        this.defaultContext = defaultContext;
         this.contextAccessors = contextAccessors.stream()
                 .sorted(Comparator.comparingInt(ContextAccessor::priority))
                 .toList();
@@ -70,10 +93,10 @@ public class DefaultFeatureDispatcher implements FeatureDispatcher {
     }
 
     /**
-     * Consults registered {@link ContextAccessor}s in priority order.
-     * If any accessor provides a context, sets it in {@link FlagContext},
-     * overriding any scoped context. If no accessor provides context,
-     * the existing scoped context (if any) is left untouched.
+     * Resolves context from the chain: accessor > scoped (FlagContext.current()) > default.
+     * If any accessor provides a context, sets it in {@link FlagContext}.
+     * If no accessor provides context and no scoped context is active,
+     * falls back to the default context if configured.
      */
     private void resolveContextFromAccessors() {
         for (ContextAccessor accessor : contextAccessors) {
@@ -82,6 +105,9 @@ public class DefaultFeatureDispatcher implements FeatureDispatcher {
                 FlagContext.set(context.get());
                 return;
             }
+        }
+        if (FlagContext.current() == null && defaultContext != null) {
+            FlagContext.set(defaultContext);
         }
     }
 

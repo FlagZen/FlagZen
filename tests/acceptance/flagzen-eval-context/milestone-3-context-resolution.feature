@@ -5,7 +5,7 @@ Feature: Context accessor SPI and resolution order
 
   # --- US-EC-06: ContextAccessor SPI ---
 
-  @US-EC-06 @pending
+  @US-EC-06
   Scenario: Context accessor provides context when no explicit context given
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a flag provider that uses targeting key for resolution
@@ -13,7 +13,7 @@ Feature: Context accessor SPI and resolution order
     When the developer resolves "CheckoutFlow" without explicit context
     Then the flag provider receives context with targeting key "accessor-user-99"
 
-  @US-EC-06 @pending
+  @US-EC-06
   Scenario: Lower priority accessor is consulted first
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a flag provider that uses targeting key for resolution
@@ -22,7 +22,7 @@ Feature: Context accessor SPI and resolution order
     When the developer resolves "CheckoutFlow" without explicit context
     Then the flag provider receives context with targeting key "reactor-user"
 
-  @US-EC-06 @error @pending
+  @US-EC-06 @error
   Scenario: Accessor returning empty is skipped
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a flag provider that uses targeting key for resolution
@@ -32,7 +32,7 @@ Feature: Context accessor SPI and resolution order
     Then the empty accessor is skipped
     And the flag provider receives context with targeting key "servlet-user"
 
-  @US-EC-06 @error @pending
+  @US-EC-06 @error
   Scenario: No accessor registered is handled gracefully
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "STREAMLINED"
     And an in-memory flag provider with "checkout-flow" set to "CLASSIC"
@@ -43,7 +43,7 @@ Feature: Context accessor SPI and resolution order
 
   # --- US-EC-07: Resolution Order ---
 
-  @US-EC-07 @pending
+  @US-EC-07
   Scenario: Explicit context beats all other sources
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a flag provider that uses targeting key for resolution
@@ -56,7 +56,7 @@ Feature: Context accessor SPI and resolution order
     When the developer resolves "CheckoutFlow" with the explicit context
     Then the flag provider receives context with targeting key "explicit-user"
 
-  @US-EC-07 @pending
+  @US-EC-07
   Scenario: Accessor beats scoped and default when no explicit context
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a flag provider that uses targeting key for resolution
@@ -66,7 +66,7 @@ Feature: Context accessor SPI and resolution order
     When the developer resolves "CheckoutFlow" without explicit context
     Then the flag provider receives context with targeting key "accessor-user"
 
-  @US-EC-07 @pending
+  @US-EC-07
   Scenario: Scoped context beats default when no explicit or accessor
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a flag provider that uses targeting key for resolution
@@ -76,7 +76,7 @@ Feature: Context accessor SPI and resolution order
     When the developer resolves "CheckoutFlow" inside the scoped block
     Then the flag provider receives context with targeting key "scoped-user"
 
-  @US-EC-07 @pending
+  @US-EC-07
   Scenario: Default context is used as last resort
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a flag provider that uses targeting key for resolution
@@ -86,7 +86,7 @@ Feature: Context accessor SPI and resolution order
     When the developer resolves "CheckoutFlow" without explicit context
     Then the flag provider receives context with targeting key "default-user"
 
-  @US-EC-07 @pending
+  @US-EC-07
   Scenario: No context at all preserves pre-context behavior
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "STREAMLINED"
     And an in-memory flag provider with "checkout-flow" set to "CLASSIC"
@@ -97,7 +97,7 @@ Feature: Context accessor SPI and resolution order
     Then the flag provider receives a contextless flag lookup
     And the resolved proxy dispatches to the "CLASSIC" variant
 
-  @US-EC-07 @error @pending
+  @US-EC-07 @error
   Scenario: Explicit context overrides scoped context within a block
     Given a feature "CheckoutFlow" with variants "CLASSIC" and "PREMIUM"
     And a flag provider that uses targeting key for resolution
@@ -108,7 +108,7 @@ Feature: Context accessor SPI and resolution order
 
   # --- Property-Shaped: Resolution Order Invariant ---
 
-  @US-EC-07 @property @pending
+  @US-EC-07 @property
   Scenario: Resolution order is deterministic regardless of registration order
     Given any combination of context sources
     When the developer resolves a feature multiple times with the same sources active
