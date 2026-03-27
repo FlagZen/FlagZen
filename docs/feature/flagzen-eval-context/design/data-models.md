@@ -10,10 +10,10 @@ This document details the data models introduced or modified by the evaluation c
 
 Carries contextual information for targeted flag resolution (A/B testing, user segmentation, tenant-scoped features).
 
-| Field        | Type                    | Description                                        |
-| ------------ | ----------------------- | -------------------------------------------------- |
-| targetingKey | String (nullable)       | Primary identifier (user ID, session ID, tenant)   |
-| attributes   | Map<String, Object>     | Custom attributes for targeting rules              |
+|    Field     |        Type         |                   Description                    |
+| ------------ | ------------------- | ------------------------------------------------ |
+| targetingKey | String (nullable)   | Primary identifier (user ID, session ID, tenant) |
+| attributes   | Map<String, Object> | Custom attributes for targeting rules            |
 
 **Constraints**:
 
@@ -27,12 +27,12 @@ Carries contextual information for targeted flag resolution (A/B testing, user s
 
 **Construction**: Builder pattern via `EvaluationContext.builder()`.
 
-| Builder Method                     | Description                        |
-| ---------------------------------- | ---------------------------------- |
-| `targetingKey(String)`             | Sets the targeting key (nullable)  |
-| `attribute(String key, Object val)`| Adds a single attribute            |
-| `attributes(Map<String, Object>)`  | Sets all attributes (replaces)     |
-| `build()`                          | Returns immutable EvaluationContext|
+|           Builder Method            |             Description             |
+| ----------------------------------- | ----------------------------------- |
+| `targetingKey(String)`              | Sets the targeting key (nullable)   |
+| `attribute(String key, Object val)` | Adds a single attribute             |
+| `attributes(Map<String, Object>)`   | Sets all attributes (replaces)      |
+| `build()`                           | Returns immutable EvaluationContext |
 
 **Design note**: Consider implementing as a Java class with a nested static `Builder` rather than a record, since records do not support the builder pattern naturally without a companion class. The crafter decides the final approach. The behavioral contract is: immutable, builder-constructed, content-based equality.
 
@@ -40,19 +40,19 @@ Carries contextual information for targeted flag resolution (A/B testing, user s
 
 Provides block-scoped evaluation context to avoid parameter drilling through call stacks.
 
-| Aspect        | Description                                                   |
-| ------------- | ------------------------------------------------------------- |
-| Type          | Final class with static methods only (no instantiation)       |
-| Storage (R1)  | ThreadLocal<EvaluationContext>                                |
-| Storage (R2)  | ScopedValue<EvaluationContext> on Java 21+, ThreadLocal fallback |
+|    Aspect    |                            Description                             |
+| ------------ | ------------------------------------------------------------------ |
+| Type         | Final class with static methods only (no instantiation)            |
+| Storage (R1) | `ThreadLocal<EvaluationContext>`                                   |
+| Storage (R2) | `ScopedValue<EvaluationContext>` on Java 21+, ThreadLocal fallback |
 
 **Static methods**:
 
-| Method                                          | Description                                              |
-| ----------------------------------------------- | -------------------------------------------------------- |
-| `run(EvaluationContext, Runnable)`               | Scopes context to block, cleans up on exit               |
-| `<T> T run(EvaluationContext, Supplier<T>)`      | Scopes context to block, returns result, cleans up       |
-| `current()`                                      | Returns current scoped context or null (package-private) |
+|                   Method                    |                       Description                        |
+| ------------------------------------------- | -------------------------------------------------------- |
+| `run(EvaluationContext, Runnable)`          | Scopes context to block, cleans up on exit               |
+| `<T> T run(EvaluationContext, Supplier<T>)` | Scopes context to block, returns result, cleans up       |
+| `current()`                                 | Returns current scoped context or null (package-private) |
 
 **Behavioral contracts**:
 
@@ -65,14 +65,14 @@ Provides block-scoped evaluation context to avoid parameter drilling through cal
 
 Encapsulates the resolution chain logic. Not part of the public API.
 
-| Field           | Type                          | Description                          |
-| --------------- | ----------------------------- | ------------------------------------ |
-| accessors       | List<ContextAccessor> (sorted)| Immutable, sorted by priority        |
-| defaultContext  | EvaluationContext (nullable)  | Fallback context from configuration  |
+|     Field      |               Type               |             Description             |
+| -------------- | -------------------------------- | ----------------------------------- |
+| accessors      | `List<ContextAccessor>` (sorted) | Immutable, sorted by priority       |
+| defaultContext | `EvaluationContext` (nullable)   | Fallback context from configuration |
 
-| Method                                         | Description                                           |
-| ---------------------------------------------- | ----------------------------------------------------- |
-| `resolve(EvaluationContext explicitCtx)`        | Returns resolved context or null following chain order |
+|                  Method                  |                      Description                       |
+| ---------------------------------------- | ------------------------------------------------------ |
+| `resolve(EvaluationContext explicitCtx)` | Returns resolved context or null following chain order |
 
 ## 2. Modified SPI Contracts
 
@@ -125,10 +125,10 @@ public interface FeatureDispatcher {
 
 ### FlagZenConfiguration (Modified)
 
-| Field          | Type                         | Description                            |
-| -------------- | ---------------------------- | -------------------------------------- |
-| provider       | FlagProvider                 | The configured flag source (existing)  |
-| defaultContext | EvaluationContext (nullable) | Default context for resolution chain   |
+|     Field      |             Type             |              Description              |
+| -------------- | ---------------------------- | ------------------------------------- |
+| provider       | FlagProvider                 | The configured flag source (existing) |
+| defaultContext | EvaluationContext (nullable) | Default context for resolution chain  |
 
 New configuration method: `defaultContext(EvaluationContext)`.
 
@@ -145,12 +145,12 @@ For each method on the @Feature interface, the proxy's `resolveVariant()` method
 
 ### Proxy Class Shape -- Unchanged
 
-| Aspect       | Value                                     |
-| ------------ | ----------------------------------------- |
-| Class name   | `{FeatureSimpleName}_FlagZenProxy`        |
-| Package      | Same as @Feature interface                |
-| Visibility   | Public class, package-private constructor |
-| Implements   | The @Feature interface                    |
+|    Aspect    |                                  Value                                  |
+| ------------ | ----------------------------------------------------------------------- |
+| Class name   | `{FeatureSimpleName}_FlagZenProxy`                                      |
+| Package      | Same as @Feature interface                                              |
+| Visibility   | Public class, package-private constructor                               |
+| Implements   | The @Feature interface                                                  |
 | Dependencies | `FlagProvider`, variant instance suppliers, `FlagContext` (static read) |
 
 The constructor signature is unchanged. No new fields are added to the proxy. Context is read from `FlagContext.current()` at dispatch time.

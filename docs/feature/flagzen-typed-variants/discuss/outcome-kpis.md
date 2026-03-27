@@ -8,12 +8,12 @@ Java developers using FlagZen can dispatch on integer and boolean flag values wi
 
 ### Outcome KPIs
 
-| # | Who | Does What | By How Much | Baseline | Measured By | Type |
-|---|-----|-----------|-------------|----------|-------------|------|
-| 1 | Java developers with int/bool flags | Declare typed features and variants without string encoding | 100% of int/bool features use typed annotations | All features are string-typed | Annotation processor processes FeatureType.INT and BOOLEAN correctly | Leading |
-| 2 | Java developers making type mistakes | Receive compile-time errors for type mismatches | 100% of type mismatches caught at compile time | Zero type validation (runtime failures only) | Processor emits ERROR diagnostic for every type-inconsistent @Variant | Leading |
-| 3 | Java developers using conditional API | Access typed flag values without manual parsing | Zero manual getString+parse calls for boolean/int/long/double | Manual parsing for every typed flag check | Typed default methods on FlagProvider return correct values | Leading |
-| 4 | FlagZen library | Maintains backward compatibility for existing features | Zero breaking changes to existing @Feature/@Variant usage | Current M0/M1 annotation behavior | All existing tests pass without modification | Guardrail |
+|  #  |                  Who                  |                          Does What                          |                          By How Much                          |                   Baseline                   |                              Measured By                              |   Type    |
+| --- | ------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------- | --------------------------------------------------------------------- | --------- |
+| 1   | Java developers with int/bool flags   | Declare typed features and variants without string encoding | 100% of int/bool features use typed annotations               | All features are string-typed                | Annotation processor processes FeatureType.INT and BOOLEAN correctly  | Leading   |
+| 2   | Java developers making type mistakes  | Receive compile-time errors for type mismatches             | 100% of type mismatches caught at compile time                | Zero type validation (runtime failures only) | Processor emits ERROR diagnostic for every type-inconsistent @Variant | Leading   |
+| 3   | Java developers using conditional API | Access typed flag values without manual parsing             | Zero manual getString+parse calls for boolean/int/long/double | Manual parsing for every typed flag check    | Typed default methods on FlagProvider return correct values           | Leading   |
+| 4   | FlagZen library                       | Maintains backward compatibility for existing features      | Zero breaking changes to existing @Feature/@Variant usage     | Current M0/M1 annotation behavior            | All existing tests pass without modification                          | Guardrail |
 
 ### Metric Hierarchy
 
@@ -23,12 +23,12 @@ Java developers using FlagZen can dispatch on integer and boolean flag values wi
 
 ### Measurement Plan
 
-| KPI | Data Source | Collection Method | Frequency | Owner |
-|-----|------------|-------------------|-----------|-------|
-| Type mismatch detection | Processor diagnostics | Compile-time error count in test suite | Every build | flagzen-core |
-| Typed dispatch correctness | UAT scenarios | Automated test pass rate | Every build | flagzen-core |
-| Backward compatibility | Existing test suite | All M0/M1 tests green | Every build | flagzen-core |
-| Parse correctness | FlagProvider default method tests | Unit tests for all input categories | Every build | flagzen-core |
+|            KPI             |            Data Source            |           Collection Method            |  Frequency  |    Owner     |
+| -------------------------- | --------------------------------- | -------------------------------------- | ----------- | ------------ |
+| Type mismatch detection    | Processor diagnostics             | Compile-time error count in test suite | Every build | flagzen-core |
+| Typed dispatch correctness | UAT scenarios                     | Automated test pass rate               | Every build | flagzen-core |
+| Backward compatibility     | Existing test suite               | All M0/M1 tests green                  | Every build | flagzen-core |
+| Parse correctness          | FlagProvider default method tests | Unit tests for all input categories    | Every build | flagzen-core |
 
 ### Hypothesis
 

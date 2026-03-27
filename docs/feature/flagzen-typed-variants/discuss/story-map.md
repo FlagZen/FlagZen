@@ -1,17 +1,18 @@
 # Story Map: flagzen-typed-variants
 
-## User: Kenji Tanaka -- Java backend developer using FlagZen for polymorphic dispatch
+**User: Kenji Tanaka -- Java backend developer using FlagZen for polymorphic dispatch**
+
 ## Goal: Dispatch on integer and boolean flag values with compile-time safety, and access typed flag values directly
 
 ## Backbone
 
-| Extend Annotations | Validate at Compile Time | Generate Typed Proxies | Provide Typed Accessors |
-|---|---|---|---|
-| Add FeatureType enum | Validate type consistency | INT proxy dispatch | getBoolean() default method |
-| Add type attr to @Feature | Validate attribute match | BOOLEAN proxy dispatch | getInt() default method |
-| Add intValue to @Variant | Validate boolean REQUIRED | Typed variant map gen | getLong() default method |
-| Add booleanValue to @Variant | Validate duplicate typed values | Context-aware typed dispatch | getDouble() default method |
-| | | | Context-aware typed accessors |
+|      Extend Annotations      |    Validate at Compile Time     |    Generate Typed Proxies    |    Provide Typed Accessors    |
+| ---------------------------- | ------------------------------- | ---------------------------- | ----------------------------- |
+| Add FeatureType enum         | Validate type consistency       | INT proxy dispatch           | getBoolean() default method   |
+| Add type attr to @Feature    | Validate attribute match        | BOOLEAN proxy dispatch       | getInt() default method       |
+| Add intValue to @Variant     | Validate boolean REQUIRED       | Typed variant map gen        | getLong() default method      |
+| Add booleanValue to @Variant | Validate duplicate typed values | Context-aware typed dispatch | getDouble() default method    |
+|                              |                                 |                              | Context-aware typed accessors |
 
 ---
 

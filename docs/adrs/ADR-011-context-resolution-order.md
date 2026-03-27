@@ -26,6 +26,7 @@ The order is hardcoded and cannot be reconfigured by the user.
 ### Alt 1: Configurable resolution order
 
 Allow users to reorder the chain (e.g., scoped before accessor). Rejected because:
+
 - Adds configuration complexity with minimal practical benefit
 - The fixed order covers all known use cases
 - Configurable order makes behavior harder to reason about in debugging
@@ -34,6 +35,7 @@ Allow users to reorder the chain (e.g., scoped before accessor). Rejected becaus
 ### Alt 2: Merge contexts from multiple sources
 
 Instead of "first wins," merge attributes from all sources (explicit overrides accessor overrides scoped, etc.). Rejected because:
+
 - Merging semantics are ambiguous (deep merge? shallow? what about conflicting targeting keys?)
 - Increases cognitive load -- developers cannot predict the final context without understanding all active sources
 - No known feature flag SDK uses merge semantics for context resolution
@@ -42,6 +44,7 @@ Instead of "first wins," merge attributes from all sources (explicit overrides a
 ### Alt 3: Scoped before accessor
 
 Place `FlagContext.run()` scoped context before ContextAccessor in the chain. Rejected because:
+
 - Framework-provided context (via accessor) is typically more specific than thread-scoped context
 - Accessor context comes from the request/reactive pipeline and carries per-request identity
 - Scoped context is a convenience for grouping resolve calls, not a precision targeting mechanism

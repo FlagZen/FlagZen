@@ -75,7 +75,6 @@ abstraction over existing flagging libraries.
   @WhenTrue(of = DarkMode.class)
   @WhenFalse(of = MaintenanceMode.class)
   class DarkOnMaintenanceOff implements DarkMode, MaintenanceMode { ... }
-  ```
 
   // Long and double dispatch
   @Feature(value = "rate-limit", type = FeatureType.LONG)
@@ -89,7 +88,7 @@ abstraction over existing flagging libraries.
   @Feature(value = "sampling-ratio", type = FeatureType.DOUBLE)
   interface SamplingStrategy { void sample(Event event); }
 
-  @Variant(doubleValue = @CloseTo(value = 0.1))              // default delta = 1e-10
+  @Variant(doubleValue = @CloseTo(value = 0.1))               // default delta = 1e-10
   @Variant(doubleValue = @CloseTo(value = 0.5, delta = 0.01)) // explicit delta
   ```
 

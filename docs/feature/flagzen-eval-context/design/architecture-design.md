@@ -88,16 +88,16 @@ resolve(Class<T> featureType, EvaluationContext explicitCtx = null)
   |
   v
 ContextResolver.resolve(explicitCtx)
-  |-- explicitCtx != null? --> use it
-  |-- ContextAccessor (sorted by priority) returns non-empty? --> use it
-  |-- FlagContext.current() != null? --> use it
-  |-- defaultContext != null? --> use it
-  |-- none? --> null (no context)
-  |
+  | -- explicitCtx != null? --> use it                                    |
+  | -- ContextAccessor (sorted by priority) returns non-empty? --> use it |
+  | -- FlagContext.current() != null? --> use it                          |
+  | -- defaultContext != null? --> use it                                 |
+  | -- none? --> null (no context)                                        |
+  |                                                                       |
   v
 context == null?
-  |-- yes --> proxy.resolveVariant() calls flagProvider.getString(key)
-  |-- no  --> proxy.resolveVariant(ctx) calls flagProvider.getString(key, ctx)
+  | -- yes --> proxy.resolveVariant() calls flagProvider.getString(key)         |
+  | -- no  --> proxy.resolveVariant(ctx) calls flagProvider.getString(key, ctx) |
 ```
 
 ### Design Rationale
@@ -195,7 +195,7 @@ ContextAccessors are discovered once during `DefaultFeatureDispatcher` construct
 
 ### Priority Convention
 
-| Range   | Purpose                           |
+|  Range  |              Purpose              |
 | ------- | --------------------------------- |
 | 0-99    | Framework-level (Reactor, Mutiny) |
 | 100-199 | Application-level                 |
@@ -225,13 +225,13 @@ The existing `resolve(Class<T>)` remains. The new method is added to the interfa
 
 ## 12. Thread Safety
 
-| Component          | Strategy                                                               |
-| ------------------ | ---------------------------------------------------------------------- |
-| EvaluationContext  | Immutable. Thread-safe by design.                                      |
-| FlagContext        | ThreadLocal/ScopedValue per-thread isolation. Thread-safe by design.   |
-| ContextAccessor    | Implementations must be thread-safe (documented contract).             |
-| ContextResolver    | Stateless (reads from immutable accessor list + FlagContext). Safe.    |
-| Generated proxies  | Stateless dispatch. Context flows through FlagContext, not proxy state.|
+|     Component     |                                Strategy                                 |
+| ----------------- | ----------------------------------------------------------------------- |
+| EvaluationContext | Immutable. Thread-safe by design.                                       |
+| FlagContext       | ThreadLocal/ScopedValue per-thread isolation. Thread-safe by design.    |
+| ContextAccessor   | Implementations must be thread-safe (documented contract).              |
+| ContextResolver   | Stateless (reads from immutable accessor list + FlagContext). Safe.     |
+| Generated proxies | Stateless dispatch. Context flows through FlagContext, not proxy state. |
 
 ## 13. Quality Attribute Impact
 
@@ -263,31 +263,31 @@ The existing `resolve(Class<T>)` remains. The new method is added to the interfa
 
 ## 14. Story-to-Component Traceability
 
-| Story    | Components Modified/Created                                        |
-| -------- | ------------------------------------------------------------------ |
-| US-EC-01 | EvaluationContext (new, `com.flagzen`)                             |
-| US-EC-02 | FeatureDispatcher (modified), DefaultFeatureDispatcher (modified)  |
-| US-EC-03 | FlagProvider (modified -- default method added)                    |
-| US-EC-04 | ProxyGenerator (modified -- context-aware dispatch generation)     |
-| US-EC-05 | FlagContext (new, `com.flagzen`)                                   |
-| US-EC-06 | ContextAccessor (new, `com.flagzen.spi`)                           |
+|  Story   |                            Components Modified/Created                             |
+| -------- | ---------------------------------------------------------------------------------- |
+| US-EC-01 | EvaluationContext (new, `com.flagzen`)                                             |
+| US-EC-02 | FeatureDispatcher (modified), DefaultFeatureDispatcher (modified)                  |
+| US-EC-03 | FlagProvider (modified -- default method added)                                    |
+| US-EC-04 | ProxyGenerator (modified -- context-aware dispatch generation)                     |
+| US-EC-05 | FlagContext (new, `com.flagzen`)                                                   |
+| US-EC-06 | ContextAccessor (new, `com.flagzen.spi`)                                           |
 | US-EC-07 | ContextResolver (new, `com.flagzen.internal`), DefaultFeatureDispatcher (modified) |
-| US-EC-08 | FlagContext (modified -- ScopedValue carrier, R2)                  |
+| US-EC-08 | FlagContext (modified -- ScopedValue carrier, R2)                                  |
 
 ## 15. ADR Index (This Milestone)
 
-| ADR     | Title                                                | Status   |
-| ------- | ---------------------------------------------------- | -------- |
-| ADR-011 | Context Resolution Order                             | Accepted |
+|   ADR   |                           Title                           |  Status  |
+| ------- | --------------------------------------------------------- | -------- |
+| ADR-011 | Context Resolution Order                                  | Accepted |
 | ADR-012 | FlagContext Carrier Strategy (ThreadLocal vs ScopedValue) | Accepted |
 
 ## 16. Architectural Enforcement
 
 Existing ArchUnit rules remain. Additional enforcement for this milestone:
 
-| Rule                                                  | Tool    | Enforcement                                                         |
-| ----------------------------------------------------- | ------- | ------------------------------------------------------------------- |
-| EvaluationContext has no setters                       | ArchUnit | `classes().that().haveSimpleName("EvaluationContext").should()...`  |
-| FlagContext is final with no public constructors       | ArchUnit | Class structure validation                                          |
-| No `java.lang.reflect` in `com.flagzen..` (unchanged) | ArchUnit | Existing rule covers new classes                                    |
-| ContextAccessor implementations are thread-safe        | Documentation | Documented in Javadoc contract                                 |
+|                         Rule                          |     Tool      |                            Enforcement                             |
+| ----------------------------------------------------- | ------------- | ------------------------------------------------------------------ |
+| EvaluationContext has no setters                      | ArchUnit      | `classes().that().haveSimpleName("EvaluationContext").should()...` |
+| FlagContext is final with no public constructors      | ArchUnit      | Class structure validation                                         |
+| No `java.lang.reflect` in `com.flagzen..` (unchanged) | ArchUnit      | Existing rule covers new classes                                   |
+| ContextAccessor implementations are thread-safe       | Documentation | Documented in Javadoc contract                                     |

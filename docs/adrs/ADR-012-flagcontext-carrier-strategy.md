@@ -33,6 +33,7 @@ This check happens once. The carrier is selected for the lifetime of the JVM.
 ### Internal Carrier Abstraction
 
 An internal `ContextCarrier` interface (in `com.flagzen.internal`) with two implementations:
+
 - `ThreadLocalContextCarrier` -- always available
 - `ScopedValueContextCarrier` -- loaded only on Java 21+
 
@@ -43,6 +44,7 @@ This uses the strategy pattern to avoid conditional logic in `FlagContext.run()`
 ### Alt 1: ThreadLocal only (no ScopedValue ever)
 
 Sufficient for correctness. Rejected for Release 2 because:
+
 - ScopedValue has better performance with virtual threads (no storage copying)
 - ScopedValue has built-in scoping semantics (no manual cleanup)
 - FlagZen targets technical excellence; supporting modern JDK features is aligned with that goal
@@ -51,6 +53,7 @@ Sufficient for correctness. Rejected for Release 2 because:
 ### Alt 2: Multi-release JAR (MRJAR)
 
 Use `META-INF/versions/21/` to provide a Java 21-specific `FlagContext` class. Rejected because:
+
 - MRJAR replaces entire classes, not methods -- duplicates most of `FlagContext`
 - Build complexity (separate source sets, testing on multiple JDKs)
 - Runtime detection via reflection is simpler and achieves the same result
@@ -59,6 +62,7 @@ Use `META-INF/versions/21/` to provide a Java 21-specific `FlagContext` class. R
 ### Alt 3: Require Java 21+ for ScopedValue, no fallback
 
 Make ScopedValue an opt-in module (e.g., `flagzen-scoped-value`). Rejected because:
+
 - Adds a module for a single internal implementation detail
 - Users should not need to know about carrier strategy
 - The detection-based approach is transparent

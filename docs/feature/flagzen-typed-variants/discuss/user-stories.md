@@ -1,5 +1,7 @@
 <!-- markdownlint-disable MD024 -->
 
+# Typed Variants User Stories
+
 ## US-M2-01: FeatureType Enum and @Feature Type Attribute
 
 ### Problem
@@ -16,11 +18,9 @@ Add a `FeatureType` enum (STRING, INT, BOOLEAN) and a `type` attribute to the `@
 
 ### Domain Examples
 
-#### 1: Retry strategy with integer flag -- Kenji annotates his RetryStrategy interface with `@Feature(value = "max-retries", type = FeatureType.INT)`. The annotation compiles. Existing features without `type` continue to default to `FeatureType.STRING`.
-
-#### 2: Dark mode with boolean flag -- Mei Chen annotates her DarkMode interface with `@Feature(value = "dark-mode", type = FeatureType.BOOLEAN)`. The annotation compiles and signals boolean dispatch.
-
-#### 3: Backward compatibility -- Kenji's existing `@Feature("checkout-flow")` interface (no type specified) continues to work identically. The processor treats it as `FeatureType.STRING`.
+- 1: Retry strategy with integer flag -- Kenji annotates his RetryStrategy interface with `@Feature(value = "max-retries", type = FeatureType.INT)`. The annotation compiles. Existing features without `type` continue to default to `FeatureType.STRING`.
+- 2: Dark mode with boolean flag -- Mei Chen annotates her DarkMode interface with `@Feature(value = "dark-mode", type = FeatureType.BOOLEAN)`. The annotation compiles and signals boolean dispatch.
+- 3: Backward compatibility -- Kenji's existing `@Feature("checkout-flow")` interface (no type specified) continues to work identically. The processor treats it as `FeatureType.STRING`.
 
 ### UAT Scenarios (BDD)
 
@@ -85,11 +85,9 @@ Add `intValue` and `booleanValue` attributes to the `@Variant` annotation. Exact
 
 ### Domain Examples
 
-#### 1: Integer variant -- Kenji annotates ConservativeRetry with `@Variant(intValue = 3)` and AggressiveRetry with `@Variant(intValue = 10)` for his max-retries feature.
-
-#### 2: Boolean variant -- Mei Chen annotates DarkModeOn with `@Variant(booleanValue = true)` and DarkModeOff with `@Variant(booleanValue = false)` for her dark-mode feature. Alternatively, she uses the convenience annotations `@WhenTrue` and `@WhenFalse`.
-
-#### 3: String variant unchanged -- Kenji's existing `@Variant("CLASSIC")` on ClassicCheckout continues to work for string-typed features.
+- 1: Integer variant -- Kenji annotates ConservativeRetry with `@Variant(intValue = 3)` and AggressiveRetry with `@Variant(intValue = 10)` for his max-retries feature.
+- 2: Boolean variant -- Mei Chen annotates DarkModeOn with `@Variant(booleanValue = true)` and DarkModeOff with `@Variant(booleanValue = false)` for her dark-mode feature. Alternatively, she uses the convenience annotations `@WhenTrue` and `@WhenFalse`.
+- 3: String variant unchanged -- Kenji's existing `@Variant("CLASSIC")` on ClassicCheckout continues to work for string-typed features.
 
 ### UAT Scenarios (BDD)
 
@@ -164,15 +162,11 @@ The annotation processor validates that all @Variant annotations for a feature u
 
 ### Domain Examples
 
-#### 1: String variant on INT feature -- Kenji has `@Feature(type = FeatureType.INT)` on RetryStrategy and `@Variant(value = "3")` on ConservativeRetry. Processor emits: "Feature 'max-retries' declares type INT but variant ConservativeRetry uses string value. Use @Variant(intValue = 3) instead."
-
-#### 2: intValue on BOOLEAN feature -- Mei Chen has `@Feature(type = FeatureType.BOOLEAN)` on DarkMode and `@Variant(intValue = 1)` on DarkModeOn. Processor emits: "Feature 'dark-mode' declares type BOOLEAN but variant DarkModeOn uses intValue. Use @Variant(booleanValue = true) instead."
-
-#### 3: Mixed types across variants -- Kenji has two variants for an INT feature: one uses `intValue = 3`, the other uses `value = "fast"`. Processor emits errors on the mismatched variant identifying it by class name.
-
-#### 4: Boolean REQUIRED incomplete -- Kenji has `@Feature(type = BOOLEAN, fallback = REQUIRED)` with only a `true` variant. Processor emits: "Boolean feature 'dark-mode' with REQUIRED fallback must have variants for both true and false."
-
-#### 5: Duplicate typed values -- Two variants both declare `intValue = 3`. Processor rejects with the existing duplicate variant value error, adapted for integer values.
+- 1: String variant on INT feature -- Kenji has `@Feature(type = FeatureType.INT)` on RetryStrategy and `@Variant(value = "3")` on ConservativeRetry. Processor emits: "Feature 'max-retries' declares type INT but variant ConservativeRetry uses string value. Use @Variant(intValue = 3) instead."
+- 2: intValue on BOOLEAN feature -- Mei Chen has `@Feature(type = FeatureType.BOOLEAN)` on DarkMode and `@Variant(intValue = 1)` on DarkModeOn. Processor emits: "Feature 'dark-mode' declares type BOOLEAN but variant DarkModeOn uses intValue. Use @Variant(booleanValue = true) instead."
+- 3: Mixed types across variants -- Kenji has two variants for an INT feature: one uses `intValue = 3`, the other uses `value = "fast"`. Processor emits errors on the mismatched variant identifying it by class name.
+- 4: Boolean REQUIRED incomplete -- Kenji has `@Feature(type = BOOLEAN, fallback = REQUIRED)` with only a `true` variant. Processor emits: "Boolean feature 'dark-mode' with REQUIRED fallback must have variants for both true and false."
+- 5: Duplicate typed values -- Two variants both declare `intValue = 3`. Processor rejects with the existing duplicate variant value error, adapted for integer values.
 
 ### UAT Scenarios (BDD)
 
@@ -257,11 +251,9 @@ The proxy generator produces dispatch logic that calls `FlagProvider.getInt(key)
 
 ### Domain Examples
 
-#### 1: Integer dispatch works -- Kenji's flag provider returns `OptionalInt.of(3)` for `getInt("max-retries")`. The proxy selects ConservativeRetry.
-
-#### 2: Flag value changes at runtime -- Flag provider starts returning 10 instead of 3. Next method call on the proxy dispatches to AggressiveRetry.
-
-#### 3: Unmatched integer triggers fallback -- Flag provider returns 99, which matches no variant. EXCEPTION strategy throws `UnmatchedVariantException` listing known values [3, 10].
+- 1: Integer dispatch works -- Kenji's flag provider returns `OptionalInt.of(3)` for `getInt("max-retries")`. The proxy selects ConservativeRetry.
+- 2: Flag value changes at runtime -- Flag provider starts returning 10 instead of 3. Next method call on the proxy dispatches to AggressiveRetry.
+- 3: Unmatched integer triggers fallback -- Flag provider returns 99, which matches no variant. EXCEPTION strategy throws `UnmatchedVariantException` listing known values [3, 10].
 
 ### UAT Scenarios (BDD)
 
@@ -347,13 +339,10 @@ The proxy generator produces dispatch logic that calls `FlagProvider.getBoolean(
 
 ### Domain Examples
 
-#### 1: Boolean dispatch -- Mei Chen's flag provider returns `true` for "dark-mode". Proxy selects DarkModeOn.
-
-#### 2: Boolean with convenience annotations -- Mei Chen uses `@WhenTrue` on DarkModeOn and `@WhenFalse` on DarkModeOff instead of `@Variant(booleanValue = ...)`. Both are syntactic sugar processed identically.
-
-#### 3: Boolean REQUIRED satisfied -- Both `@Variant(booleanValue = true)` and `@Variant(booleanValue = false)` (or `@WhenTrue`/`@WhenFalse`) exist. REQUIRED strategy is satisfied. Compiles.
-
-#### 4: DefaultVariant covers boolean gap -- Only `@WhenTrue` exists, but `@DefaultVariant` covers the false case. REQUIRED is satisfied.
+- 1: Boolean dispatch -- Mei Chen's flag provider returns `true` for "dark-mode". Proxy selects DarkModeOn.
+- 2: Boolean with convenience annotations -- Mei Chen uses `@WhenTrue` on DarkModeOn and `@WhenFalse` on DarkModeOff instead of `@Variant(booleanValue = ...)`. Both are syntactic sugar processed identically.
+- 3: Boolean REQUIRED satisfied -- Both `@Variant(booleanValue = true)` and `@Variant(booleanValue = false)` (or `@WhenTrue`/`@WhenFalse`) exist. REQUIRED strategy is satisfied. Compiles.
+- 4: DefaultVariant covers boolean gap -- Only `@WhenTrue` exists, but `@DefaultVariant` covers the false case. REQUIRED is satisfied.
 
 ### UAT Scenarios (BDD)
 
@@ -431,11 +420,9 @@ Add `getBoolean(String key)` and `getInt(String key)` as default methods on `Fla
 
 ### Domain Examples
 
-#### 1: Boolean conditional check -- Kenji writes `if (flags.getBoolean("feature-x").orElse(false)) { enableFeatureX(); }`. Clean, no manual parsing.
-
-#### 2: Integer conditional check -- Kenji writes `int maxItems = flags.getInt("max-items").orElse(100);`. Provider returns "200" as string, getInt parses it to 200.
-
-#### 3: Unparseable value is absent -- Provider returns "abc" for "max-items". `flags.getInt("max-items")` returns `Optional.empty()`. Kenji's `.orElse(100)` kicks in.
+- 1: Boolean conditional check -- Kenji writes `if (flags.getBoolean("feature-x").orElse(false)) { enableFeatureX(); }`. Clean, no manual parsing.
+- 2: Integer conditional check -- Kenji writes `int maxItems = flags.getInt("max-items").orElse(100);`. Provider returns "200" as string, getInt parses it to 200.
+- 3: Unparseable value is absent -- Provider returns "abc" for "max-items". `flags.getInt("max-items")` returns `Optional.empty()`. Kenji's `.orElse(100)` kicks in.
 
 ### UAT Scenarios (BDD)
 
@@ -509,11 +496,9 @@ Add `getLong(String key)` and `getDouble(String key)` as default methods on `Fla
 
 ### Domain Examples
 
-#### 1: Long value -- Kenji's rate-limit flag has value "1000000000". `flags.getLong("rate-limit")` returns `OptionalLong.of(1000000000L)`.
-
-#### 2: Double value -- Kenji's sampling-ratio flag has value "0.75". `flags.getDouble("sampling-ratio")` returns `OptionalDouble.of(0.75)`.
-
-#### 3: Overflow handling -- Flag "big-number" has value "999999999999999999999". `flags.getLong("big-number")` returns `Optional.empty()` (exceeds Long.MAX_VALUE).
+- 1: Long value -- Kenji's rate-limit flag has value "1000000000". `flags.getLong("rate-limit")` returns `OptionalLong.of(1000000000L)`.
+- 2: Double value -- Kenji's sampling-ratio flag has value "0.75". `flags.getDouble("sampling-ratio")` returns `OptionalDouble.of(0.75)`.
+- 3: Overflow handling -- Flag "big-number" has value "999999999999999999999". `flags.getLong("big-number")` returns `Optional.empty()` (exceeds Long.MAX_VALUE).
 
 ### UAT Scenarios (BDD)
 

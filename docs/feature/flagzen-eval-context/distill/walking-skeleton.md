@@ -15,6 +15,7 @@ Three walking skeletons trace thin vertical slices through the evaluation contex
 **Demo-able outcome**: "Given a VIP user context, the checkout resolves to PREMIUM instead of CLASSIC."
 
 **Litmus test**:
+
 - Title describes user goal: YES -- "Developer resolves a feature with per-user evaluation context"
 - Given/When describe user actions: YES -- building context, resolving feature
 - Then describes observable outcome: YES -- proxy dispatches to correct variant, provider received context
@@ -31,6 +32,7 @@ Three walking skeletons trace thin vertical slices through the evaluation contex
 **Demo-able outcome**: "Both CheckoutFlow and PaymentMethod resolve using Maria's context within a single code block."
 
 **Litmus test**:
+
 - Title describes user goal: YES -- "Developer scopes evaluation context to a block of code"
 - Given/When describe user actions: YES -- wrapping resolve calls in scoped block
 - Then describes observable outcome: YES -- both features resolved with same targeting key
@@ -47,6 +49,7 @@ Three walking skeletons trace thin vertical slices through the evaluation contex
 **Demo-able outcome**: "Despite an accessor and scoped context being active, the explicit context with targeting key 'explicit-user' is used."
 
 **Litmus test**:
+
 - Title describes user goal: YES -- "Explicit context takes precedence over all other context sources"
 - Given/When describe user actions: YES -- multiple sources configured, explicit passed
 - Then describes observable outcome: YES -- provider received explicit targeting key, accessor not consulted

@@ -56,6 +56,7 @@
 ### CM-A: Hexagonal Boundary Enforcement
 
 All scenarios invoke through driving ports only:
+
 - `EvaluationContext.builder()` -- public API
 - `FeatureDispatcher.resolve(Class)` and `resolve(Class, EvaluationContext)` -- driving port
 - `FlagContext.run(EvaluationContext, Runnable/Supplier)` -- public API
@@ -79,15 +80,15 @@ Not applicable at acceptance test design phase. The DELIVER wave crafter will ex
 
 ## Artifacts Produced
 
-| Artifact | File | Status |
-|----------|------|--------|
-| Walking skeleton scenarios | `tests/acceptance/flagzen-eval-context/walking-skeleton.feature` | Complete |
-| Context model scenarios | `tests/acceptance/flagzen-eval-context/milestone-1-context-model.feature` | Complete |
-| Block-scoped context scenarios | `tests/acceptance/flagzen-eval-context/milestone-2-block-scoped-context.feature` | Complete |
-| Context resolution scenarios | `tests/acceptance/flagzen-eval-context/milestone-3-context-resolution.feature` | Complete |
-| Test scenarios inventory | `docs/feature/flagzen-eval-context/distill/test-scenarios.md` | Complete |
-| Walking skeleton documentation | `docs/feature/flagzen-eval-context/distill/walking-skeleton.md` | Complete |
-| Wave decisions | `docs/feature/flagzen-eval-context/distill/wave-decisions.md` | This file |
+|            Artifact            |                                       File                                       |  Status   |
+| ------------------------------ | -------------------------------------------------------------------------------- | --------- |
+| Walking skeleton scenarios     | `tests/acceptance/flagzen-eval-context/walking-skeleton.feature`                 | Complete  |
+| Context model scenarios        | `tests/acceptance/flagzen-eval-context/milestone-1-context-model.feature`        | Complete  |
+| Block-scoped context scenarios | `tests/acceptance/flagzen-eval-context/milestone-2-block-scoped-context.feature` | Complete  |
+| Context resolution scenarios   | `tests/acceptance/flagzen-eval-context/milestone-3-context-resolution.feature`   | Complete  |
+| Test scenarios inventory       | `docs/feature/flagzen-eval-context/distill/test-scenarios.md`                    | Complete  |
+| Walking skeleton documentation | `docs/feature/flagzen-eval-context/distill/walking-skeleton.md`                  | Complete  |
+| Wave decisions                 | `docs/feature/flagzen-eval-context/distill/wave-decisions.md`                    | This file |
 
 ## Handoff to DELIVER Wave (software-crafter)
 

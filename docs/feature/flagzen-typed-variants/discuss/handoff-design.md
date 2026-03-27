@@ -6,30 +6,30 @@ This package defines the requirements for Milestone 2 (Typed Variants and Condit
 
 ## Artifacts
 
-| Artifact | Path | Purpose |
-|----------|------|---------|
-| Journey Visual | `journey-typed-dispatch-visual.md` | ASCII flow with emotional arc and error paths |
-| Journey Schema | `journey-typed-dispatch.yaml` | Structured journey with shared artifacts |
-| Gherkin Scenarios | `journey-typed-dispatch.feature` | 26 testable scenarios across 2 features |
-| Story Map | `story-map.md` | Backbone, walking skeleton, 2 releases |
-| Prioritization | `prioritization.md` | MoSCoW and release ordering |
-| User Stories | `user-stories.md` | 7 LeanUX stories with BDD scenarios |
-| Shared Artifacts Registry | `shared-artifacts-registry.md` | 5 shared artifacts with integration checkpoints |
-| Outcome KPIs | `outcome-kpis.md` | 4 KPIs with measurement plan |
-| DoR Validation | `dor-validation.md` | All 7 stories PASSED |
-| Peer Review | `peer-review.md` | APPROVED after 2 iterations |
+|         Artifact          |                Path                |                     Purpose                     |
+| ------------------------- | ---------------------------------- | ----------------------------------------------- |
+| Journey Visual            | `journey-typed-dispatch-visual.md` | ASCII flow with emotional arc and error paths   |
+| Journey Schema            | `journey-typed-dispatch.yaml`      | Structured journey with shared artifacts        |
+| Gherkin Scenarios         | `journey-typed-dispatch.feature`   | 26 testable scenarios across 2 features         |
+| Story Map                 | `story-map.md`                     | Backbone, walking skeleton, 2 releases          |
+| Prioritization            | `prioritization.md`                | MoSCoW and release ordering                     |
+| User Stories              | `user-stories.md`                  | 7 LeanUX stories with BDD scenarios             |
+| Shared Artifacts Registry | `shared-artifacts-registry.md`     | 5 shared artifacts with integration checkpoints |
+| Outcome KPIs              | `outcome-kpis.md`                  | 4 KPIs with measurement plan                    |
+| DoR Validation            | `dor-validation.md`                | All 7 stories PASSED                            |
+| Peer Review               | `peer-review.md`                   | APPROVED after 2 iterations                     |
 
 ## Stories for DESIGN Wave
 
-| Story ID | Title | Priority | Est. Days | Dependencies |
-|----------|-------|----------|-----------|-------------|
-| US-M2-01 | FeatureType Enum and @Feature Type Attribute | P1 (Must) | 1 | M0 complete |
-| US-M2-02 | @Variant intValue and booleanValue Attributes | P1 (Must) | 1 | US-M2-01 |
-| US-M2-03 | Compile-Time Type Consistency Validation | P1 (Must) | 2 | US-M2-02 |
-| US-M2-04 | Integer Proxy Dispatch and FlagProvider.getInt | P1 (Must) | 2 | US-M2-03 |
-| US-M2-05 | Boolean Dispatch with REQUIRED Completeness | P2 (Must) | 1-2 | US-M2-04 |
-| US-M2-06 | Conditional API -- getBoolean and getInt | P3 (Should) | 1 | US-M2-04 |
-| US-M2-07 | Conditional API -- getLong and getDouble | P3 (Could) | 0.5 | US-M2-06 |
+| Story ID |                     Title                      |  Priority   | Est. Days | Dependencies |
+| -------- | ---------------------------------------------- | ----------- | --------- | ------------ |
+| US-M2-01 | FeatureType Enum and @Feature Type Attribute   | P1 (Must)   | 1         | M0 complete  |
+| US-M2-02 | @Variant intValue and booleanValue Attributes  | P1 (Must)   | 1         | US-M2-01     |
+| US-M2-03 | Compile-Time Type Consistency Validation       | P1 (Must)   | 2         | US-M2-02     |
+| US-M2-04 | Integer Proxy Dispatch and FlagProvider.getInt | P1 (Must)   | 2         | US-M2-03     |
+| US-M2-05 | Boolean Dispatch with REQUIRED Completeness    | P2 (Must)   | 1-2       | US-M2-04     |
+| US-M2-06 | Conditional API -- getBoolean and getInt       | P3 (Should) | 1         | US-M2-04     |
+| US-M2-07 | Conditional API -- getLong and getDouble       | P3 (Could)  | 0.5       | US-M2-06     |
 
 **Total estimated effort**: 8.5-9.5 days
 
@@ -54,11 +54,11 @@ This package defines the requirements for Milestone 2 (Typed Variants and Condit
 
 ## Risks
 
-| Risk | Probability | Impact | Mitigation |
-|------|------------|--------|------------|
-| Annotation sentinel detection complexity | Medium | Medium | Spike if needed; Java annotation processor APIs support reading default vs explicit values |
-| ProxyGenerator code duplication across types | Low | Low | Extract dispatch template with type parameter |
-| Existing provider adapters need updates | Low | Low | Default methods handle delegation; adapters can optionally override |
+|                     Risk                     | Probability | Impact |                                         Mitigation                                         |
+| -------------------------------------------- | ----------- | ------ | ------------------------------------------------------------------------------------------ |
+| Annotation sentinel detection complexity     | Medium      | Medium | Spike if needed; Java annotation processor APIs support reading default vs explicit values |
+| ProxyGenerator code duplication across types | Low         | Low    | Extract dispatch template with type parameter                                              |
+| Existing provider adapters need updates      | Low         | Low    | Default methods handle delegation; adapters can optionally override                        |
 
 ## DoR Status
 

@@ -6,12 +6,12 @@ Progress against [project-brief.md](project-brief.md). Each milestone maps to an
 
 ## Release Plan
 
-|  Release   |            Milestones            |                                            Theme                                            |
-| ---------- | -------------------------------- | ------------------------------------------------------------------------------------------- |
+|  Release   |              Milestones               |                                                  Theme                                                   |
+| ---------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | **v1.1.0** | M0, M1, M2, M3, M13, M4, M5 (partial) | Core library with typed dispatch, eval context, multi-value, Spring, env provider, one external provider |
-| **v1.2.0** | M5 (remaining), M6, M8, M11      | Condition predicates, remaining providers, hooks, cross-module                              |
-| **v1.3.0** | M7, M9                           | Reactive context, extended testing                                                          |
-| **v1.4.0** | M10                              | CDI/Quarkus integration                                                                     |
+| **v1.2.0** | M5 (remaining), M6, M8, M11           | Condition predicates, remaining providers, hooks, cross-module                                           |
+| **v1.3.0** | M7, M9                                | Reactive context, extended testing                                                                       |
+| **v1.4.0** | M10                                   | CDI/Quarkus integration                                                                                  |
 
 M12 (Documentation) is continuous — Javadoc and docs are updated with every release.
 

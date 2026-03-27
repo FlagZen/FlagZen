@@ -8,38 +8,38 @@ All evaluation context types are within flagzen-core. No new modules are introdu
 
 ### com.flagzen (Public API)
 
-| Type                | Kind              | Status   | Rationale                                        |
-| ------------------- | ----------------- | -------- | ------------------------------------------------ |
-| `EvaluationContext` | Immutable class   | NEW      | Public API -- consumers build and pass contexts  |
-| `FlagContext`       | Final utility     | NEW      | Public API -- consumers scope context to blocks  |
-| `FeatureDispatcher` | Interface         | MODIFIED | New `resolve(Class, EvaluationContext)` overload |
-| `FlagZen`           | Factory class     | MODIFIED | Configuration gains `defaultContext()`           |
+|        Type         |      Kind       |  Status  |                    Rationale                     |
+| ------------------- | --------------- | -------- | ------------------------------------------------ |
+| `EvaluationContext` | Immutable class | NEW      | Public API -- consumers build and pass contexts  |
+| `FlagContext`       | Final utility   | NEW      | Public API -- consumers scope context to blocks  |
+| `FeatureDispatcher` | Interface       | MODIFIED | New `resolve(Class, EvaluationContext)` overload |
+| `FlagZen`           | Factory class   | MODIFIED | Configuration gains `defaultContext()`           |
 
 **Rationale for `com.flagzen`**: These types are directly used by library consumers. They belong in the top-level public API package alongside `FeatureDispatcher` and `FlagZen`.
 
 ### com.flagzen.spi (SPI Contracts)
 
-| Type              | Kind      | Status   | Rationale                                              |
-| ----------------- | --------- | -------- | ------------------------------------------------------ |
-| `FlagProvider`    | Interface | MODIFIED | New default method `getString(key, context)`           |
-| `ContextAccessor` | Interface | NEW      | SPI for pluggable context sources (reactor, mutiny)    |
+|       Type        |   Kind    |  Status  |                      Rationale                      |
+| ----------------- | --------- | -------- | --------------------------------------------------- |
+| `FlagProvider`    | Interface | MODIFIED | New default method `getString(key, context)`        |
+| `ContextAccessor` | Interface | NEW      | SPI for pluggable context sources (reactor, mutiny) |
 
 **Rationale for `com.flagzen.spi`**: `ContextAccessor` is an SPI -- implemented by extension modules, discovered via ServiceLoader. It follows the same pattern as `FlagProvider`.
 
 ### com.flagzen.internal (Internal Implementation)
 
-| Type                      | Kind   | Status   | Rationale                                           |
-| ------------------------- | ------ | -------- | --------------------------------------------------- |
-| `DefaultFeatureDispatcher`| Class  | MODIFIED | Integrates ContextResolver into resolution flow     |
-| `ContextResolver`         | Class  | NEW      | Encapsulates resolution chain, not public API       |
+|            Type            | Kind  |  Status  |                    Rationale                    |
+| -------------------------- | ----- | -------- | ----------------------------------------------- |
+| `DefaultFeatureDispatcher` | Class | MODIFIED | Integrates ContextResolver into resolution flow |
+| `ContextResolver`          | Class | NEW      | Encapsulates resolution chain, not public API   |
 
 **Rationale for `com.flagzen.internal`**: `ContextResolver` is an implementation detail of the resolution chain. It is not exposed to consumers. Package-private visibility enforced.
 
 ### com.flagzen.processor (Annotation Processor -- Compile-Time Only)
 
-| Type             | Kind  | Status   | Rationale                                          |
-| ---------------- | ----- | -------- | -------------------------------------------------- |
-| `ProxyGenerator` | Class | MODIFIED | Generates context-aware dispatch in proxy methods  |
+|       Type       | Kind  |  Status  |                     Rationale                     |
+| ---------------- | ----- | -------- | ------------------------------------------------- |
+| `ProxyGenerator` | Class | MODIFIED | Generates context-aware dispatch in proxy methods |
 
 No new types in the processor package. `ProxyGenerator` is modified to emit `FlagContext.current()` reads in generated `resolveVariant()` methods.
 
@@ -97,19 +97,19 @@ No changes required. Spring auto-configuration creates `DefaultFeatureDispatcher
 
 ### New Public Types
 
-| Type                | Package       | Methods (public)                                                    |
-| ------------------- | ------------- | ------------------------------------------------------------------- |
-| `EvaluationContext` | `com.flagzen` | `targetingKey()`, `attributes()`, `getAttribute(key)`, `builder()`, `toString()`, `equals()`, `hashCode()` |
-| `FlagContext`       | `com.flagzen` | `run(EvaluationContext, Runnable)`, `run(EvaluationContext, Supplier)` |
-| `ContextAccessor`   | `com.flagzen.spi` | `getContext()`, `priority()`                                    |
+|        Type         |      Package      |                                              Methods (public)                                              |
+| ------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------- |
+| `EvaluationContext` | `com.flagzen`     | `targetingKey()`, `attributes()`, `getAttribute(key)`, `builder()`, `toString()`, `equals()`, `hashCode()` |
+| `FlagContext`       | `com.flagzen`     | `run(EvaluationContext, Runnable)`, `run(EvaluationContext, Supplier)`                                     |
+| `ContextAccessor`   | `com.flagzen.spi` | `getContext()`, `priority()`                                                                               |
 
 ### Modified Public Types
 
-| Type                | Package           | Change                                            |
-| ------------------- | ----------------- | ------------------------------------------------- |
-| `FeatureDispatcher` | `com.flagzen`     | +`resolve(Class, EvaluationContext)`               |
-| `FlagProvider`      | `com.flagzen.spi` | +`getString(String, EvaluationContext)` (default)  |
-| `FlagZenConfiguration` | `com.flagzen`  | +`defaultContext(EvaluationContext)`               |
+|          Type          |      Package      |                      Change                       |
+| ---------------------- | ----------------- | ------------------------------------------------- |
+| `FeatureDispatcher`    | `com.flagzen`     | +`resolve(Class, EvaluationContext)`              |
+| `FlagProvider`         | `com.flagzen.spi` | +`getString(String, EvaluationContext)` (default) |
+| `FlagZenConfiguration` | `com.flagzen`     | +`defaultContext(EvaluationContext)`              |
 
 ### Updated Count
 

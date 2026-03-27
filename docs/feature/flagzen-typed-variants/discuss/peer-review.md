@@ -57,6 +57,7 @@ high_issues_count: 1
 ### HIGH: Testing DX for typed features (must address before handoff)
 
 Add to US-M2-04 acceptance criteria:
+
 - `@PinFlag` supports pinning typed features (developer pins variant by its typed value or string representation)
 - `TestFlagContext.pin()` works with typed features
 - `InMemoryFlagProvider` supports typed value storage or correctly parses string values via default methods
@@ -84,6 +85,7 @@ One HIGH issue (testing DX) requires remediation before DESIGN handoff. The thre
 ## Iteration 2: Post-Remediation
 
 All HIGH and MEDIUM issues addressed:
+
 - HIGH (testing DX): Added 3 AC items to US-M2-04 covering @PinFlag, TestFlagContext, InMemoryFlagProvider for typed features
 - MEDIUM (provider-native typed resolution): Added to US-M2-04 technical notes
 - MEDIUM (multi-feature variant mixed types): Added to US-M2-04 technical notes
