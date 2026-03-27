@@ -1,0 +1,273 @@
+journey:
+  name: "Evaluation Context Integration"
+  goal: "Resolve feature flags based on user/tenant context for targeted flag resolution"
+  persona: "Kenji Tanaka -- Senior Java developer integrating FlagZen context support"
+  feature_type: "backend (API extension)"
+
+  emotional_arc:
+    start: "Curious -- can FlagZen do per-user targeting?"
+    middle: "Confident -- builder API is ergonomic, explicit context is minimal change"
+    end: "Satisfied -- resolution order is predictable, block-scoped context eliminates boilerplate"
+
+steps:
+  - id: 1
+    name: "Discover Context API"
+    action: "Browse FeatureDispatcher Javadoc / IDE autocomplete"
+
+    api_surface: |
+      interface FeatureDispatcher {
+        <T> T resolve(Class<T> featureType);
+        <T> T resolve(Class<T> featureType, EvaluationContext context);  // NEW
+      }
+
+    shared_artifacts:
+      - name: "FeatureDispatcher.resolve() overload"
+        source: "com.flagzen.FeatureDispatcher"
+        consumers: ["generated proxies", "user code", "test code"]
+
+    emotional_state:
+      entry: "Curious -- exploring new API"
+      exit: "Confident -- recognizes familiar pattern"
+
+    integration_checkpoint: |
+      resolve(Class, EvaluationContext) overload is visible in IDE autocomplete
+      and documented in Javadoc.
+
+    gherkin: |
+      Scenario: Developer discovers context-aware resolve
+        Given Kenji Tanaka has FlagZen M1 on his classpath
+        When he views FeatureDispatcher in his IDE
+        Then he sees both resolve(Class) and resolve(Class, EvaluationContext) methods
+        And the Javadoc explains that context is used for targeted flag resolution
+
+  - id: 2
+    name: "Model Evaluation Context"
+    action: "Create EvaluationContext via builder"
+
+    api_surface: |
+      EvaluationContext context = EvaluationContext.builder()
+          .targetingKey("user-7291")
+          .attribute("plan", "enterprise")
+          .attribute("region", "eu-west")
+          .build();
+
+    shared_artifacts:
+      - name: "EvaluationContext"
+        source: "com.flagzen.EvaluationContext"
+        consumers: ["FeatureDispatcher.resolve()", "FlagProvider.getString()", "FlagContext.run()", "ContextAccessor.getContext()"]
+      - name: "EvaluationContext.Builder"
+        source: "com.flagzen.EvaluationContext"
+        consumers: ["user code", "ContextAccessor implementations", "test code"]
+
+    emotional_state:
+      entry: "Confident -- builder pattern is familiar"
+      exit: "Confident -- builder pattern is clean and familiar"
+
+    integration_checkpoint: |
+      Builder validates nothing (targeting key is nullable, attributes are flexible).
+      EvaluationContext has meaningful toString(), equals(), hashCode().
+      Immutability is enforced by type design (no setters, unmodifiable collections) -- verified by unit test, not acceptance scenario.
+
+    gherkin: |
+      Scenario: Developer creates evaluation context with targeting key and attributes
+        Given Kenji Tanaka needs to target flag resolution for user "user-7291"
+        When he builds an EvaluationContext with targeting key "user-7291" and attribute "plan" = "enterprise"
+        Then the targeting key is "user-7291"
+        And the attribute "plan" has value "enterprise"
+
+      Scenario: Developer creates evaluation context without targeting key
+        Given Kenji Tanaka needs context with only attributes
+        When he builds an EvaluationContext with attribute "region" = "eu-west" but no targeting key
+        Then the context is valid
+        And the targeting key is null
+
+  - id: 3
+    name: "Pass Explicit Context to resolve()"
+    action: "Call dispatcher.resolve(Class, EvaluationContext)"
+
+    api_surface: |
+      CheckoutFlow checkout = dispatcher.resolve(CheckoutFlow.class, context);
+      checkout.execute(cart);
+
+    shared_artifacts:
+      - name: "FlagProvider.getString(String, EvaluationContext)"
+        source: "com.flagzen.spi.FlagProvider"
+        consumers: ["generated proxies", "provider implementations"]
+
+    emotional_state:
+      entry: "Confident -- one additional parameter"
+      exit: "Competent -- existing code unchanged"
+
+    integration_checkpoint: |
+      FlagProvider.getString(String, EvaluationContext) has default method
+      delegating to getString(String) for backward compatibility.
+      Generated proxies pass context through to FlagProvider.
+
+    gherkin: |
+      Scenario: Explicit context passed to flag provider
+        Given Kenji Tanaka has a FlagProvider that returns "PREMIUM" for enterprise users
+        And an EvaluationContext with targeting key "user-7291" and attribute "plan" = "enterprise"
+        When he calls dispatcher.resolve(CheckoutFlow.class, context)
+        Then the FlagProvider receives the context
+        And the resolved variant is the one matching "PREMIUM"
+
+      Scenario: Existing resolve without context still works
+        Given Kenji Tanaka has existing code calling dispatcher.resolve(CheckoutFlow.class)
+        When he upgrades to M1
+        Then the existing call compiles and works unchanged
+        And the FlagProvider receives getString(key) without context
+
+  - id: 4
+    name: "Block-Scoped Context via FlagContext.run()"
+    action: "Wrap request-handling code in FlagContext.run()"
+
+    api_surface: |
+      FlagContext.run(context, () -> {
+          CheckoutFlow checkout = dispatcher.resolve(CheckoutFlow.class);
+          PaymentMethod payment = dispatcher.resolve(PaymentMethod.class);
+      });
+
+    shared_artifacts:
+      - name: "FlagContext"
+        source: "com.flagzen.FlagContext"
+        consumers: ["user code", "framework integrations"]
+      - name: "ScopedValue/ThreadLocal storage"
+        source: "com.flagzen.internal"
+        consumers: ["FlagContext.run()", "DefaultFeatureDispatcher"]
+
+    emotional_state:
+      entry: "Interested -- how to avoid threading context through call stack"
+      exit: "Relieved -- FlagContext.run() handles scoping transparently"
+
+    integration_checkpoint: |
+      FlagContext.run() stores context in ScopedValue (Java 21+) or ThreadLocal (Java 17-20).
+      Context is automatically cleared when the block exits.
+      Nested FlagContext.run() uses innermost context.
+      resolve(Class, EvaluationContext) always beats scoped context.
+
+    gherkin: |
+      Scenario: Block-scoped context applies to all resolve calls within block
+        Given Kenji Tanaka has an EvaluationContext with targeting key "user-7291"
+        When he wraps two resolve() calls inside FlagContext.run(context, ...)
+        Then both resolve() calls use the scoped context
+        And the FlagProvider receives the context for both calls
+
+      Scenario: Explicit context overrides block-scoped context
+        Given Kenji Tanaka is inside a FlagContext.run() block with context A
+        When he calls dispatcher.resolve(CheckoutFlow.class, contextB)
+        Then contextB is used for that resolve call, not context A
+
+      Scenario: Context is cleared after block exits
+        Given Kenji Tanaka has completed a FlagContext.run() block
+        When he calls dispatcher.resolve(CheckoutFlow.class) after the block
+        Then no scoped context is available
+        And the resolve call falls through to ContextAccessor or default
+
+  - id: 5
+    name: "SPI Extension via ContextAccessor"
+    action: "Implement ContextAccessor for framework-specific context"
+
+    api_surface: |
+      public interface ContextAccessor {
+          Optional<EvaluationContext> getContext();
+          int priority();  // lower = higher priority
+      }
+
+    shared_artifacts:
+      - name: "ContextAccessor SPI"
+        source: "com.flagzen.spi.ContextAccessor"
+        consumers: ["reactor module (M6)", "mutiny module (M6)", "custom implementations"]
+
+    emotional_state:
+      entry: "Curious -- how to integrate with framework context"
+      exit: "Empowered -- SPI pattern is familiar from FlagProvider"
+
+    integration_checkpoint: |
+      ContextAccessor is discovered via ServiceLoader.
+      Multiple accessors sorted by priority().
+      First non-empty result wins.
+      ContextAccessor sits between explicit/scoped and default in resolution order.
+
+    gherkin: |
+      Scenario: Custom ContextAccessor provides context
+        Given Kenji Tanaka has implemented a RequestContextAccessor with priority 100
+        And it returns an EvaluationContext with targeting key from the current request
+        When dispatcher.resolve(CheckoutFlow.class) is called without explicit context
+        Then the ContextAccessor's context is used
+        And the FlagProvider receives the accessor-provided context
+
+      Scenario: ContextAccessor is skipped when explicit context provided
+        Given a ContextAccessor is registered
+        When Kenji Tanaka calls dispatcher.resolve(CheckoutFlow.class, explicitContext)
+        Then the ContextAccessor is not invoked
+        And the explicit context is used
+
+  - id: 6
+    name: "Verify Resolution Order"
+    action: "Test all context resolution paths"
+
+    api_surface: |
+      Resolution order:
+        1. Explicit parameter (dispatcher.resolve(Class, context))
+        2. ContextAccessor (ServiceLoader-discovered, priority-ordered)
+        3. Block-scoped (FlagContext.run())
+        4. Default context (FlagZen.configure(c -> c.defaultContext(ctx)))
+
+    shared_artifacts:
+      - name: "Resolution order"
+        source: "com.flagzen.internal.DefaultFeatureDispatcher"
+        consumers: ["documentation", "test assertions", "user mental model"]
+
+    emotional_state:
+      entry: "Verifying -- does it behave as expected?"
+      exit: "Satisfied -- predictable, well-documented behavior"
+
+    integration_checkpoint: |
+      Resolution order is deterministic and documented.
+      Each level can be tested independently.
+      @PinFlag and TestFlagContext work with context-aware resolution.
+
+    gherkin: |
+      Scenario: Full resolution order -- explicit wins
+        Given an explicit context, a ContextAccessor, a scoped context, and a default context are all present
+        When dispatcher.resolve(CheckoutFlow.class, explicitContext) is called
+        Then the explicit context is used
+
+      Scenario: Full resolution order -- accessor wins when no explicit
+        Given no explicit context, a ContextAccessor, a scoped context, and a default context are all present
+        When dispatcher.resolve(CheckoutFlow.class) is called
+        Then the ContextAccessor's context is used
+
+      Scenario: Full resolution order -- scoped wins when no explicit or accessor
+        Given no explicit context, no ContextAccessor, a scoped context, and a default context
+        When dispatcher.resolve(CheckoutFlow.class) is called inside FlagContext.run()
+        Then the scoped context is used
+
+      Scenario: Full resolution order -- default used as last resort
+        Given no explicit context, no ContextAccessor, no scoped context, and a default context
+        When dispatcher.resolve(CheckoutFlow.class) is called
+        Then the default context is used
+
+      Scenario: No context at all -- backward compatible
+        Given no explicit context, no ContextAccessor, no scoped context, no default context
+        When dispatcher.resolve(CheckoutFlow.class) is called
+        Then the FlagProvider receives getString(key) without any context
+        And behavior is identical to M0
+
+integration_validation:
+  shared_artifact_consistency:
+    - artifact: "EvaluationContext"
+      must_match_across: [2, 3, 4, 5, 6]
+      failure_message: "EvaluationContext must be the same immutable type across all resolution paths"
+
+    - artifact: "FlagProvider.getString overload"
+      must_match_across: [3, 6]
+      failure_message: "FlagProvider.getString(key, context) default method must delegate to getString(key) for backward compatibility"
+
+    - artifact: "Resolution order"
+      must_match_across: [3, 4, 5, 6]
+      failure_message: "Resolution order (explicit > accessor > scoped > default) must be consistent across all code paths"
+
+    - artifact: "FlagContext thread safety"
+      must_match_across: [4, 6]
+      failure_message: "FlagContext.run() must use ScopedValue on Java 21+ and ThreadLocal on 17-20, correctly cleaning up in both cases"
