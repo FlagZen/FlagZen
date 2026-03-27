@@ -42,4 +42,51 @@ public final class FlagContext {
     public static void clear() {
         CURRENT.remove();
     }
+
+    /**
+     * Executes the given block with the specified evaluation context active.
+     * The context is available via {@link #current()} for the duration of the block,
+     * and is restored to the previous value (or cleared) when the block completes.
+     *
+     * @param context the evaluation context to activate
+     * @param block the code to execute within the scoped context
+     */
+    public static void run(EvaluationContext context, Runnable block) {
+        EvaluationContext previous = CURRENT.get();
+        CURRENT.set(context);
+        try {
+            block.run();
+        } finally {
+            if (previous == null) {
+                CURRENT.remove();
+            } else {
+                CURRENT.set(previous);
+            }
+        }
+    }
+
+    /**
+     * Executes the given block with the specified evaluation context active,
+     * returning the block's result.
+     * The context is available via {@link #current()} for the duration of the block,
+     * and is restored to the previous value (or cleared) when the block completes.
+     *
+     * @param context the evaluation context to activate
+     * @param block the code to execute within the scoped context
+     * @param <T> the return type
+     * @return the result of the block
+     */
+    public static <T> T run(EvaluationContext context, java.util.function.Supplier<T> block) {
+        EvaluationContext previous = CURRENT.get();
+        CURRENT.set(context);
+        try {
+            return block.get();
+        } finally {
+            if (previous == null) {
+                CURRENT.remove();
+            } else {
+                CURRENT.set(previous);
+            }
+        }
+    }
 }
