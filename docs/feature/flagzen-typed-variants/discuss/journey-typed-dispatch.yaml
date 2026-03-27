@@ -1,0 +1,177 @@
+journey:
+  name: "Typed Polymorphic Dispatch and Conditional API"
+  goal: "Dispatch on integer and boolean flag values with compile-time type safety, and access typed flag values directly via FlagProvider"
+  persona: "Kenji Tanaka -- Java backend developer using FlagZen for polymorphic dispatch"
+
+  emotional_arc:
+    start: "Curious -- wants typed dispatch instead of string encoding"
+    middle: "Focused/Confident -- familiar annotation pattern, processor catches errors"
+    end: "Satisfied -- cleaner code, no parsing hacks"
+
+steps:
+  - id: 1
+    name: "Discover Typed Dispatch"
+    action: "Developer reads documentation for typed @Feature and @Variant annotations"
+
+    shared_artifacts:
+      - name: "feature_type_enum"
+        source: "com.flagzen.FeatureType"
+        displayed_as: "FeatureType.STRING | FeatureType.INT | FeatureType.BOOLEAN"
+        consumers:
+          - "@Feature annotation type attribute"
+          - "Annotation processor validation"
+          - "Proxy generator dispatch logic"
+
+    emotional_state:
+      entry: "Curious -- wondering if FlagZen supports non-string dispatch"
+      exit: "Hopeful -- sees typed dispatch is supported"
+
+    gherkin: |
+      Scenario: Developer discovers typed feature annotation
+        Given Kenji reviews the FlagZen documentation
+        When he looks up the @Feature annotation API
+        Then he sees the type attribute accepting FeatureType.STRING, INT, or BOOLEAN
+        And STRING is the default for backward compatibility
+
+  - id: 2
+    name: "Annotate Feature with Typed Variants"
+    action: "Developer adds @Feature(type=INT) and @Variant(intValue=N) annotations"
+
+    shared_artifacts:
+      - name: "variant_int_value"
+        source: "@Variant annotation intValue attribute"
+        displayed_as: "@Variant(intValue = 42)"
+        consumers:
+          - "Annotation processor validation"
+          - "Generated proxy variant map (Map<Integer, Supplier<T>>)"
+      - name: "variant_boolean_value"
+        source: "@Variant annotation booleanValue attribute"
+        displayed_as: "@Variant(booleanValue = true)"
+        consumers:
+          - "Annotation processor validation"
+          - "Generated proxy variant map (Map<Boolean, Supplier<T>>)"
+
+    emotional_state:
+      entry: "Focused -- applying familiar annotation pattern with new attributes"
+      exit: "Confident -- code looks clean and intention-revealing"
+
+    gherkin: |
+      Scenario: Developer annotates integer-typed feature
+        Given Kenji has a RetryStrategy interface with two implementations
+        When he annotates the interface with @Feature(value = "max-retries", type = FeatureType.INT)
+        And annotates ConservativeRetry with @Variant(intValue = 3)
+        And annotates AggressiveRetry with @Variant(intValue = 10)
+        Then the code compiles successfully
+        And the annotation processor generates a typed proxy
+
+  - id: 3
+    name: "Compile-Time Validation"
+    action: "Annotation processor validates type consistency across feature and variants"
+
+    emotional_state:
+      entry: "Neutral -- expecting compilation to work"
+      exit: "Confident -- processor catches mismatches with actionable messages"
+
+    integration_checkpoint: |
+      All @Variant annotations for a @Feature must use the matching type attribute:
+        - FeatureType.STRING --> @Variant(value = "...")
+        - FeatureType.INT --> @Variant(intValue = ...)
+        - FeatureType.BOOLEAN --> @Variant(booleanValue = ...)
+      Boolean REQUIRED features must have exactly 2 variants (true + false).
+
+    gherkin: |
+      Scenario: Type mismatch detected at compile time
+        Given Kenji has @Feature(value = "max-retries", type = FeatureType.INT)
+        And a variant annotated with @Variant(value = "3") instead of @Variant(intValue = 3)
+        When the annotation processor runs
+        Then compilation fails with an error message
+        And the message explains the type mismatch and suggests using intValue
+
+      Scenario: Mixed variant types detected
+        Given Kenji has @Feature(value = "max-retries", type = FeatureType.INT)
+        And one variant uses @Variant(intValue = 3)
+        And another variant uses @Variant(value = "fast")
+        When the annotation processor runs
+        Then compilation fails listing all inconsistent variants
+
+      Scenario: Boolean REQUIRED completeness
+        Given Kenji has @Feature(value = "dark-mode", type = FeatureType.BOOLEAN, fallback = REQUIRED)
+        And only a variant with @Variant(booleanValue = true)
+        When the annotation processor runs
+        Then compilation fails stating "boolean feature requires both true and false variants"
+
+  - id: 4
+    name: "Runtime Typed Dispatch"
+    action: "Generated proxy uses FlagProvider.getInt/getBoolean for typed resolution"
+
+    shared_artifacts:
+      - name: "flag_provider_typed_methods"
+        source: "com.flagzen.spi.FlagProvider"
+        displayed_as: "getInt(String key), getBoolean(String key)"
+        consumers:
+          - "Generated proxies for INT/BOOLEAN features"
+          - "Conditional API users (non-polymorphic)"
+          - "Provider adapter implementations"
+
+    emotional_state:
+      entry: "Expectant -- proxy should resolve correctly"
+      exit: "Satisfied -- typed dispatch works without parsing hacks"
+
+    gherkin: |
+      Scenario: Integer feature resolves via getInt
+        Given the FlagProvider returns 3 for flag "max-retries"
+        And RetryStrategy is configured with FeatureType.INT
+        When Kenji resolves RetryStrategy via FeatureDispatcher
+        Then the ConservativeRetry variant is returned
+
+      Scenario: Boolean feature resolves via getBoolean
+        Given the FlagProvider returns true for flag "dark-mode"
+        And DarkMode is configured with FeatureType.BOOLEAN
+        When Kenji resolves DarkMode via FeatureDispatcher
+        Then the DarkModeOn variant is returned
+
+  - id: 5
+    name: "Conditional API (Non-Polymorphic)"
+    action: "Developer uses typed accessors on FlagProvider for simple flag checks"
+
+    shared_artifacts:
+      - name: "conditional_api_methods"
+        source: "com.flagzen.spi.FlagProvider"
+        displayed_as: "getBoolean(), getInt(), getLong(), getDouble()"
+        consumers:
+          - "Application code for conditional flag checks"
+          - "Tests via TestFlagContext"
+
+    emotional_state:
+      entry: "Pragmatic -- sometimes needs simple flag check without polymorphism"
+      exit: "Satisfied -- clean API, consistent with typed dispatch"
+
+    gherkin: |
+      Scenario: Boolean conditional check
+        Given the FlagProvider has flag "feature-x" with string value "true"
+        When Kenji calls flags.getBoolean("feature-x")
+        Then Optional.of(true) is returned
+
+      Scenario: Integer conditional check
+        Given the FlagProvider has flag "max-items" with string value "100"
+        When Kenji calls flags.getInt("max-items")
+        Then Optional.of(100) is returned
+
+      Scenario: Unparseable value returns empty
+        Given the FlagProvider has flag "max-items" with string value "abc"
+        When Kenji calls flags.getInt("max-items")
+        Then Optional.empty() is returned
+
+integration_validation:
+  shared_artifact_consistency:
+    - artifact: "feature_type_enum"
+      must_match_across: [1, 2, 3, 4]
+      failure_message: "FeatureType enum values must be consistent across annotation, processor, and proxy generator"
+
+    - artifact: "flag_provider_typed_methods"
+      must_match_across: [4, 5]
+      failure_message: "FlagProvider typed methods used by both polymorphic proxies and conditional API must have identical signatures"
+
+    - artifact: "variant_int_value"
+      must_match_across: [2, 3]
+      failure_message: "intValue attribute on @Variant must be validated by processor and used in proxy generation"
