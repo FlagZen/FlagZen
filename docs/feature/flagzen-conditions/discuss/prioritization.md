@@ -13,7 +13,7 @@
 
 |  Story   | Release | Priority | MoSCoW | Value (1-5) | Urgency (1-5) | Effort (1-5) | Score |         Dependencies          |
 | -------- | ------- | -------- | ------ | ----------- | ------------- | ------------ | ----- | ----------------------------- |
-| US-CP-01 | R1 (WS) | P1       | Must   | 5           | 5             | 1            | 25.0  | M1 (EvaluationContext)        |
+| US-CP-01 | R1 (WS) | P1       | Must   | 5           | 5             | 1            | 25.0  | None (uses JDK interfaces)    |
 | US-CP-02 | R1 (WS) | P1       | Must   | 5           | 5             | 1            | 25.0  | None                          |
 | US-CP-04 | R1 (WS) | P1       | Must   | 5           | 5             | 2            | 12.5  | US-CP-01, US-CP-02            |
 | US-CP-06 | R1 (WS) | P1       | Must   | 5           | 5             | 3            | 8.3   | US-CP-01, US-CP-02, US-CP-04  |
@@ -27,11 +27,11 @@
 ## Delivery Sequence
 
 ```
-US-CP-01 (FeaturePredicate) ----+
+US-CP-01 (JDK predicates)  ----+
 | --> US-CP-04 (type validation) --> US-CP-06 (proxy dispatch) |
-| US-CP-02 (@Condition)     -----+                             |
+| US-CP-02 (@Condition)    -----+                              |
                                                                        v
-US-CP-03 (@Condition model)  --> US-CP-05 (order/mixing validation)   US-CP-07 (fallback)
+US-CP-03 (@Condition model)  --> US-CP-05 (order validation)          US-CP-07 (fallback)
                                                                        |
                                                                        v
                                                                   US-CP-08 (Spring DI)

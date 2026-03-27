@@ -8,12 +8,14 @@ iteration: 1
 
 strengths:
   - "Strong compile-time safety emphasis -- all invalid configurations caught before runtime"
-  - "Domain examples use realistic personas and data (Kenji Tanaka, IsEnterprise, IsEuRegion, IsBetaTester)"
+  - "Domain examples use realistic personas and data (Kenji Tanaka, Enterprise, HighRetryRange)"
   - "Clear REQUIRED strategy reinterpretation for condition-based features -- @DefaultVariant mandatory since predicate completeness is not statically verifiable"
   - "Consistent reuse of M0 concepts (FallbackStrategy, @DefaultVariant) with no new learning curve"
-  - "Right-sized stories: 1-3 days each, 3-5 scenarios, clear boundaries"
+  - "Right-sized stories: 1-3 days each, 3-6 scenarios, clear boundaries"
   - "Spring DI story (US-CP-08) explicitly marked as deferrable if M4 not started"
-  - "Error path coverage: invalid predicates, duplicate orders, mixed modes, missing context"
+  - "Error path coverage: invalid predicates, duplicate orders, matches/notMatches mutual exclusion, missing flag value"
+  - "Uses JDK predicate interfaces instead of custom FeaturePredicate -- zero new types for developers to learn"
+  - "Unified dispatch: exact matches and conditions coexist on the same @Feature"
 
 issues_identified:
   confirmation_bias:
@@ -35,7 +37,7 @@ issues_identified:
   priority_validation:
     q1_largest_bottleneck: "YES -- condition predicates are the stated M6 goal"
     q2_simple_alternatives: "ADEQUATE -- noted that server-side targeting rules are preferred when available"
-    q3_constraint_prioritization: "CORRECT -- M1 dependency is correctly tracked"
+    q3_constraint_prioritization: "CORRECT -- dependencies correctly tracked"
     q4_data_justified: "NO_DATA -- personal research project, no user data. Acceptable."
     verdict: "PASS"
 
@@ -48,7 +50,7 @@ high_issues_count: 1
 
 ### High: Predicate exception during test()
 
-Added to US-CP-06 journey error paths (E4) and the Gherkin feature file already covers this implicitly. The technical note in US-CP-06 should be updated to explicitly state exception propagation behavior.
+Added to US-CP-06 journey error paths (E4) and the Gherkin feature file. The technical note in US-CP-06 explicitly states exception propagation behavior.
 
 **Decision**: Predicates are user code. FlagZen does not wrap predicate exceptions. If `test()` throws, the exception propagates to the caller. This is consistent with how generated proxies handle user code exceptions generally.
 
@@ -68,6 +70,9 @@ strengths:
   - "All iteration 1 issues addressed"
   - "Exception propagation behavior documented"
   - "Performance best practice noted"
+  - "JDK predicate interfaces eliminate custom type overhead"
+  - "Unified dispatch removes artificial separation between exact matches and conditions"
+  - "matches/notMatches mutual exclusion validated at compile time"
 
 issues_identified:
   confirmation_bias: []

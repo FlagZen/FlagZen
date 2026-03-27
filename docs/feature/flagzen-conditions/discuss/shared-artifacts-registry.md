@@ -2,33 +2,18 @@
 
 ## Shared Artifacts
 
-### FeaturePredicate Interface
+### JDK Predicate Interfaces
 
 ```yaml
-source_of_truth: "com.flagzen.FeaturePredicate (flagzen-core)"
+source_of_truth: "java.util.function.Predicate<String>, IntPredicate, LongPredicate, DoublePredicate (JDK)"
 consumers:
   - "Predicate implementation classes (user code)"
   - "Annotation processor validation (FlagZenProcessor)"
   - "Generated proxy dispatch logic (ProxyGenerator)"
-  - "@Condition annotation's on() attribute (type reference)"
-owner: "flagzen-core"
-integration_risk: "HIGH -- contract change breaks all predicates and generated proxies"
-validation: "FeaturePredicate has single method: boolean test(EvaluationContext ctx)"
-```
-
-### EvaluationContext
-
-```yaml
-source_of_truth: "com.flagzen.EvaluationContext (flagzen-core, M1)"
-consumers:
-  - "FeaturePredicate.test() parameter"
-  - "FlagContext.run() parameter"
-  - "FeatureDispatcher.resolve() parameter"
-  - "FlagProvider.getString(key, context) parameter"
-  - "ContextAccessor.getContext() return type"
-owner: "flagzen-core (M1 milestone)"
-integration_risk: "HIGH -- M6 depends on M1 delivering this type unchanged"
-validation: "Immutable record/class with targetingKey and attributes map"
+  - "@Condition annotation's matches()/notMatches() attribute (type reference)"
+owner: "JDK (standard library)"
+integration_risk: "LOW -- stable JDK interfaces, no contract to maintain"
+validation: "Predicate classes implement one of the supported JDK predicate interfaces"
 ```
 
 ### @Condition Annotation
@@ -40,8 +25,21 @@ consumers:
   - "Annotation processor validation"
   - "Proxy generator code generation"
 owner: "flagzen-core"
-integration_risk: "MEDIUM -- annotation attributes (on, order) must match processor expectations"
-validation: "on() returns Class<? extends FeaturePredicate>, order() returns int"
+integration_risk: "MEDIUM -- annotation attributes (matches, notMatches) must match processor expectations"
+validation: "matches() or notMatches() returns a class implementing a JDK predicate interface; matches and notMatches are mutually exclusive"
+```
+
+### @Variant order Attribute
+
+```yaml
+source_of_truth: "com.flagzen.Variant (flagzen-core)"
+consumers:
+  - "@Variant(order = int) on user variant classes"
+  - "Annotation processor duplicate detection"
+  - "Proxy generator dispatch sequence"
+owner: "flagzen-core"
+integration_risk: "MEDIUM -- order attribute must be on @Variant, not on @Condition"
+validation: "order values are unique within the same @Feature; optional when unambiguous"
 ```
 
 ### FallbackStrategy Enum
@@ -68,34 +66,34 @@ consumers:
   - "Spring FeatureFactoryBean registration"
 owner: "flagzen-core annotation processor"
 integration_risk: "MEDIUM -- proxy shape changes affect all consumers"
-validation: "Proxy implements @Feature interface, has zero reflection imports"
+validation: "Proxy implements @Feature interface, has zero reflection imports, supports unified dispatch (exact matches + conditions)"
 ```
 
-### Context Resolution Order
+### Unified Dispatch Order
 
 ```yaml
-source_of_truth: "com.flagzen.internal.DefaultFeatureDispatcher (M1: US-EC-07)"
+source_of_truth: "Generated proxy (ProxyGenerator)"
 consumers:
-  - "Value-based dispatch (M0+M1)"
-  - "Condition-based predicate evaluation (M6)"
-owner: "flagzen-core (M1 milestone)"
-integration_risk: "LOW -- resolution order is the same for both dispatch modes"
-validation: "Order: explicit > accessor > scoped > default"
+  - "Exact match dispatch"
+  - "Condition-based predicate evaluation"
+owner: "flagzen-core annotation processor"
+integration_risk: "MEDIUM -- dispatch order must be deterministic"
+validation: "Exact matches checked first, then conditions by @Variant order"
 ```
 
 ## Integration Checkpoints
 
-### Checkpoint 1: M1 Dependency
+### Checkpoint 1: JDK Predicate Interface Compatibility
 
-EvaluationContext from M1 (US-EC-01) must be available before M6 development begins. FeaturePredicate.test() takes EvaluationContext as its parameter. If EvaluationContext API changes during M1 development, FeaturePredicate contract must be updated.
+Predicates must implement one of the supported JDK interfaces: `Predicate<String>`, `IntPredicate`, `LongPredicate`, `DoublePredicate`. The annotation processor validates this at compile time.
 
 ### Checkpoint 2: Annotation Processor Extension
 
-The existing FlagZenProcessor must be extended (not replaced) to handle @Condition. Value-based validation and condition-based validation must coexist. The processor must reject features that mix both modes.
+The existing FlagZenProcessor must be extended (not replaced) to handle @Condition. Value-based validation and condition-based validation must coexist. The processor must support unified dispatch where exact matches and conditions coexist on the same @Feature.
 
 ### Checkpoint 3: Proxy Generator Extension
 
-ProxyGenerator must emit a second dispatch path for condition-based features. The generated proxy determines dispatch mode at construction time (value-based vs condition-based) based on the metadata. Both modes share the same FallbackStrategy and @DefaultVariant behavior.
+ProxyGenerator must emit unified dispatch logic supporting both exact matches and conditions on the same @Feature. Exact matches are checked first, then conditions by @Variant order. Both modes share the same FallbackStrategy and @DefaultVariant behavior.
 
 ### Checkpoint 4: FallbackStrategy Consistency
 

@@ -2,11 +2,11 @@
 
 ## Persona
 
-**Kenji Tanaka** -- Senior Java developer at a SaaS company. Uses FlagZen for polymorphic dispatch. Wants to select variants based on runtime context properties (user plan, region, deployment stage) without depending on an external flag service. Comfortable with annotation-based APIs and the Strategy pattern.
+**Kenji Tanaka** -- Senior Java developer at a SaaS company. Uses FlagZen for polymorphic dispatch. Wants to select variants based on flag values (pricing tier, retry count, threshold) without depending on an external flag service. Comfortable with annotation-based APIs and the Strategy pattern.
 
 ## Journey Goal
 
-Define predicate-based conditions on variants so the proxy evaluates them in order against the EvaluationContext and dispatches to the first matching variant -- a declarative in-code Strategy pattern selector.
+Define predicate-based conditions on variants so the proxy evaluates them in order against the flag value and dispatches to the first matching variant -- a declarative in-code Strategy pattern selector. Exact matches and conditions can coexist on the same @Feature via unified ordered dispatch.
 
 ## Emotional Arc
 
@@ -24,41 +24,48 @@ to variants"
      |                      |                     |                      |
      v                      v                     v                      v
 Kenji writes a         Kenji puts              Annotation             Proxy evaluates
-FeaturePredicate       @Condition on           processor              predicates in
-implementation         @Variant                validates &            order, first
-                                               generates proxy        match wins
+JDK predicate          @Condition on           processor              predicates in
+implementation         @Variant with           validates &            order, first
+(tests flag value)     order on @Variant       generates proxy        match wins
 
   Feels:                 Feels:                 Feels:                 Feels:
   Familiar --            Declarative,           Safe -- errors         Confident --
   just a                 reads like             caught at compile      deterministic
-  functional             intent                 time                   behavior
+  JDK functional         intent                 time                   behavior
   interface
 
   Artifacts:             Artifacts:             Artifacts:             Artifacts:
-  IsEnterprise.java      @Variant(when=...)     Generated proxy        Resolved variant
-  (implements            on variant class       with predicate         instance
-  FeaturePredicate)                             dispatch logic
+  Enterprise.java        @Variant(when=...,     Generated proxy        Resolved variant
+  (implements            order=N)               with predicate         instance
+  Predicate<String>)     on variant class       dispatch logic
 ```
 
 ## Step Details
 
-### Step 1: Define FeaturePredicate
+### Step 1: Define Predicate
 
 ```
 +-- Define Predicate ------------------------------------------------+
 |                                                                     |
-|  public class IsEnterprise implements FeaturePredicate {            |
+|  public class Enterprise implements Predicate<String> {             |
 |      @Override                                                      |
-|      public boolean test(EvaluationContext ctx) {                   |
-|          return "enterprise".equals(ctx.attribute("plan"));         |
+|      public boolean test(String value) {                            |
+|          return "enterprise".equals(value);                         |
+|      }                                                              |
+|  }                                                                  |
+|                                                                     |
+|  public class HighRetryRange implements IntPredicate {              |
+|      @Override                                                      |
+|      public boolean test(int value) {                               |
+|          return value >= 7;                                          |
 |      }                                                              |
 |  }                                                                  |
 |                                                                     |
 |  -- No-arg constructor (required)                                   |
-|  -- Pure function: EvaluationContext in, boolean out                |
+|  -- Pure function: flag value in, boolean out                       |
 |  -- No side effects, no state                                       |
 +---------------------------------------------------------------------+
-  Emotional state: Familiar. "This is just a predicate -- I know this pattern."
+  Emotional state: Familiar. "This is just a JDK predicate -- I know this pattern."
 ```
 
 ### Step 2: Annotate Variant with @Condition
@@ -69,18 +76,20 @@ implementation         @Variant                validates &            order, fir
 |  @Feature("pricing-tier")                                           |
 |  interface PricingStrategy { Money calculate(Order order); }        |
 |                                                                     |
-|  @Variant(when = @Condition(on = IsEnterprise.class, order = 1))    |
+|  @Variant(when = @Condition(matches = Enterprise.class), order = 1) |
 |  class EnterprisePricing implements PricingStrategy { ... }         |
 |                                                                     |
-|  @Variant(when = @Condition(on = IsStartup.class, order = 2))       |
+|  @Variant(when = @Condition(matches = Startup.class), order = 2)    |
 |  class StartupPricing implements PricingStrategy { ... }            |
 |                                                                     |
 |  @DefaultVariant                                                    |
 |  class StandardPricing implements PricingStrategy { ... }           |
 |                                                                     |
-|  -- @Condition(on = ...) references the predicate class             |
-|  -- order = int determines evaluation sequence                      |
+|  -- @Condition(matches = ...) references the predicate class        |
+|  -- @Condition(notMatches = ...) for negation (mutually exclusive)   |
+|  -- order on @Variant determines evaluation sequence                |
 |  -- @DefaultVariant catches unmatched cases                         |
+|  -- Exact matches and conditions can coexist on the same @Feature   |
 +---------------------------------------------------------------------+
   Emotional state: Declarative clarity. "This reads like my intent."
 ```
@@ -92,18 +101,19 @@ implementation         @Variant                validates &            order, fir
 |                                                                    |
 |  Annotation processor validates:                                   |
 |                                                                    |
-|  [OK] IsEnterprise implements FeaturePredicate                     |
-|  [OK] IsStartup implements FeaturePredicate                        |
+|  [OK] Enterprise implements Predicate<String>                      |
+|  [OK] Startup implements Predicate<String>                         |
 |  [OK] No duplicate order values within same @Feature               |
 |  [OK] Predicate class has accessible no-arg constructor            |
-|  [OK] @Condition not combined with value-based @Variant("...")     |
+|  [OK] matches and notMatches are not both specified                |
 |                                                                    |
 |  Generates: PricingStrategy_FlagZenProxy                           |
-|  with predicate-based dispatch logic                               |
+|  with unified dispatch logic (exact + predicate)                   |
 |                                                                    |
 |  ERROR EXAMPLE:                                                    |
-|  @Variant(when = @Condition(on = NotAPredicate.class, order = 1))  |
-|  --> error: NotAPredicate does not implement FeaturePredicate      |
+|  @Variant(when = @Condition(matches = NotAPredicate.class))        |
+|  --> error: NotAPredicate does not implement a supported            |
+|             predicate interface                                    |
 +--------------------------------------------------------------------+
   Emotional state: Safe. "If it compiles, it's correct."
 ```
@@ -113,19 +123,13 @@ implementation         @Variant                validates &            order, fir
 ```
 +-- Runtime Dispatch -----------------------------------------------+
 |                                                                    |
-|  EvaluationContext ctx = EvaluationContext.builder()                |
-|      .targetingKey("user-7291")                                    |
-|      .attribute("plan", "enterprise")                              |
-|      .build();                                                     |
+|  PricingStrategy pricing =                                         |
+|      dispatcher.resolve(PricingStrategy.class);                    |
 |                                                                    |
-|  FlagContext.run(ctx, () -> {                                      |
-|      PricingStrategy pricing =                                     |
-|          dispatcher.resolve(PricingStrategy.class);                 |
-|                                                                    |
-|      // Proxy evaluates:                                           |
-|      // 1. IsEnterprise.test(ctx) --> true --> EnterprisePricing    |
-|      // (IsStartup never evaluated -- first match wins)            |
-|  });                                                               |
+|  // Proxy evaluates:                                               |
+|  // 1. Exact matches checked first                                 |
+|  // 2. Enterprise.test("enterprise") --> true --> EnterprisePricing |
+|  // (Startup never evaluated -- first match wins)                  |
 |                                                                    |
 |  FALLBACK CASE (no match, no default):                             |
 |  FallbackStrategy.EXCEPTION --> UnmatchedVariantException          |
@@ -136,16 +140,16 @@ implementation         @Variant                validates &            order, fir
 
 ## Error Paths
 
-### E1: Predicate class does not implement FeaturePredicate
+### E1: Predicate class does not implement a JDK predicate interface
 
 **When**: Compile time
-**What user sees**: `error: IsEnterprise does not implement FeaturePredicate`
-**Recovery**: Implement `FeaturePredicate` on the class
+**What user sees**: `error: Enterprise does not implement a supported predicate interface`
+**Recovery**: Implement `Predicate<String>`, `IntPredicate`, `LongPredicate`, or `DoublePredicate` on the class
 
 ### E2: Duplicate order values within same @Feature
 
 **When**: Compile time
-**What user sees**: `error: Duplicate @Condition order 1 on PricingStrategy`
+**What user sees**: `error: Duplicate @Variant order 1 on PricingStrategy`
 **Recovery**: Assign unique order values
 
 ### E3: No predicate matches and no @DefaultVariant
@@ -160,22 +164,21 @@ implementation         @Variant                validates &            order, fir
 **What user sees**: Exception propagated from predicate evaluation
 **Recovery**: Fix predicate logic; predicates should be pure functions
 
-### E5: Mixing value-based and condition-based @Variant on same feature
+### E5: matches and notMatches both specified on @Condition
 
 **When**: Compile time
-**What user sees**: `error: PricingStrategy mixes value-based and condition-based variants`
-**Recovery**: Use one dispatch mode per @Feature -- either value-based or condition-based
+**What user sees**: `error: matches and notMatches are mutually exclusive on @Condition`
+**Recovery**: Use only one of `matches` or `notMatches` per @Condition
 
-### E6: No EvaluationContext available for condition-based feature
+### E6: No flag value available for condition-based feature
 
 **When**: Runtime
-**What user sees**: No predicate can match (all receive null/empty context). Falls through to @DefaultVariant or FallbackStrategy.
-**Recovery**: Ensure EvaluationContext is provided via explicit param, FlagContext.run(), or ContextAccessor
+**What user sees**: No predicate can match (all receive null/empty value). Falls through to @DefaultVariant or FallbackStrategy.
+**Recovery**: Ensure flag value is available via FlagProvider
 
 ## Integration Points
 
-- **M1 dependency**: EvaluationContext must exist (US-EC-01). FeaturePredicate.test() takes EvaluationContext.
-- **Proxy generation**: Extends existing ProxyGenerator to emit predicate dispatch alongside value-based dispatch.
+- **Proxy generation**: ProxyGenerator emits unified dispatch logic supporting both exact matches and conditions on the same @Feature.
 - **FallbackStrategy**: Existing enum reused unchanged -- @DefaultVariant and FallbackStrategy apply identically.
 - **Spring module**: When flagzen-spring present, predicates can be instantiated via DI instead of no-arg constructor.
-- **Context resolution order**: Same chain (explicit > accessor > scoped > default) provides the EvaluationContext to predicate evaluation.
+- **Unified dispatch**: Exact matches and conditions coexist. `order` on @Variant controls evaluation sequence. Exact matches are checked first, then conditions by order.

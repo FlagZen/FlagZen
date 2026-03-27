@@ -1,6 +1,6 @@
 journey:
   name: "Condition Predicate-Based Variant Selection"
-  goal: "Select variants based on runtime context predicates without external flag provider"
+  goal: "Select variants based on flag value predicates without external flag provider"
   persona: "Kenji Tanaka -- senior Java developer, SaaS company, uses FlagZen polymorphic dispatch"
 
   emotional_arc:
@@ -10,55 +10,58 @@ journey:
 
 steps:
   - id: 1
-    name: "Define FeaturePredicate"
-    action: "Write a class implementing FeaturePredicate with test(EvaluationContext) method"
+    name: "Define Predicate"
+    action: "Write a class implementing a JDK predicate interface (Predicate<String>, IntPredicate, etc.) that tests the flag value"
 
     code_example: |
-      public class IsEnterprise implements FeaturePredicate {
+      public class Enterprise implements Predicate<String> {
           @Override
-          public boolean test(EvaluationContext ctx) {
-              return "enterprise".equals(ctx.attribute("plan"));
+          public boolean test(String value) {
+              return "enterprise".equals(value);
+          }
+      }
+
+      public class HighRetryRange implements IntPredicate {
+          @Override
+          public boolean test(int value) {
+              return value >= 7;
           }
       }
 
     shared_artifacts:
-      - name: "FeaturePredicate interface"
-        source: "com.flagzen.FeaturePredicate (flagzen-core)"
-        displayed_as: "FeaturePredicate"
+      - name: "JDK predicate interfaces"
+        source: "java.util.function.Predicate<String>, java.util.function.IntPredicate, etc."
+        displayed_as: "Predicate<String>, IntPredicate, LongPredicate, DoublePredicate"
         consumers: ["predicate implementations", "annotation processor validation", "proxy dispatch"]
-      - name: "EvaluationContext"
-        source: "com.flagzen.EvaluationContext (flagzen-core, M1)"
-        displayed_as: "EvaluationContext"
-        consumers: ["FeaturePredicate.test()", "FlagContext.run()", "FeatureDispatcher.resolve()"]
 
     emotional_state:
       entry: "Purposeful -- knows what conditions to express"
-      exit: "Comfortable -- familiar functional interface pattern"
+      exit: "Comfortable -- familiar JDK functional interface pattern"
 
     integration_checkpoint: |
-      Predicate class compiles and implements FeaturePredicate.
+      Predicate class compiles and implements a supported JDK predicate interface.
       Has accessible no-arg constructor (or @Component for Spring DI).
 
     gherkin: |
-      Scenario: Define a feature predicate
-        Given Kenji Tanaka needs to select variants based on user plan
-        When he creates IsEnterprise implementing FeaturePredicate
-        And the test method checks ctx.attribute("plan") equals "enterprise"
+      Scenario: Define a predicate using Predicate<String>
+        Given Kenji Tanaka needs to select variants based on flag value
+        When he creates Enterprise implementing Predicate<String>
+        And the test method checks value equals "enterprise"
         Then the predicate compiles successfully
         And it has a no-arg constructor
 
   - id: 2
     name: "Annotate Variant with @Condition"
-    action: "Add @Condition annotation on @Variant referencing the predicate class"
+    action: "Add @Condition annotation on @Variant referencing the predicate class; order on @Variant controls evaluation sequence"
 
     code_example: |
       @Feature("pricing-tier")
       interface PricingStrategy { Money calculate(Order order); }
 
-      @Variant(when = @Condition(on = IsEnterprise.class, order = 1))
+      @Variant(when = @Condition(matches = Enterprise.class), order = 1)
       class EnterprisePricing implements PricingStrategy { ... }
 
-      @Variant(when = @Condition(on = IsStartup.class, order = 2))
+      @Variant(when = @Condition(matches = Startup.class), order = 2)
       class StartupPricing implements PricingStrategy { ... }
 
       @DefaultVariant
@@ -67,10 +70,10 @@ steps:
     shared_artifacts:
       - name: "@Condition annotation"
         source: "com.flagzen.Condition (flagzen-core)"
-        displayed_as: "@Condition(on = ..., order = ...)"
+        displayed_as: "@Condition(matches = ...) or @Condition(notMatches = ...)"
         consumers: ["@Variant annotation", "annotation processor", "proxy generator"]
       - name: "order attribute"
-        source: "@Condition(order = int)"
+        source: "@Variant(order = int)"
         displayed_as: "order"
         consumers: ["proxy dispatch sequence", "compile-time duplicate detection"]
 
@@ -79,15 +82,16 @@ steps:
       exit: "Satisfied -- reads like intent, not implementation"
 
     integration_checkpoint: |
-      @Condition references a valid FeaturePredicate class.
-      Order values are unique within the @Feature.
-      @Variant with @Condition does not also specify value/intValue/booleanValue.
+      @Condition references a valid JDK predicate class.
+      Order values on @Variant are unique within the @Feature.
+      matches and notMatches are mutually exclusive on @Condition.
+      Exact matches and conditions can coexist on the same @Feature.
 
     gherkin: |
       Scenario: Annotate variants with conditions
         Given a @Feature interface PricingStrategy
-        When Kenji annotates EnterprisePricing with @Condition(on = IsEnterprise.class, order = 1)
-        And annotates StartupPricing with @Condition(on = IsStartup.class, order = 2)
+        When Kenji annotates EnterprisePricing with @Condition(matches = Enterprise.class) and order = 1
+        And annotates StartupPricing with @Condition(matches = Startup.class) and order = 2
         And marks StandardPricing as @DefaultVariant
         Then the feature has two condition-based variants and one default
 
@@ -106,20 +110,21 @@ steps:
       exit: "Reassured -- compiler caught errors or confirmed correctness"
 
     integration_checkpoint: |
-      Processor validates: predicate implements FeaturePredicate, no duplicate orders,
-      no mixing of value-based and condition-based on same feature.
+      Processor validates: predicate implements a JDK predicate interface, no duplicate orders,
+      matches/notMatches are mutually exclusive.
+      Exact matches and conditions can coexist on the same feature (unified dispatch).
       Proxy generated with predicate dispatch logic.
 
     gherkin: |
       Scenario: Compile-time validation catches invalid predicate
-        Given a @Variant with @Condition(on = NotAPredicate.class)
+        Given a @Variant with @Condition(matches = NotAPredicate.class)
         When the annotation processor runs
-        Then compilation fails with "NotAPredicate does not implement FeaturePredicate"
+        Then compilation fails with "NotAPredicate does not implement a supported predicate interface"
 
       Scenario: Compile-time validation catches duplicate order
         Given two @Variant annotations on same @Feature with order = 1
         When the annotation processor runs
-        Then compilation fails with "Duplicate @Condition order 1 on PricingStrategy"
+        Then compilation fails with "Duplicate @Variant order 1 on PricingStrategy"
 
       Scenario: Successful compilation generates proxy
         Given valid @Feature with condition-based @Variant annotations
@@ -129,23 +134,16 @@ steps:
 
   - id: 4
     name: "Runtime Dispatch"
-    action: "Proxy evaluates predicates in order against EvaluationContext, first match wins"
+    action: "Proxy evaluates predicates in order against flag value, first match wins; exact matches and conditions coexist"
 
     code_example: |
-      EvaluationContext ctx = EvaluationContext.builder()
-          .targetingKey("user-7291")
-          .attribute("plan", "enterprise")
-          .build();
-
-      FlagContext.run(ctx, () -> {
-          PricingStrategy pricing = dispatcher.resolve(PricingStrategy.class);
-          // IsEnterprise.test(ctx) -> true -> EnterprisePricing
-      });
+      PricingStrategy pricing = dispatcher.resolve(PricingStrategy.class);
+      // Flag value "enterprise" -> Enterprise.test("enterprise") -> true -> EnterprisePricing
 
     shared_artifacts:
-      - name: "Context resolution order"
-        source: "DefaultFeatureDispatcher (M1: US-EC-07)"
-        displayed_as: "explicit > accessor > scoped > default"
+      - name: "Unified dispatch order"
+        source: "Generated proxy"
+        displayed_as: "exact match first, then conditions by order"
         consumers: ["predicate evaluation", "value-based dispatch"]
 
     emotional_state:
@@ -153,38 +151,35 @@ steps:
       exit: "Confident -- deterministic, traceable dispatch"
 
     integration_checkpoint: |
-      EvaluationContext resolved via standard resolution chain (M1).
-      Predicates evaluated in order.
+      Flag value obtained from FlagProvider.
+      Exact matches evaluated first, then conditions by order.
       First match selected. No match falls to @DefaultVariant or FallbackStrategy.
 
     gherkin: |
       Scenario: First matching predicate wins
-        Given PricingStrategy with IsEnterprise (order 1) and IsStartup (order 2)
-        And EvaluationContext with attribute "plan" = "enterprise"
+        Given PricingStrategy with Enterprise (order 1) and Startup (order 2)
+        And flag value "enterprise"
         When dispatcher.resolve(PricingStrategy.class) is called
         Then EnterprisePricing is selected
-        And IsStartup is not evaluated
+        And Startup is not evaluated
 
       Scenario: No predicate matches, default variant used
         Given PricingStrategy with conditions and @DefaultVariant StandardPricing
-        And EvaluationContext with attribute "plan" = "free"
+        And flag value "free"
         When dispatcher.resolve(PricingStrategy.class) is called
         Then StandardPricing is selected
 
       Scenario: No predicate matches, no default, EXCEPTION strategy
         Given PricingStrategy with EXCEPTION fallback and no @DefaultVariant
-        And EvaluationContext with attribute "plan" = "free"
+        And flag value "free"
         When dispatcher.resolve(PricingStrategy.class) is called
         Then UnmatchedVariantException is thrown
 
 integration_validation:
   shared_artifact_consistency:
-    - artifact: "EvaluationContext"
-      must_match_across: [1, 2, 3, 4]
-      failure_message: "EvaluationContext must be the same type from M1 across all steps"
-    - artifact: "FeaturePredicate interface"
+    - artifact: "JDK predicate interfaces"
       must_match_across: [1, 2, 3]
-      failure_message: "FeaturePredicate contract must match between implementation, annotation processor validation, and proxy dispatch"
+      failure_message: "Predicate contract must match between implementation, annotation processor validation, and proxy dispatch"
     - artifact: "FallbackStrategy"
       must_match_across: [3, 4]
       failure_message: "FallbackStrategy behavior must be identical for condition-based and value-based dispatch"

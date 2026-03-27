@@ -1,18 +1,18 @@
 # Definition of Ready Validation: Condition Predicates (flagzen-conditions)
 
-## Story: US-CP-01 -- FeaturePredicate Functional Interface
+## Story: US-CP-01 -- JDK Predicate Contract for Flag Values
 
 |        DoR Item         | Status |                                Evidence/Issue                                |
 | ----------------------- | ------ | ---------------------------------------------------------------------------- |
 | Problem statement clear | PASS   | "No contract for expressing conditions; manual if/else outside FlagZen"      |
 | User/persona identified | PASS   | Kenji Tanaka, senior Java developer, SaaS company, polymorphic dispatch user |
-| 3+ domain examples      | PASS   | IsEnterprise (plan), IsEuRegion (region set), IsBetaTester (multi-attribute) |
-| UAT scenarios (3-7)     | PASS   | 4 scenarios: single method, true match, false match, null attribute          |
-| AC derived from UAT     | PASS   | @FunctionalInterface, test method signature, package location                |
-| Right-sized             | PASS   | 1 day, 4 scenarios, single interface definition                              |
-| Technical notes         | PASS   | M1 dependency, @FunctionalInterface, no generics, zero dependencies          |
-| Dependencies tracked    | PASS   | Depends on M1 US-EC-01 (EvaluationContext)                                   |
-| Outcome KPIs defined    | PASS   | Single interface/method, same pattern as Predicate                           |
+| 3+ domain examples      | PASS   | Enterprise (string), HighRetryRange (int), HighThresholdRange (double)       |
+| UAT scenarios (3-7)     | PASS   | 4 scenarios: string true, string false, int true, null handling              |
+| AC derived from UAT     | PASS   | JDK predicate interfaces, flag value testing, package location               |
+| Right-sized             | PASS   | 1 day, 4 scenarios, no new interface definition (uses JDK)                   |
+| Technical notes         | PASS   | JDK interfaces, flag value testing, zero dependencies                        |
+| Dependencies tracked    | PASS   | No external dependencies (uses JDK standard library)                         |
+| Outcome KPIs defined    | PASS   | Uses familiar JDK interfaces, zero new types                                 |
 
 ### DoR Status: PASSED
 
@@ -20,17 +20,17 @@
 
 ## Story: US-CP-02 -- @Condition Annotation Definition
 
-|        DoR Item         | Status |                           Evidence/Issue                            |
-| ----------------------- | ------ | ------------------------------------------------------------------- |
-| Problem statement clear | PASS   | "No way to declaratively bind predicate to @Variant"                |
-| User/persona identified | PASS   | Kenji Tanaka, has FeaturePredicate implementations                  |
-| 3+ domain examples      | PASS   | Single condition, multiple with ordering, with @DefaultVariant      |
-| UAT scenarios (3-7)     | PASS   | 3 scenarios: compiles, on attribute resolves, backward compat       |
-| AC derived from UAT     | PASS   | Annotation attributes, nesting in @Variant, retention, defaults     |
-| Right-sized             | PASS   | 1 day, 3 scenarios, annotation definition                           |
-| Technical notes         | PASS   | Nested annotation, sentinel default, int order, US-CP-01 dependency |
-| Dependencies tracked    | PASS   | Depends on US-CP-01                                                 |
-| Outcome KPIs defined    | PASS   | Single annotation line vs manual dispatch                           |
+|        DoR Item         | Status |                              Evidence/Issue                               |
+| ----------------------- | ------ | ------------------------------------------------------------------------- |
+| Problem statement clear | PASS   | "No way to declaratively bind predicate to @Variant"                      |
+| User/persona identified | PASS   | Kenji Tanaka, has JDK predicate implementations                          |
+| 3+ domain examples      | PASS   | Single condition with matches, multiple with ordering, negation notMatches |
+| UAT scenarios (3-7)     | PASS   | 3 scenarios: compiles with matches, compiles with notMatches, backward compat |
+| AC derived from UAT     | PASS   | matches/notMatches attributes, order on @Variant, retention, defaults     |
+| Right-sized             | PASS   | 1 day, 3 scenarios, annotation definition                                 |
+| Technical notes         | PASS   | Nested annotation, sentinel default, order on @Variant, US-CP-01 dep     |
+| Dependencies tracked    | PASS   | Depends on US-CP-01                                                       |
+| Outcome KPIs defined    | PASS   | Single annotation line vs manual dispatch                                 |
 
 ### DoR Status: PASSED
 
@@ -42,10 +42,10 @@
 | ----------------------- | ------ | --------------------------------------------------------------------------------- |
 | Problem statement clear | PASS   | "Processor does not understand when attribute"                                    |
 | User/persona identified | PASS   | Kenji compiling @Feature with @Condition variants                                 |
-| 3+ domain examples      | PASS   | Condition variant, value-based variant, sorted collection                         |
-| UAT scenarios (3-7)     | PASS   | 3 scenarios: extract predicate class, distinguish modes, sort by order            |
-| AC derived from UAT     | PASS   | VariantModel extension, annotation mirror reading, sorting, value-based unchanged |
-| Right-sized             | PASS   | 1 day, 3 scenarios, internal processor model                                      |
+| 3+ domain examples      | PASS   | Condition variant (matches), value-based variant, unified dispatch collection     |
+| UAT scenarios (3-7)     | PASS   | 4 scenarios: extract from matches, extract from notMatches, unified dispatch, sort |
+| AC derived from UAT     | PASS   | VariantModel extension, annotation mirror reading, sorting, unified dispatch       |
+| Right-sized             | PASS   | 1 day, 4 scenarios, internal processor model                                      |
 | Technical notes         | PASS   | javax.lang.model, TypeMirror, US-CP-02 dependency                                 |
 | Dependencies tracked    | PASS   | Depends on US-CP-02                                                               |
 | Outcome KPIs defined    | PASS   | Zero processor errors on valid usage                                              |
@@ -56,31 +56,31 @@
 
 ## Story: US-CP-04 -- Compile-Time Predicate Type Validation
 
-|        DoR Item         | Status |                             Evidence/Issue                             |
-| ----------------------- | ------ | ---------------------------------------------------------------------- |
-| Problem statement clear | PASS   | "Invalid predicate class causes runtime ClassCastException"            |
-| User/persona identified | PASS   | Kenji referencing predicate class, expects compile-time safety         |
-| 3+ domain examples      | PASS   | Valid predicate, non-predicate class, missing constructor              |
-| UAT scenarios (3-7)     | PASS   | 4 scenarios: valid, non-predicate, no constructor, abstract class      |
-| AC derived from UAT     | PASS   | Implements check, constructor check, abstract check, actionable errors |
-| Right-sized             | PASS   | 1-2 days, 4 scenarios, processor validation                            |
-| Technical notes         | PASS   | Types.isAssignable(), ElementFilter, US-CP-01+03 dependency            |
-| Dependencies tracked    | PASS   | Depends on US-CP-01, US-CP-03                                          |
-| Outcome KPIs defined    | PASS   | 100% invalid predicates caught at compile time                         |
+|        DoR Item         | Status |                             Evidence/Issue                              |
+| ----------------------- | ------ | ----------------------------------------------------------------------- |
+| Problem statement clear | PASS   | "Invalid predicate class causes runtime ClassCastException"             |
+| User/persona identified | PASS   | Kenji referencing predicate class, expects compile-time safety          |
+| 3+ domain examples      | PASS   | Valid predicate, non-predicate class, missing constructor               |
+| UAT scenarios (3-7)     | PASS   | 5 scenarios: valid, non-predicate, no constructor, abstract, exclusive  |
+| AC derived from UAT     | PASS   | JDK interface check, constructor check, abstract check, mutual exclusion |
+| Right-sized             | PASS   | 1-2 days, 5 scenarios, processor validation                             |
+| Technical notes         | PASS   | Types.isAssignable(), ElementFilter, US-CP-01+03 dependency             |
+| Dependencies tracked    | PASS   | Depends on US-CP-01, US-CP-03                                           |
+| Outcome KPIs defined    | PASS   | 100% invalid predicates caught at compile time                          |
 
 ### DoR Status: PASSED
 
 ---
 
-## Story: US-CP-05 -- Order Uniqueness and Mixing Validation
+## Story: US-CP-05 -- Order Uniqueness Validation
 
 |        DoR Item         | Status |                                    Evidence/Issue                                     |
 | ----------------------- | ------ | ------------------------------------------------------------------------------------- |
-| Problem statement clear | PASS   | "Duplicate order or mixed modes cause ambiguous dispatch"                             |
+| Problem statement clear | PASS   | "Duplicate order causes ambiguous dispatch"                                           |
 | User/persona identified | PASS   | Kenji declaring multiple condition variants                                           |
-| 3+ domain examples      | PASS   | Duplicate order, mixed modes, separate features valid                                 |
-| UAT scenarios (3-7)     | PASS   | 4 scenarios: duplicate rejected, mixed rejected, separate valid, non-sequential valid |
-| AC derived from UAT     | PASS   | Duplicate detection, mixing detection, error messages, non-sequential valid           |
+| 3+ domain examples      | PASS   | Duplicate order, unified dispatch coexistence, separate features valid                |
+| UAT scenarios (3-7)     | PASS   | 4 scenarios: duplicate rejected, unified coexistence, separate valid, non-sequential  |
+| AC derived from UAT     | PASS   | Duplicate detection, unified dispatch, error messages, non-sequential valid           |
 | Right-sized             | PASS   | 1 day, 4 scenarios, processor validation                                              |
 | Technical notes         | PASS   | Partition variants, @DefaultVariant compatible with both, US-CP-03 dependency         |
 | Dependencies tracked    | PASS   | Depends on US-CP-03                                                                   |
@@ -97,10 +97,10 @@
 | Problem statement clear | PASS   | "Proxy generator only supports value-based dispatch"                                  |
 | User/persona identified | PASS   | Kenji with compiled condition-based @Feature                                          |
 | 3+ domain examples      | PASS   | Enterprise selected, startup selected, default selected                               |
-| UAT scenarios (3-7)     | PASS   | 5 scenarios: order evaluation, short-circuit, default, re-evaluation, zero reflection |
-| AC derived from UAT     | PASS   | Predicate dispatch path, order, short-circuit, dynamic, zero reflect                  |
-| Right-sized             | PASS   | 2-3 days, 5 scenarios, significant code generation work                               |
-| Technical notes         | PASS   | Predicate instantiation, context from resolution chain, dispatch mode determination   |
+| UAT scenarios (3-7)     | PASS   | 6 scenarios: order evaluation, short-circuit, default, re-evaluation, exception, zero reflection |
+| AC derived from UAT     | PASS   | Predicate dispatch path, order, short-circuit, dynamic, zero reflect, unified dispatch |
+| Right-sized             | PASS   | 2-3 days, 6 scenarios, significant code generation work                               |
+| Technical notes         | PASS   | Predicate instantiation, flag value from FlagProvider, unified dispatch                |
 | Dependencies tracked    | PASS   | Depends on US-CP-01, 02, 03, 04                                                       |
 | Outcome KPIs defined    | PASS   | Zero dispatch code written by developer                                               |
 
@@ -113,9 +113,9 @@
 |        DoR Item         | Status |                              Evidence/Issue                               |
 | ----------------------- | ------ | ------------------------------------------------------------------------- |
 | Problem statement clear | PASS   | "REQUIRED semantics unclear for condition-based features"                 |
-| User/persona identified | PASS   | Kenji with unmatched context, expects consistent fallback                 |
+| User/persona identified | PASS   | Kenji with unmatched flag value, expects consistent fallback              |
 | 3+ domain examples      | PASS   | EXCEPTION throw, NOOP defaults, REQUIRED demands @DefaultVariant          |
-| UAT scenarios (3-7)     | PASS   | 5 scenarios: EXCEPTION, NOOP, REQUIRED fails, REQUIRED passes, no context |
+| UAT scenarios (3-7)     | PASS   | 5 scenarios: EXCEPTION, NOOP, REQUIRED fails, REQUIRED passes, no value  |
 | AC derived from UAT     | PASS   | EXCEPTION message, NOOP defaults, REQUIRED requires @DefaultVariant       |
 | Right-sized             | PASS   | 1-2 days, 5 scenarios                                                     |
 | Technical notes         | PASS   | REQUIRED interpretation for conditions is key design decision             |
