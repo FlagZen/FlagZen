@@ -85,17 +85,21 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 - [ ] `@WhenTrue` / `@WhenFalse` convenience annotations (with `of` for multi-feature)
 - [ ] Compile-time validation: all variants of a feature use the same type
 - [ ] Compile-time validation: `@Variant` attribute matches `@Feature(type = ...)`
-- [ ] Proxy dispatches on typed value (int/boolean lookup instead of string)
-- [ ] `FlagProvider.getInt(String key)` and `FlagProvider.getBoolean(String key)` for typed resolution
+- [ ] `@Variant(longValue = ...)` for long-typed features
+- [ ] `@Variant(doubleValue = @CloseTo(value = 0.3))` for double-typed features
+- [ ] `@CloseTo` annotation with `value` and `delta` (default 1e-10) for approximate double matching
+- [ ] `FeatureType` extended with LONG and DOUBLE
+- [ ] Proxy dispatches on typed value (int/long/boolean lookup, double approximate match)
 - [ ] REQUIRED strategy works with boolean features (exactly 2 variants: true + false)
 
 #### Conditional API (Non-Polymorphic)
 
-- [ ] `FlagProvider.getBoolean(String key)` default method
-- [ ] `FlagProvider.getInt(String key)` default method
-- [ ] `FlagProvider.getLong(String key)` default method
-- [ ] `FlagProvider.getDouble(String key)` default method
+- [ ] `FlagProvider.getBoolean(String key)` → `Optional<Boolean>`
+- [ ] `FlagProvider.getInt(String key)` → `OptionalInt`
+- [ ] `FlagProvider.getLong(String key)` → `OptionalLong`
+- [ ] `FlagProvider.getDouble(String key)` → `OptionalDouble`
 - [ ] `FlagProvider.getString(String key)` remains the primitive (typed methods delegate + parse)
+- [ ] Context-aware overloads for all typed methods
 
 ### M3: Environment Variable Provider — `flagzen-env`
 

@@ -77,9 +77,26 @@ abstraction over existing flagging libraries.
   class DarkOnMaintenanceOff implements DarkMode, MaintenanceMode { ... }
   ```
 
-  Supported types: STRING (default), INT, BOOLEAN. The processor validates
-  type consistency: all @Variant annotations for a feature must use the
-  matching attribute (value/intValue/booleanValue).
+  // Long and double dispatch
+  @Feature(value = "rate-limit", type = FeatureType.LONG)
+  interface RateLimiter { long maxRequests(); }
+
+  @Variant(longValue = 1000)
+  class StandardLimit implements RateLimiter { ... }
+
+  // Double dispatch with approximate matching (@CloseTo handles
+  // floating-point imprecision from JS backends, etc.)
+  @Feature(value = "sampling-ratio", type = FeatureType.DOUBLE)
+  interface SamplingStrategy { void sample(Event event); }
+
+  @Variant(doubleValue = @CloseTo(value = 0.1))              // default delta = 1e-10
+  @Variant(doubleValue = @CloseTo(value = 0.5, delta = 0.01)) // explicit delta
+  ```
+
+  Supported types: STRING (default), INT, LONG, BOOLEAN, DOUBLE.
+  The processor validates type consistency: all @Variant annotations for a
+  feature must use the matching attribute. FlagProvider returns `OptionalInt`,
+  `OptionalLong`, `OptionalDouble` for primitive types (avoiding boxing).
 
 - Support for enum validation (if present)
 

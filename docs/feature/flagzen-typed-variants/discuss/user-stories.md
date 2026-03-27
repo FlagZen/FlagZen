@@ -257,7 +257,7 @@ The proxy generator produces dispatch logic that calls `FlagProvider.getInt(key)
 
 ### Domain Examples
 
-#### 1: Integer dispatch works -- Kenji's flag provider returns `Optional.of(3)` for `getInt("max-retries")`. The proxy selects ConservativeRetry.
+#### 1: Integer dispatch works -- Kenji's flag provider returns `OptionalInt.of(3)` for `getInt("max-retries")`. The proxy selects ConservativeRetry.
 
 #### 2: Flag value changes at runtime -- Flag provider starts returning 10 instead of 3. Next method call on the proxy dispatches to AggressiveRetry.
 
@@ -268,7 +268,7 @@ The proxy generator produces dispatch logic that calls `FlagProvider.getInt(key)
 #### Scenario: Proxy dispatches on integer value
 
 Given Kenji has RetryStrategy with FeatureType.INT and variants for intValue 3 and 10
-And the FlagProvider returns `Optional.of(3)` for `getInt("max-retries")`
+And the FlagProvider returns `OptionalInt.of(3)` for `getInt("max-retries")`
 When Kenji resolves RetryStrategy via FeatureDispatcher
 Then ConservativeRetry handles the method call
 
@@ -282,7 +282,7 @@ Then AggressiveRetry handles the call
 #### Scenario: Unmatched integer with EXCEPTION fallback
 
 Given RetryStrategy has fallback EXCEPTION
-And the FlagProvider returns `Optional.of(99)` for `getInt("max-retries")`
+And the FlagProvider returns `OptionalInt.of(99)` for `getInt("max-retries")`
 When Kenji resolves RetryStrategy
 Then `UnmatchedVariantException` is thrown
 And the exception message includes "99" and known values [3, 10]
@@ -291,7 +291,7 @@ And the exception message includes "99" and known values [3, 10]
 
 Given a FlagProvider that implements only `getString()` returning "42"
 When `getInt("some-key")` is called via the default method
-Then `Optional.of(42)` is returned
+Then `OptionalInt.of(42)` is returned
 
 #### Scenario: FlagProvider.getInt returns empty for non-integer
 
@@ -461,7 +461,7 @@ Then `Optional.empty()` is returned
 
 Given the FlagProvider has flag "max-items" with string value "200"
 When Kenji calls `flags.getInt("max-items")`
-Then `Optional.of(200)` is returned
+Then `OptionalInt.of(200)` is returned
 
 #### Scenario: getInt returns empty for non-integer string
 
@@ -493,25 +493,25 @@ Then `Optional.empty()` is returned
 
 ---
 
-## US-M2-07: Conditional API -- getLong and getDouble on FlagProvider
+## US-M2-07: Long/Double Typed Dispatch, @CloseTo, and Conditional API
 
 ### Problem
 
-Kenji Tanaka has a rate-limiting service with a "rate-limit" flag that holds a long value (1000000000) and a "sampling-ratio" flag with a double value (0.75). He currently parses these manually from `getString()`. He wants `getLong()` and `getDouble()` for consistency with the existing `getBoolean()` and `getInt()` methods.
+Kenji Tanaka has a rate-limiting service with a "rate-limit" flag that holds a long value (1000000000) and a "sampling-ratio" flag with a double value (0.75). He currently parses these manually from `getString()`. He wants `getLong()` and `getDouble()` for consistency with the existing `getBoolean()` and `getInt()` methods. He also wants `@Variant(longValue = ...)` and `@Variant(doubleValue = @CloseTo(...))` for typed polymorphic dispatch on long and double values. The `@CloseTo` annotation handles floating-point imprecision (e.g., JS backends where 0.1+0.2 != 0.3).
 
 ### Who
 
-- Java developer | Uses FlagProvider with long/double flag values | Wants complete typed accessor set
+- Java developer | Uses FlagProvider with long/double flag values | Wants typed dispatch and complete typed accessor set
 
 ### Solution
 
-Add `getLong(String key)` and `getDouble(String key)` as default methods on `FlagProvider`, following the same pattern as `getBoolean()` and `getInt()`.
+Add `getLong(String key)` and `getDouble(String key)` as default methods on `FlagProvider`. Add `longValue` and `doubleValue` attributes to `@Variant`. Add `@CloseTo(value, delta)` annotation for approximate double matching with default delta = 1e-10. Add LONG and DOUBLE to `FeatureType` enum.
 
 ### Domain Examples
 
-#### 1: Long value -- Kenji's rate-limit flag has value "1000000000". `flags.getLong("rate-limit")` returns `Optional.of(1000000000L)`.
+#### 1: Long value -- Kenji's rate-limit flag has value "1000000000". `flags.getLong("rate-limit")` returns `OptionalLong.of(1000000000L)`.
 
-#### 2: Double value -- Kenji's sampling-ratio flag has value "0.75". `flags.getDouble("sampling-ratio")` returns `Optional.of(0.75)`.
+#### 2: Double value -- Kenji's sampling-ratio flag has value "0.75". `flags.getDouble("sampling-ratio")` returns `OptionalDouble.of(0.75)`.
 
 #### 3: Overflow handling -- Flag "big-number" has value "999999999999999999999". `flags.getLong("big-number")` returns `Optional.empty()` (exceeds Long.MAX_VALUE).
 
@@ -521,7 +521,7 @@ Add `getLong(String key)` and `getDouble(String key)` as default methods on `Fla
 
 Given the FlagProvider has flag "rate-limit" with string value "1000000000"
 When Kenji calls `flags.getLong("rate-limit")`
-Then `Optional.of(1000000000L)` is returned
+Then `OptionalLong.of(1000000000L)` is returned
 
 #### Scenario: getLong returns empty for non-long string
 
@@ -533,7 +533,7 @@ Then `Optional.empty()` is returned
 
 Given the FlagProvider has flag "ratio" with string value "0.75"
 When Kenji calls `flags.getDouble("ratio")`
-Then `Optional.of(0.75)` is returned
+Then `OptionalDouble.of(0.75)` is returned
 
 #### Scenario: getDouble returns empty for non-numeric string
 
@@ -546,26 +546,35 @@ Then `Optional.empty()` is returned
 Given the FlagProvider has context-dependent flag "rate-limit"
 And for targeting key "premium-tier" the value is "5000000000"
 When Kenji calls `flags.getLong("rate-limit", context)` with targeting key "premium-tier"
-Then `Optional.of(5000000000L)` is returned
+Then `OptionalLong.of(5000000000L)` is returned
 
 ### Acceptance Criteria
 
-- [ ] `FlagProvider.getLong(String key)` default method parses from getString
-- [ ] `FlagProvider.getDouble(String key)` default method parses from getString
+- [ ] `FlagProvider.getLong(String key)` default method returning `OptionalLong`, parses from getString
+- [ ] `FlagProvider.getDouble(String key)` default method returning `OptionalDouble`, parses from getString
 - [ ] Both methods have context-aware overloads
-- [ ] Parse failures and absent flags return Optional.empty()
-- [ ] Numeric overflow returns Optional.empty(), not exception
+- [ ] Parse failures and absent flags return empty optionals
+- [ ] Numeric overflow returns empty, not exception
+- [ ] `@Variant(longValue = ...)` attribute for long-typed features
+- [ ] `@Variant(doubleValue = @CloseTo(value = 0.3))` for double-typed features
+- [ ] `@CloseTo` annotation with `value` (double) and `delta` (double, default 1e-10)
+- [ ] `FeatureType` enum extended with LONG and DOUBLE
+- [ ] Proxy dispatches on long value (exact match) and double value (approximate match within delta)
+- [ ] Compile-time validation: longValue/doubleValue matches @Feature(type = LONG/DOUBLE)
 
 ### Outcome KPIs
 
 - **Who**: Java developers using FlagProvider with long/double flags
-- **Does what**: Access long and double flag values without manual parsing
-- **By how much**: Complete typed accessor set (boolean, int, long, double) available on FlagProvider
-- **Measured by**: getLong/getDouble return correct values for valid input, empty for invalid
-- **Baseline**: Manual getString + Long.parseLong / Double.parseDouble
+- **Does what**: Dispatch on and access long/double flag values with type safety
+- **By how much**: Complete typed accessor set (boolean, int, long, double) with polymorphic dispatch support
+- **Measured by**: getLong/getDouble return correct values; proxy dispatches correctly on typed values
+- **Baseline**: Manual getString + parsing, no long/double polymorphic dispatch
 
 ### Technical Notes
 
-- These are purely additive default methods on FlagProvider -- no impact on existing implementations
-- Not used by polymorphic dispatch (no LONG or DOUBLE FeatureType) -- conditional API only
-- Pattern is identical to getInt/getBoolean: parse from getString, catch NumberFormatException, return empty
+- `FlagProvider.getInt()` returns `OptionalInt`, `getLong()` returns `OptionalLong`, `getDouble()` returns `OptionalDouble` — JDK primitive optional types avoid boxing
+- `getBoolean()` returns `Optional<Boolean>` — no `OptionalBoolean` in the JDK
+- `@CloseTo` is necessary because flag backends (especially JS-based) may return imprecise doubles (0.1+0.2 = 0.30000000000000004)
+- Double proxy dispatch: iterate variants, use `Math.abs(flagValue - variantValue) <= delta` for matching
+- Long proxy dispatch: exact match via `Map<Long, Supplier<T>>`
+- `@CloseTo.delta()` defaults to 1e-10, overridable per variant
