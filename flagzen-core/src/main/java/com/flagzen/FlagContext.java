@@ -52,6 +52,9 @@ public final class FlagContext {
      * @param block the code to execute within the scoped context
      */
     public static void run(EvaluationContext context, Runnable block) {
+        if (context == null) {
+            throw new FlagZenException("EvaluationContext must not be null. Use FlagContext.clear() to remove context.");
+        }
         EvaluationContext previous = CURRENT.get();
         CURRENT.set(context);
         try {
@@ -77,6 +80,9 @@ public final class FlagContext {
      * @return the result of the block
      */
     public static <T> T run(EvaluationContext context, java.util.function.Supplier<T> block) {
+        if (context == null) {
+            throw new FlagZenException("EvaluationContext must not be null. Use FlagContext.clear() to remove context.");
+        }
         EvaluationContext previous = CURRENT.get();
         CURRENT.set(context);
         try {

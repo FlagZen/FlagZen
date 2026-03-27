@@ -11,6 +11,7 @@ final class SharedProxyHolder {
 
     private static final ThreadLocal<CheckoutFlow> PROXY = new ThreadLocal<>();
     private static final ThreadLocal<PaymentMethod> PAYMENT_PROXY = new ThreadLocal<>();
+    private static final ThreadLocal<String> LAST_DISPATCH_RESULT = new ThreadLocal<>();
 
     private SharedProxyHolder() {
     }
@@ -31,8 +32,17 @@ final class SharedProxyHolder {
         return PAYMENT_PROXY.get();
     }
 
+    static void setLastDispatchResult(String result) {
+        LAST_DISPATCH_RESULT.set(result);
+    }
+
+    static String getLastDispatchResult() {
+        return LAST_DISPATCH_RESULT.get();
+    }
+
     static void reset() {
         PROXY.remove();
         PAYMENT_PROXY.remove();
+        LAST_DISPATCH_RESULT.remove();
     }
 }

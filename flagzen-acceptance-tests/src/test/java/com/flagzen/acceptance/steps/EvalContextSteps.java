@@ -145,12 +145,17 @@ public class EvalContextSteps {
 
     @Then("the resolved proxy dispatches to the {string} variant")
     public void theResolvedProxyDispatchesToTheVariant(String expectedVariant) {
-        String result = resolvedProxy.execute();
-        // Variant names are uppercase (CLASSIC, PREMIUM, STREAMLINED).
-        // Variant classes return title-case class names (ClassicCheckout, PremiumCheckout, etc.).
         String titleCase = expectedVariant.substring(0, 1).toUpperCase()
                 + expectedVariant.substring(1).toLowerCase();
-        assertThat(result).isEqualTo(titleCase + "Checkout");
+        String expected = titleCase + "Checkout";
+        // If dispatch result was captured inside a scoped block, use that
+        String preCapture = SharedProxyHolder.getLastDispatchResult();
+        if (preCapture != null) {
+            assertThat(preCapture).isEqualTo(expected);
+            return;
+        }
+        CheckoutFlow proxy = resolvedProxy != null ? resolvedProxy : SharedProxyHolder.get();
+        assertThat(proxy.execute()).isEqualTo(expected);
     }
 
     @When("the developer resolves {string} without evaluation context")
@@ -198,6 +203,7 @@ public class EvalContextSteps {
         context = EvaluationContext.builder()
                 .targetingKey(targetingKey)
                 .build();
+        SharedDispatcherHolder.setEvalContext(context);
     }
 
     @Then("the in-memory flag provider returns {string} regardless of context")

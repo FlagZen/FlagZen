@@ -1,14 +1,18 @@
 package com.flagzen.acceptance.fixtures;
 
+import com.flagzen.EvaluationContext;
+import com.flagzen.FlagContext;
 import com.flagzen.UnmatchedVariantException;
 import com.flagzen.spi.FlagProvider;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
  * Hand-crafted proxy for PaymentMethod acceptance tests.
- * Simulates the dispatch logic the annotation processor would generate.
+ * Simulates the dispatch logic the annotation processor would generate,
+ * including context-aware flag resolution via {@link FlagContext}.
  */
 class PaymentMethodProxy implements PaymentMethod {
 
@@ -26,7 +30,11 @@ class PaymentMethodProxy implements PaymentMethod {
 
     @Override
     public String execute() {
-        String flagValue = flagProvider.getString("payment-method").orElse(null);
+        EvaluationContext context = FlagContext.current();
+        Optional<String> flagOpt = (context != null)
+                ? flagProvider.getString("payment-method", context)
+                : flagProvider.getString("payment-method");
+        String flagValue = flagOpt.orElse(null);
         if (flagValue != null) {
             Supplier<PaymentMethod> supplier = variants.get(flagValue);
             if (supplier != null) {
