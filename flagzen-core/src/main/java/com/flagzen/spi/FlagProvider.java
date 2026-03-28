@@ -50,14 +50,17 @@ public interface FlagProvider {
 
     /**
      * Returns the current boolean value for the given flag key using the provided evaluation context.
-     * The default implementation delegates to {@link #getBoolean(String)}.
+     * The default implementation parses from {@link #getString(String, EvaluationContext)},
+     * ensuring that providers overriding only the string+context method get context-aware typed resolution.
      *
      * @param key the flag key to look up
      * @param context the evaluation context for targeted resolution
      * @return the boolean flag value, or empty if not set or not parseable as boolean
      */
     default Optional<Boolean> getBoolean(String key, EvaluationContext context) {
-        return getBoolean(key);
+        return getString(key, context)
+                .filter(v -> v.equalsIgnoreCase("true") || v.equalsIgnoreCase("false"))
+                .map(Boolean::parseBoolean);
     }
 
     /**
@@ -81,14 +84,22 @@ public interface FlagProvider {
 
     /**
      * Returns the current integer value for the given flag key using the provided evaluation context.
-     * The default implementation delegates to {@link #getInt(String)}.
+     * The default implementation parses from {@link #getString(String, EvaluationContext)},
+     * ensuring that providers overriding only the string+context method get context-aware typed resolution.
      *
      * @param key the flag key to look up
      * @param context the evaluation context for targeted resolution
      * @return the integer flag value, or empty if not set or not parseable
      */
     default OptionalInt getInt(String key, EvaluationContext context) {
-        return getInt(key);
+        try {
+            return getString(key, context)
+                    .map(Integer::parseInt)
+                    .map(OptionalInt::of)
+                    .orElse(OptionalInt.empty());
+        } catch (NumberFormatException e) {
+            return OptionalInt.empty();
+        }
     }
 
     /**
@@ -112,14 +123,22 @@ public interface FlagProvider {
 
     /**
      * Returns the current long value for the given flag key using the provided evaluation context.
-     * The default implementation delegates to {@link #getLong(String)}.
+     * The default implementation parses from {@link #getString(String, EvaluationContext)},
+     * ensuring that providers overriding only the string+context method get context-aware typed resolution.
      *
      * @param key the flag key to look up
      * @param context the evaluation context for targeted resolution
      * @return the long flag value, or empty if not set or not parseable
      */
     default OptionalLong getLong(String key, EvaluationContext context) {
-        return getLong(key);
+        try {
+            return getString(key, context)
+                    .map(Long::parseLong)
+                    .map(OptionalLong::of)
+                    .orElse(OptionalLong.empty());
+        } catch (NumberFormatException e) {
+            return OptionalLong.empty();
+        }
     }
 
     /**
@@ -143,13 +162,21 @@ public interface FlagProvider {
 
     /**
      * Returns the current double value for the given flag key using the provided evaluation context.
-     * The default implementation delegates to {@link #getDouble(String)}.
+     * The default implementation parses from {@link #getString(String, EvaluationContext)},
+     * ensuring that providers overriding only the string+context method get context-aware typed resolution.
      *
      * @param key the flag key to look up
      * @param context the evaluation context for targeted resolution
      * @return the double flag value, or empty if not set or not parseable
      */
     default OptionalDouble getDouble(String key, EvaluationContext context) {
-        return getDouble(key);
+        try {
+            return getString(key, context)
+                    .map(Double::parseDouble)
+                    .map(OptionalDouble::of)
+                    .orElse(OptionalDouble.empty());
+        } catch (NumberFormatException e) {
+            return OptionalDouble.empty();
+        }
     }
 }

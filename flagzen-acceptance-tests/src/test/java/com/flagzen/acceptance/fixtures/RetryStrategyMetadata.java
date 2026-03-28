@@ -11,8 +11,25 @@ import java.util.function.Supplier;
 /**
  * Hand-crafted FeatureMetadata for INT dispatch acceptance testing.
  * Simulates what the annotation processor would generate for an INT-typed feature.
+ * Supports configurable fallback strategy and default variant for different test scenarios.
  */
 public class RetryStrategyMetadata implements FeatureMetadata<RetryStrategy> {
+
+    private static volatile FallbackStrategy configuredFallback = FallbackStrategy.EXCEPTION;
+    private static volatile Supplier<RetryStrategy> configuredDefault = null;
+
+    public static void setFallbackStrategy(FallbackStrategy strategy) {
+        configuredFallback = strategy;
+    }
+
+    public static void setDefaultVariant(Supplier<RetryStrategy> supplier) {
+        configuredDefault = supplier;
+    }
+
+    public static void reset() {
+        configuredFallback = FallbackStrategy.EXCEPTION;
+        configuredDefault = null;
+    }
 
     @Override
     public Class<RetryStrategy> featureType() {
@@ -26,7 +43,7 @@ public class RetryStrategyMetadata implements FeatureMetadata<RetryStrategy> {
 
     @Override
     public FallbackStrategy fallbackStrategy() {
-        return FallbackStrategy.EXCEPTION;
+        return configuredFallback;
     }
 
     @Override
@@ -39,7 +56,7 @@ public class RetryStrategyMetadata implements FeatureMetadata<RetryStrategy> {
 
     @Override
     public Supplier<RetryStrategy> defaultVariantSupplier() {
-        return null;
+        return configuredDefault;
     }
 
     @Override
@@ -48,6 +65,6 @@ public class RetryStrategyMetadata implements FeatureMetadata<RetryStrategy> {
                                      Supplier<RetryStrategy> defaultVariant) {
         Map<Integer, Supplier<RetryStrategy>> intVariants = new HashMap<>();
         variants.forEach((k, v) -> intVariants.put(Integer.parseInt(k), v));
-        return new RetryStrategyProxy(flagProvider, intVariants, defaultVariant);
+        return new RetryStrategyProxy(flagProvider, intVariants, defaultVariant, configuredFallback);
     }
 }

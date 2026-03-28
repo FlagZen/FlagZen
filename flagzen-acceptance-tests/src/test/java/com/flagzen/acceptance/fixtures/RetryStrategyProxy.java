@@ -19,18 +19,31 @@ class RetryStrategyProxy implements RetryStrategy {
     private final FlagProvider flagProvider;
     private final Map<Integer, Supplier<RetryStrategy>> variants;
     private final Supplier<RetryStrategy> defaultVariant;
+    private final FallbackStrategy fallbackStrategy;
 
     RetryStrategyProxy(FlagProvider flagProvider,
                        Map<Integer, Supplier<RetryStrategy>> variants,
                        Supplier<RetryStrategy> defaultVariant) {
+        this(flagProvider, variants, defaultVariant, FallbackStrategy.EXCEPTION);
+    }
+
+    RetryStrategyProxy(FlagProvider flagProvider,
+                       Map<Integer, Supplier<RetryStrategy>> variants,
+                       Supplier<RetryStrategy> defaultVariant,
+                       FallbackStrategy fallbackStrategy) {
         this.flagProvider = flagProvider;
         this.variants = variants;
         this.defaultVariant = defaultVariant;
+        this.fallbackStrategy = fallbackStrategy;
     }
 
     @Override
     public String execute() {
-        return resolveVariant().execute();
+        RetryStrategy delegate = resolveVariant();
+        if (delegate == null) {
+            return null;
+        }
+        return delegate.execute();
     }
 
     private RetryStrategy resolveVariant() {
@@ -48,6 +61,10 @@ class RetryStrategyProxy implements RetryStrategy {
 
         if (defaultVariant != null) {
             return defaultVariant.get();
+        }
+
+        if (fallbackStrategy == FallbackStrategy.NOOP) {
+            return null;
         }
 
         if (flagValue.isEmpty()) {
