@@ -8,35 +8,35 @@ All typed variant types are within flagzen-core. No new modules are introduced. 
 
 ### com.flagzen (Public API)
 
-| Type          | Kind             | Status   | Rationale                                           |
-| ------------- | ---------------- | -------- | --------------------------------------------------- |
-| `FeatureType` | Enum             | NEW      | Annotation attribute type, used by `@Feature.type()` |
-| `@CloseTo`    | Annotation       | NEW      | Nested annotation within `@Variant.doubleValue()`   |
-| `@WhenTrue`   | Annotation       | NEW      | Convenience sugar for `@Variant(booleanValue=true)` |
-| `@WhenFalse`  | Annotation       | NEW      | Convenience sugar for `@Variant(booleanValue=false)` |
-| `@WhenTrues`  | Container annotation | NEW  | Repeatable container for `@WhenTrue`                |
-| `@WhenFalses` | Container annotation | NEW  | Repeatable container for `@WhenFalse`               |
-| `@Feature`    | Annotation       | MODIFIED | New `type()` attribute with FeatureType default     |
-| `@Variant`    | Annotation       | MODIFIED | New typed attributes (intValue, longValue, etc.)    |
+|     Type      |         Kind         |  Status  |                      Rationale                       |
+| ------------- | -------------------- | -------- | ---------------------------------------------------- |
+| `FeatureType` | Enum                 | NEW      | Annotation attribute type, used by `@Feature.type()` |
+| `@CloseTo`    | Annotation           | NEW      | Nested annotation within `@Variant.doubleValue()`    |
+| `@WhenTrue`   | Annotation           | NEW      | Convenience sugar for `@Variant(booleanValue=true)`  |
+| `@WhenFalse`  | Annotation           | NEW      | Convenience sugar for `@Variant(booleanValue=false)` |
+| `@WhenTrues`  | Container annotation | NEW      | Repeatable container for `@WhenTrue`                 |
+| `@WhenFalses` | Container annotation | NEW      | Repeatable container for `@WhenFalse`                |
+| `@Feature`    | Annotation           | MODIFIED | New `type()` attribute with FeatureType default      |
+| `@Variant`    | Annotation           | MODIFIED | New typed attributes (intValue, longValue, etc.)     |
 
 **Rationale for `com.flagzen`**: All annotation types and their supporting enums belong in the top-level public API package. Developers write `@Feature`, `@Variant`, `@WhenTrue`, `@WhenFalse`, and `@CloseTo` directly -- they must be importable from the same package as existing annotations.
 
 ### com.flagzen.spi (SPI Contracts)
 
-| Type           | Kind      | Status   | Rationale                                               |
-| -------------- | --------- | -------- | ------------------------------------------------------- |
-| `FlagProvider` | Interface | MODIFIED | New typed default methods (getInt, getBoolean, etc.)    |
+|      Type      |   Kind    |  Status  |                      Rationale                       |
+| -------------- | --------- | -------- | ---------------------------------------------------- |
+| `FlagProvider` | Interface | MODIFIED | New typed default methods (getInt, getBoolean, etc.) |
 
 **Rationale for `com.flagzen.spi`**: `FlagProvider` remains the SPI interface. Typed methods are additions to the existing contract via default methods.
 
 ### com.flagzen.processor (Annotation Processor -- Compile-Time Only)
 
-| Type             | Kind   | Status   | Rationale                                                  |
-| ---------------- | ------ | -------- | ---------------------------------------------------------- |
-| `FlagZenProcessor` | Class | MODIFIED | Reads `@Feature.type()`, normalizes `@WhenTrue`/`@WhenFalse`, validates type consistency |
-| `FeatureModel`   | Record | MODIFIED | New `featureType` field                                    |
-| `VariantModel`   | Record | MODIFIED | New typed value fields (intVariantValue, etc.)             |
-| `ProxyGenerator` | Class  | MODIFIED | Generates typed dispatch logic per FeatureType             |
+|        Type        |  Kind  |  Status  |                                        Rationale                                         |
+| ------------------ | ------ | -------- | ---------------------------------------------------------------------------------------- |
+| `FlagZenProcessor` | Class  | MODIFIED | Reads `@Feature.type()`, normalizes `@WhenTrue`/`@WhenFalse`, validates type consistency |
+| `FeatureModel`     | Record | MODIFIED | New `featureType` field                                                                  |
+| `VariantModel`     | Record | MODIFIED | New typed value fields (intVariantValue, etc.)                                           |
+| `ProxyGenerator`   | Class  | MODIFIED | Generates typed dispatch logic per FeatureType                                           |
 
 **Rationale for `com.flagzen.processor`**: All processor-internal types stay in the processor package. No new types -- only modifications to existing records and classes.
 
@@ -96,21 +96,21 @@ No changes required. Spring auto-configuration creates `DefaultFeatureDispatcher
 
 ### New Public Types
 
-| Type          | Package      | Description                                          |
-| ------------- | ------------ | ---------------------------------------------------- |
-| `FeatureType` | `com.flagzen` | Enum: STRING, INT, LONG, BOOLEAN, DOUBLE            |
-| `@CloseTo`    | `com.flagzen` | Annotation: value() + delta() for double matching   |
-| `@WhenTrue`   | `com.flagzen` | Annotation: convenience for boolean true variant    |
-| `@WhenFalse`  | `com.flagzen` | Annotation: convenience for boolean false variant   |
-| `@WhenTrues`  | `com.flagzen` | Container annotation for repeatable `@WhenTrue`     |
-| `@WhenFalses` | `com.flagzen` | Container annotation for repeatable `@WhenFalse`    |
+|     Type      |    Package    |                    Description                    |
+| ------------- | ------------- | ------------------------------------------------- |
+| `FeatureType` | `com.flagzen` | Enum: STRING, INT, LONG, BOOLEAN, DOUBLE          |
+| `@CloseTo`    | `com.flagzen` | Annotation: value() + delta() for double matching |
+| `@WhenTrue`   | `com.flagzen` | Annotation: convenience for boolean true variant  |
+| `@WhenFalse`  | `com.flagzen` | Annotation: convenience for boolean false variant |
+| `@WhenTrues`  | `com.flagzen` | Container annotation for repeatable `@WhenTrue`   |
+| `@WhenFalses` | `com.flagzen` | Container annotation for repeatable `@WhenFalse`  |
 
 ### Modified Public Types
 
-| Type           | Package          | Change                                                              |
-| -------------- | ---------------- | ------------------------------------------------------------------- |
-| `@Feature`     | `com.flagzen`    | +`type()` attribute (FeatureType, default STRING)                   |
-| `@Variant`     | `com.flagzen`    | +`intValue`, `longValue`, `booleanValue`, `doubleValue` attributes  |
+|      Type      |      Package      |                               Change                               |
+| -------------- | ----------------- | ------------------------------------------------------------------ |
+| `@Feature`     | `com.flagzen`     | +`type()` attribute (FeatureType, default STRING)                  |
+| `@Variant`     | `com.flagzen`     | +`intValue`, `longValue`, `booleanValue`, `doubleValue` attributes |
 | `FlagProvider` | `com.flagzen.spi` | +8 default methods (4 typed + 4 context-aware overloads)           |
 
 ### Updated Count

@@ -78,8 +78,8 @@ C4Component
 
 ### Dispatch Strategy by FeatureType
 
-| FeatureType | FlagProvider Method | Proxy Map Type                    | Dispatch Strategy      | Complexity |
-| ----------- | ------------------- | --------------------------------- | ---------------------- | ---------- |
+| FeatureType | FlagProvider Method |          Proxy Map Type          |   Dispatch Strategy    | Complexity |
+| ----------- | ------------------- | -------------------------------- | ---------------------- | ---------- |
 | STRING      | `getString()`       | `Map<String, Supplier<T>>`       | Exact map lookup       | O(1)       |
 | INT         | `getInt()`          | `Map<Integer, Supplier<T>>`      | Exact map lookup       | O(1)       |
 | LONG        | `getLong()`         | `Map<Long, Supplier<T>>`         | Exact map lookup       | O(1)       |
@@ -102,8 +102,8 @@ context = FlagContext.current()
 [INT]    flagProvider.getInt(key [, ctx])    --> map.get(value)
 [LONG]   flagProvider.getLong(key [, ctx])   --> map.get(value)
 [BOOLEAN] flagProvider.getBoolean(key [, ctx]) --> map.get(value)
-[DOUBLE] flagProvider.getDouble(key [, ctx]) --> iterate: |flagValue - v.value| <= v.delta
-  |
+| [DOUBLE] flagProvider.getDouble(key [, ctx]) --> iterate: | flagValue - v.value | <= v.delta |
+|                                                           |                     |            |
   v
 match found? --> delegate to variant
 no match? --> defaultVariant or fallback strategy
@@ -142,16 +142,16 @@ When no `order` is present:
 
 `FlagProvider` gains eight new default methods (four typed accessors, each with a context-aware overload). All parse from `getString()` for backward compatibility:
 
-| Method                                        | Return Type          | Parse Behavior                                              |
-| --------------------------------------------- | -------------------- | ----------------------------------------------------------- |
-| `getBoolean(String key)`                      | `Optional<Boolean>`  | "true"/"false" case-insensitive; other strings return empty |
-| `getBoolean(String key, EvaluationContext)`    | `Optional<Boolean>`  | Delegates to `getBoolean(key)` by default                   |
-| `getInt(String key)`                          | `OptionalInt`        | `Integer.parseInt()`; parse failure returns empty           |
-| `getInt(String key, EvaluationContext)`        | `OptionalInt`        | Delegates to `getInt(key)` by default                       |
-| `getLong(String key)`                         | `OptionalLong`       | `Long.parseLong()`; overflow/parse failure returns empty    |
-| `getLong(String key, EvaluationContext)`       | `OptionalLong`       | Delegates to `getLong(key)` by default                      |
-| `getDouble(String key)`                       | `OptionalDouble`     | `Double.parseDouble()`; parse failure returns empty         |
-| `getDouble(String key, EvaluationContext)`     | `OptionalDouble`     | Delegates to `getDouble(key)` by default                    |
+|                   Method                    |     Return Type     |                       Parse Behavior                        |
+| ------------------------------------------- | ------------------- | ----------------------------------------------------------- |
+| `getBoolean(String key)`                    | `Optional<Boolean>` | "true"/"false" case-insensitive; other strings return empty |
+| `getBoolean(String key, EvaluationContext)` | `Optional<Boolean>` | Delegates to `getBoolean(key)` by default                   |
+| `getInt(String key)`                        | `OptionalInt`       | `Integer.parseInt()`; parse failure returns empty           |
+| `getInt(String key, EvaluationContext)`     | `OptionalInt`       | Delegates to `getInt(key)` by default                       |
+| `getLong(String key)`                       | `OptionalLong`      | `Long.parseLong()`; overflow/parse failure returns empty    |
+| `getLong(String key, EvaluationContext)`    | `OptionalLong`      | Delegates to `getLong(key)` by default                      |
+| `getDouble(String key)`                     | `OptionalDouble`    | `Double.parseDouble()`; parse failure returns empty         |
+| `getDouble(String key, EvaluationContext)`  | `OptionalDouble`    | Delegates to `getDouble(key)` by default                    |
 
 ### Backward Compatibility
 
@@ -174,17 +174,17 @@ This is a single set of methods, not two. US-M2-08 validates the conditional API
 
 ### New Responsibilities
 
-| Responsibility                            | Trigger                                                     |
-| ----------------------------------------- | ----------------------------------------------------------- |
-| Read `@Feature.type()` attribute          | Every `@Feature` annotation                                 |
-| Normalize `@WhenTrue`/`@WhenFalse`        | Annotations discovered in processing round                  |
-| Validate typed attribute matches type     | Every `@Variant` on a non-STRING feature                    |
-| Validate no mixed attributes              | Variants on same feature use consistent typed attribute     |
-| Validate BOOLEAN REQUIRED completeness    | BOOLEAN feature with REQUIRED fallback                      |
-| Validate duplicate typed values           | Two variants with same intValue/longValue/booleanValue      |
-| Validate `@CloseTo` delta                 | Every `@CloseTo` annotation (positive, finite)              |
-| Populate FeatureModel with featureType    | After reading `@Feature.type()`                             |
-| Populate VariantModel with typed value    | After reading typed `@Variant` attributes                   |
+|             Responsibility             |                         Trigger                         |
+| -------------------------------------- | ------------------------------------------------------- |
+| Read `@Feature.type()` attribute       | Every `@Feature` annotation                             |
+| Normalize `@WhenTrue`/`@WhenFalse`     | Annotations discovered in processing round              |
+| Validate typed attribute matches type  | Every `@Variant` on a non-STRING feature                |
+| Validate no mixed attributes           | Variants on same feature use consistent typed attribute |
+| Validate BOOLEAN REQUIRED completeness | BOOLEAN feature with REQUIRED fallback                  |
+| Validate duplicate typed values        | Two variants with same intValue/longValue/booleanValue  |
+| Validate `@CloseTo` delta              | Every `@CloseTo` annotation (positive, finite)          |
+| Populate FeatureModel with featureType | After reading `@Feature.type()`                         |
+| Populate VariantModel with typed value | After reading typed `@Variant` attributes               |
 
 ### @WhenTrue/@WhenFalse Normalization
 
@@ -215,23 +215,23 @@ Generated proxies hold `Map<String, Supplier<T>>` and call `flagProvider.getStri
 
 Generated proxies are type-aware:
 
-| FeatureType | Proxy Internal State                             | FlagProvider Call              |
-| ----------- | ------------------------------------------------ | ------------------------------ |
-| STRING      | `Map<String, Supplier<T>>` (unchanged)           | `getString()` (unchanged)      |
-| INT         | `Map<Integer, Supplier<T>>`                      | `getInt()`                     |
-| LONG        | `Map<Long, Supplier<T>>`                         | `getLong()`                    |
-| BOOLEAN     | `Map<Boolean, Supplier<T>>`                      | `getBoolean()`                 |
-| DOUBLE      | List of `(double value, double delta, Supplier)` | `getDouble()`                  |
+| FeatureType |               Proxy Internal State               |     FlagProvider Call     |
+| ----------- | ------------------------------------------------ | ------------------------- |
+| STRING      | `Map<String, Supplier<T>>` (unchanged)           | `getString()` (unchanged) |
+| INT         | `Map<Integer, Supplier<T>>`                      | `getInt()`                |
+| LONG        | `Map<Long, Supplier<T>>`                         | `getLong()`               |
+| BOOLEAN     | `Map<Boolean, Supplier<T>>`                      | `getBoolean()`            |
+| DOUBLE      | List of `(double value, double delta, Supplier)` | `getDouble()`             |
 
 ### Proxy Class Shape -- Unchanged
 
-| Aspect       | Value                                            |
-| ------------ | ------------------------------------------------ |
-| Class name   | `{FeatureSimpleName}_FlagZenProxy`               |
-| Package      | Same as @Feature interface                       |
-| Visibility   | Public class, package-private constructor         |
-| Implements   | The @Feature interface                           |
-| Dependencies | `FlagProvider`, typed variant suppliers           |
+|    Aspect    |                   Value                   |
+| ------------ | ----------------------------------------- |
+| Class name   | `{FeatureSimpleName}_FlagZenProxy`        |
+| Package      | Same as @Feature interface                |
+| Visibility   | Public class, package-private constructor |
+| Implements   | The @Feature interface                    |
+| Dependencies | `FlagProvider`, typed variant suppliers   |
 
 The constructor signature changes: the variant map/list parameter type varies by FeatureType. The metadata factory method signature follows suit. This is internal to generated code -- not part of the public API.
 
@@ -247,8 +247,8 @@ For DOUBLE: the `resolveVariant()` method calls `getDouble()`, iterates the vari
 
 `FeatureMetadata` (generated per `@Feature`, SPI-discovered) evolves to carry `FeatureType`. The `createProxy` factory method signature changes to accept the typed variant data structure.
 
-| Current createProxy Signature                                                        | Updated Concept                                     |
-| ------------------------------------------------------------------------------------ | --------------------------------------------------- |
+|                    Current createProxy Signature                     |                   Updated Concept                   |
+| -------------------------------------------------------------------- | --------------------------------------------------- |
 | `T createProxy(FlagProvider, Map<String, Supplier<T>>, Supplier<T>)` | Signature varies by FeatureType (typed map or list) |
 
 Since `FeatureMetadata` is generated (not hand-written), this is a code generation change. The `FeatureMetadata` interface may need to become generic over the key type, or the factory method can accept `Object` and cast internally. The crafter decides the internal approach.
@@ -257,13 +257,13 @@ Since `FeatureMetadata` is generated (not hand-written), this is a code generati
 
 All new types follow existing thread safety patterns:
 
-| Component          | Strategy                                                           |
-| ------------------ | ------------------------------------------------------------------ |
-| FeatureType enum   | Immutable enum. Thread-safe by design.                             |
-| @CloseTo           | Annotation. No runtime state.                                      |
-| @WhenTrue/@WhenFalse | Annotations. No runtime state.                                  |
-| Typed proxy maps   | Immutable after construction. Thread-safe by design.               |
-| FlagProvider defaults | Stateless default methods calling `getString()`. Thread-safe.   |
+|       Component       |                           Strategy                            |
+| --------------------- | ------------------------------------------------------------- |
+| FeatureType enum      | Immutable enum. Thread-safe by design.                        |
+| @CloseTo              | Annotation. No runtime state.                                 |
+| @WhenTrue/@WhenFalse  | Annotations. No runtime state.                                |
+| Typed proxy maps      | Immutable after construction. Thread-safe by design.          |
+| FlagProvider defaults | Stateless default methods calling `getString()`. Thread-safe. |
 
 ## 11. Quality Attribute Impact
 
@@ -297,11 +297,11 @@ All new types follow existing thread safety patterns:
 
 ## 12. Story-to-Component Traceability
 
-| Story    | Components Modified/Created                                                                                |
+|  Story   |                                        Components Modified/Created                                         |
 | -------- | ---------------------------------------------------------------------------------------------------------- |
 | US-M2-01 | `FeatureType` (new), `@Feature` (modified -- `type` attribute), FeatureModel (modified)                    |
-| US-M2-02 | `@Variant` (modified -- typed attributes), `@CloseTo` (new), VariantModel (modified)                      |
-| US-M2-03 | `@WhenTrue` (new), `@WhenFalse` (new), FlagZenProcessor (modified -- normalization)                       |
+| US-M2-02 | `@Variant` (modified -- typed attributes), `@CloseTo` (new), VariantModel (modified)                       |
+| US-M2-03 | `@WhenTrue` (new), `@WhenFalse` (new), FlagZenProcessor (modified -- normalization)                        |
 | US-M2-04 | FlagZenProcessor (modified -- type validation, completeness, duplicates)                                   |
 | US-M2-05 | FlagProvider (modified -- `getInt`/`getBoolean` default methods), ProxyGenerator (modified -- INT/BOOLEAN) |
 | US-M2-06 | ProxyGenerator (verified -- typed dispatch uses existing M1 context flow)                                  |
@@ -310,23 +310,23 @@ All new types follow existing thread safety patterns:
 
 ## 13. ADR Index (This Milestone)
 
-| ADR     | Title                                                        | Status   |
-| ------- | ------------------------------------------------------------ | -------- |
-| ADR-013 | @CloseTo Delta Strategy for Approximate Double Matching      | Accepted |
+|   ADR   |                             Title                             |  Status  |
+| ------- | ------------------------------------------------------------- | -------- |
+| ADR-013 | @CloseTo Delta Strategy for Approximate Double Matching       | Accepted |
 | ADR-014 | @WhenTrue/@WhenFalse as Annotation Sugar for Boolean Variants | Accepted |
 
 ## 14. Architectural Enforcement
 
 Existing ArchUnit rules remain. Additional enforcement for this milestone:
 
-| Rule                                                      | Tool     | Enforcement                                                              |
-| --------------------------------------------------------- | -------- | ------------------------------------------------------------------------ |
-| No `java.lang.reflect` in `com.flagzen..` (unchanged)    | ArchUnit | Existing rule covers new classes                                         |
-| FeatureType enum is in `com.flagzen` package              | ArchUnit | Enum placement validation                                               |
-| @CloseTo is in `com.flagzen` package                     | ArchUnit | Annotation placement validation                                         |
-| @WhenTrue/@WhenFalse are in `com.flagzen` package        | ArchUnit | Annotation placement validation                                         |
-| Generated proxies contain no reflection (unchanged)       | ArchUnit | Existing rule covers typed proxies                                       |
-| FlagProvider typed methods are default (not abstract)     | ArchUnit | Interface method validation (prevents breaking change to existing impls) |
+|                         Rule                          |   Tool   |                               Enforcement                                |
+| ----------------------------------------------------- | -------- | ------------------------------------------------------------------------ |
+| No `java.lang.reflect` in `com.flagzen..` (unchanged) | ArchUnit | Existing rule covers new classes                                         |
+| FeatureType enum is in `com.flagzen` package          | ArchUnit | Enum placement validation                                                |
+| @CloseTo is in `com.flagzen` package                  | ArchUnit | Annotation placement validation                                          |
+| @WhenTrue/@WhenFalse are in `com.flagzen` package     | ArchUnit | Annotation placement validation                                          |
+| Generated proxies contain no reflection (unchanged)   | ArchUnit | Existing rule covers typed proxies                                       |
+| FlagProvider typed methods are default (not abstract) | ArchUnit | Interface method validation (prevents breaking change to existing impls) |
 
 ## 15. External Integrations
 

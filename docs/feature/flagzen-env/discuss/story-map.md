@@ -8,15 +8,15 @@
 
 ## Backbone
 
-| Add Dependency | Set Env Vars | Configure Provider | Resolve Flags |
-| --- | --- | --- | --- |
-| Add flagzen-env to Gradle | Default FLAGZEN_ SCREAMING_SNAKE convention | Zero-config create() | getString() from immutable map |
-| | screamingSnakeCase parser (with/without prefix) | ServiceLoader auto-discovery | Typed resolution (int, boolean, long, double) |
-| | camelCase parser (with/without prefix) | Builder with custom parser | Missing key returns empty |
-| | Custom lambda parser | Builder with custom formatter | Context-aware passthrough |
-| | kebabCase formatter (default) | Builder with multiple parsers | Conflict warning on first access |
-| | snakeCase, camelCase, pascalCase, dotCase, colonCase formatters | Builder with multiple formatters | |
-| | Custom lambda formatter | ConflictStrategy (WARN/ERROR) | |
+|      Add Dependency       |                          Set Env Vars                           |        Configure Provider        |                 Resolve Flags                 |
+| ------------------------- | --------------------------------------------------------------- | -------------------------------- | --------------------------------------------- |
+| Add flagzen-env to Gradle | Default FLAGZEN_SCREAMING_SNAKE convention                      | Zero-config create()             | getString() from immutable map                |
+|                           | screamingSnakeCase parser (with/without prefix)                 | ServiceLoader auto-discovery     | Typed resolution (int, boolean, long, double) |
+|                           | camelCase parser (with/without prefix)                          | Builder with custom parser       | Missing key returns empty                     |
+|                           | Custom lambda parser                                            | Builder with custom formatter    | Context-aware passthrough                     |
+|                           | kebabCase formatter (default)                                   | Builder with multiple parsers    | Conflict warning on first access              |
+|                           | snakeCase, camelCase, pascalCase, dotCase, colonCase formatters | Builder with multiple formatters |                                               |
+|                           | Custom lambda formatter                                         | ConflictStrategy (WARN/ERROR)    |                                               |
 
 ---
 

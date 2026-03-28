@@ -10,13 +10,13 @@ This document details the data models introduced or modified by the typed varian
 
 Defines the type of flag value a `@Feature` dispatches on.
 
-| Constant | Description                          | Dispatch Strategy      |
-| -------- | ------------------------------------ | ---------------------- |
-| STRING   | String-valued flag (default, M0)     | Exact map lookup       |
-| INT      | Integer-valued flag                  | Exact map lookup       |
-| LONG     | Long-valued flag                     | Exact map lookup       |
-| BOOLEAN  | Boolean-valued flag                  | Exact map lookup       |
-| DOUBLE   | Double-valued flag (approximate)     | Iterate with delta     |
+| Constant |           Description            | Dispatch Strategy  |
+| -------- | -------------------------------- | ------------------ |
+| STRING   | String-valued flag (default, M0) | Exact map lookup   |
+| INT      | Integer-valued flag              | Exact map lookup   |
+| LONG     | Long-valued flag                 | Exact map lookup   |
+| BOOLEAN  | Boolean-valued flag              | Exact map lookup   |
+| DOUBLE   | Double-valued flag (approximate) | Iterate with delta |
 
 **Package**: `com.flagzen`
 
@@ -30,10 +30,10 @@ Defines the type of flag value a `@Feature` dispatches on.
 
 Expresses an approximate double value for variant matching.
 
-| Attribute | Type   | Default | Description                         |
-| --------- | ------ | ------- | ----------------------------------- |
-| value     | double | (required) | Target double value              |
-| delta     | double | 1e-10   | Tolerance for approximate matching  |
+| Attribute |  Type  |  Default   |            Description             |
+| --------- | ------ | ---------- | ---------------------------------- |
+| value     | double | (required) | Target double value                |
+| delta     | double | 1e-10      | Tolerance for approximate matching |
 
 **Package**: `com.flagzen`
 
@@ -52,8 +52,8 @@ See ADR-013 for delta strategy rationale.
 
 Convenience annotation equivalent to `@Variant(booleanValue = true)`.
 
-| Attribute | Type      | Default    | Description                                    |
-| --------- | --------- | ---------- | ---------------------------------------------- |
+| Attribute |    Type    |  Default   |                   Description                   |
+| --------- | ---------- | ---------- | ----------------------------------------------- |
 | of        | `Class<?>` | void.class | Target @Feature interface (multi-feature class) |
 
 **Package**: `com.flagzen`
@@ -70,8 +70,8 @@ Convenience annotation equivalent to `@Variant(booleanValue = true)`.
 
 Convenience annotation equivalent to `@Variant(booleanValue = false)`.
 
-| Attribute | Type      | Default    | Description                                    |
-| --------- | --------- | ---------- | ---------------------------------------------- |
+| Attribute |    Type    |  Default   |                   Description                   |
+| --------- | ---------- | ---------- | ----------------------------------------------- |
 | of        | `Class<?>` | void.class | Target @Feature interface (multi-feature class) |
 
 **Package**: `com.flagzen`
@@ -102,11 +102,11 @@ Repeatable container for `@WhenFalse`.
 
 ### @Feature (Modified)
 
-| Attribute | Type             | Default                | Description                                | Status   |
-| --------- | ---------------- | ---------------------- | ------------------------------------------ | -------- |
-| value     | String           | (required)             | Flag key                                   | Existing |
-| fallback  | FallbackStrategy | REQUIRED               | Fallback strategy                          | Existing |
-| type      | FeatureType      | FeatureType.STRING     | Type of flag value for dispatch            | NEW      |
+| Attribute |       Type       |      Default       |           Description           |  Status  |
+| --------- | ---------------- | ------------------ | ------------------------------- | -------- |
+| value     | String           | (required)         | Flag key                        | Existing |
+| fallback  | FallbackStrategy | REQUIRED           | Fallback strategy               | Existing |
+| type      | FeatureType      | FeatureType.STRING | Type of flag value for dispatch | NEW      |
 
 **Constraints**:
 
@@ -116,15 +116,15 @@ Repeatable container for `@WhenFalse`.
 
 ### @Variant (Modified)
 
-| Attribute    | Type      | Default               | Description                                    | Status   |
-| ------------ | --------- | --------------------- | ---------------------------------------------- | -------- |
-| value        | String    | `""` (empty sentinel) | String variant value                           | MODIFIED |
+|  Attribute   |    Type    |        Default        |                  Description                   |  Status  |
+| ------------ | ---------- | --------------------- | ---------------------------------------------- | -------- |
+| value        | String     | `""` (empty sentinel) | String variant value                           | MODIFIED |
 | of           | `Class<?>` | void.class            | Target @Feature interface                      | Existing |
-| intValue     | int       | `Integer.MIN_VALUE`   | Integer variant value (for INT features)       | NEW      |
-| longValue    | long      | `Long.MIN_VALUE`      | Long variant value (for LONG features)         | NEW      |
-| booleanValue | String    | `""` (empty sentinel) | Boolean variant value as string "true"/"false" | NEW      |
-| doubleValue  | @CloseTo  | sentinel @CloseTo     | Double variant value with tolerance            | NEW      |
-| order        | int       | -1 (unset sentinel)   | Dispatch order (ADR-008)                       | Existing |
+| intValue     | int        | `Integer.MIN_VALUE`   | Integer variant value (for INT features)       | NEW      |
+| longValue    | long       | `Long.MIN_VALUE`      | Long variant value (for LONG features)         | NEW      |
+| booleanValue | String     | `""` (empty sentinel) | Boolean variant value as string "true"/"false" | NEW      |
+| doubleValue  | @CloseTo   | sentinel @CloseTo     | Double variant value with tolerance            | NEW      |
+| order        | int        | -1 (unset sentinel)   | Dispatch order (ADR-008)                       | Existing |
 
 **Constraints**:
 
@@ -137,13 +137,13 @@ Repeatable container for `@WhenFalse`.
 
 **Sentinel Detection**:
 
-| Attribute    | Sentinel Value                         | Detection                           |
-| ------------ | -------------------------------------- | ----------------------------------- |
-| value        | `""` (empty string)                    | `value.isEmpty()`                   |
-| intValue     | `Integer.MIN_VALUE`                    | `intValue == Integer.MIN_VALUE`     |
-| longValue    | `Long.MIN_VALUE`                       | `longValue == Long.MIN_VALUE`       |
-| booleanValue | `""` (empty string)                    | `booleanValue.isEmpty()`            |
-| doubleValue  | `@CloseTo(value = Double.NaN)`         | `Double.isNaN(doubleValue.value())` |
+|  Attribute   |         Sentinel Value         |              Detection              |
+| ------------ | ------------------------------ | ----------------------------------- |
+| value        | `""` (empty string)            | `value.isEmpty()`                   |
+| intValue     | `Integer.MIN_VALUE`            | `intValue == Integer.MIN_VALUE`     |
+| longValue    | `Long.MIN_VALUE`               | `longValue == Long.MIN_VALUE`       |
+| booleanValue | `""` (empty string)            | `booleanValue.isEmpty()`            |
+| doubleValue  | `@CloseTo(value = Double.NaN)` | `Double.isNaN(doubleValue.value())` |
 
 **Note on sentinels**: `Integer.MIN_VALUE` and `Long.MIN_VALUE` are technically valid flag values but extremely unlikely in practice. If a developer needs to match `Integer.MIN_VALUE`, they can use string-based dispatch. The crafter may choose alternative sentinel strategies if better options exist -- the behavioral contract is that the processor can distinguish "set" from "unset".
 
@@ -151,16 +151,16 @@ Repeatable container for `@WhenFalse`.
 
 ### FeatureModel (Modified)
 
-| Field                | Type                        | Description                                       | Status   |
-| -------------------- | --------------------------- | ------------------------------------------------- | -------- |
-| packageName          | String                      | Package of the @Feature interface                 | Existing |
-| interfaceName        | String                      | Simple class name                                 | Existing |
-| flagKey              | String                      | Flag key from `@Feature("key")`                   | Existing |
-| fallbackStrategy     | FallbackStrategy            | REQUIRED, EXCEPTION, or NOOP                      | Existing |
-| methods              | List of MethodModel         | Methods on the interface                          | Existing |
-| variants             | List of VariantModel        | Discovered variants                               | Existing |
-| defaultVariantClassName | String (nullable)        | @DefaultVariant class name                        | Existing |
-| featureType          | FeatureType                 | STRING, INT, LONG, BOOLEAN, or DOUBLE             | NEW      |
+|          Field          |         Type         |              Description              |  Status  |
+| ----------------------- | -------------------- | ------------------------------------- | -------- |
+| packageName             | String               | Package of the @Feature interface     | Existing |
+| interfaceName           | String               | Simple class name                     | Existing |
+| flagKey                 | String               | Flag key from `@Feature("key")`       | Existing |
+| fallbackStrategy        | FallbackStrategy     | REQUIRED, EXCEPTION, or NOOP          | Existing |
+| methods                 | List of MethodModel  | Methods on the interface              | Existing |
+| variants                | List of VariantModel | Discovered variants                   | Existing |
+| defaultVariantClassName | String (nullable)    | @DefaultVariant class name            | Existing |
+| featureType             | FeatureType          | STRING, INT, LONG, BOOLEAN, or DOUBLE | NEW      |
 
 The `featureType` field drives:
 
@@ -172,16 +172,16 @@ The `featureType` field drives:
 
 The VariantModel must store typed values alongside the string value. The current VariantModel is a record with `qualifiedClassName` and `variantValue` (String).
 
-| Field              | Type            | Description                                    | Status   |
-| ------------------ | --------------- | ---------------------------------------------- | -------- |
-| qualifiedClassName | String          | Fully qualified variant class name             | Existing |
-| variantValue       | String          | String variant value (for STRING features)     | Existing |
-| intVariantValue    | Integer (null)  | Integer variant value (for INT features)       | NEW      |
-| longVariantValue   | Long (null)     | Long variant value (for LONG features)         | NEW      |
-| booleanVariantValue | Boolean (null) | Boolean variant value (for BOOLEAN features)   | NEW      |
-| doubleVariantValue | Double (null)   | Double variant value (for DOUBLE features)     | NEW      |
-| doubleDelta        | Double (null)   | Delta tolerance (for DOUBLE features)          | NEW      |
-| order              | int             | Dispatch order (-1 = unset)                    | Existing |
+|        Field        |      Type      |                 Description                  |  Status  |
+| ------------------- | -------------- | -------------------------------------------- | -------- |
+| qualifiedClassName  | String         | Fully qualified variant class name           | Existing |
+| variantValue        | String         | String variant value (for STRING features)   | Existing |
+| intVariantValue     | Integer (null) | Integer variant value (for INT features)     | NEW      |
+| longVariantValue    | Long (null)    | Long variant value (for LONG features)       | NEW      |
+| booleanVariantValue | Boolean (null) | Boolean variant value (for BOOLEAN features) | NEW      |
+| doubleVariantValue  | Double (null)  | Double variant value (for DOUBLE features)   | NEW      |
+| doubleDelta         | Double (null)  | Delta tolerance (for DOUBLE features)        | NEW      |
+| order               | int            | Dispatch order (-1 = unset)                  | Existing |
 
 **Constraints**:
 
@@ -230,12 +230,12 @@ public interface FlagProvider {
 
 **Parse rules for default methods**:
 
-| Method       | Parse Logic                                                          | Empty When                       |
-| ------------ | -------------------------------------------------------------------- | -------------------------------- |
-| `getBoolean` | "true"/"false" case-insensitive only                                 | getString empty, not "true"/"false" |
-| `getInt`     | `Integer.parseInt(value.trim())`                                     | getString empty, parse fails     |
-| `getLong`    | `Long.parseLong(value.trim())`                                       | getString empty, parse fails, overflow |
-| `getDouble`  | `Double.parseDouble(value.trim())`                                   | getString empty, parse fails     |
+|    Method    |             Parse Logic              |               Empty When               |
+| ------------ | ------------------------------------ | -------------------------------------- |
+| `getBoolean` | "true"/"false" case-insensitive only | getString empty, not "true"/"false"    |
+| `getInt`     | `Integer.parseInt(value.trim())`     | getString empty, parse fails           |
+| `getLong`    | `Long.parseLong(value.trim())`       | getString empty, parse fails, overflow |
+| `getDouble`  | `Double.parseDouble(value.trim())`   | getString empty, parse fails           |
 
 **Important**: `getBoolean` is stricter than `Boolean.parseBoolean()`. Only "true" and "false" (case-insensitive) return a value. "1", "yes", "0", "no" all return empty. This prevents silent misinterpretation of non-boolean strings.
 
@@ -243,13 +243,13 @@ public interface FlagProvider {
 
 ### Proxy Internal State by FeatureType
 
-| FeatureType | Variant Map/List Field                                                 |
-| ----------- | ---------------------------------------------------------------------- |
-| STRING      | `Map<String, Supplier<T>>` (unchanged from M0)                        |
-| INT         | `Map<Integer, Supplier<T>>`                                           |
-| LONG        | `Map<Long, Supplier<T>>`                                              |
-| BOOLEAN     | `Map<Boolean, Supplier<T>>`                                           |
-| DOUBLE      | List of `(double value, double delta, Supplier<T>)` tuples            |
+| FeatureType |                   Variant Map/List Field                   |
+| ----------- | ---------------------------------------------------------- |
+| STRING      | `Map<String, Supplier<T>>` (unchanged from M0)             |
+| INT         | `Map<Integer, Supplier<T>>`                                |
+| LONG        | `Map<Long, Supplier<T>>`                                   |
+| BOOLEAN     | `Map<Boolean, Supplier<T>>`                                |
+| DOUBLE      | List of `(double value, double delta, Supplier<T>)` tuples |
 
 ### Proxy Dispatch Logic (Updated)
 
@@ -274,25 +274,25 @@ For DOUBLE features:
 
 The generated `{Feature}_FlagZenMetadata` evolves to carry `FeatureType` and construct the proxy with the appropriate typed data structure.
 
-| Method            | Return Type      | Description                  | Status   |
-| ----------------- | ---------------- | ---------------------------- | -------- |
-| featureType()     | `Class<T>`       | The @Feature interface class | Existing |
-| flagKey()         | String           | The flag key                 | Existing |
-| fallbackStrategy() | FallbackStrategy | Configured strategy         | Existing |
-| featureValueType() | FeatureType     | The FeatureType enum value   | NEW      |
-| createProxy(...)  | T                | Factory method (typed)       | MODIFIED |
+|       Method       |   Return Type    |         Description          |  Status  |
+| ------------------ | ---------------- | ---------------------------- | -------- |
+| featureType()      | `Class<T>`       | The @Feature interface class | Existing |
+| flagKey()          | String           | The flag key                 | Existing |
+| fallbackStrategy() | FallbackStrategy | Configured strategy          | Existing |
+| featureValueType() | FeatureType      | The FeatureType enum value   | NEW      |
+| createProxy(...)   | T                | Factory method (typed)       | MODIFIED |
 
 ## 6. Compile-Time Validation Rules (New)
 
 ### Type Mismatch Detection
 
-| Feature Type | Valid @Variant Attribute | Error on Invalid                                                   |
-| ------------ | ----------------------- | ------------------------------------------------------------------ |
-| STRING       | `value`                 | "Feature 'X' declares type STRING but variant Y uses intValue..."  |
-| INT          | `intValue`              | "Feature 'X' declares type INT but variant Y uses string value..." |
-| LONG         | `longValue`             | "Use @Variant(longValue = ...) instead"                            |
-| BOOLEAN      | `booleanValue`          | "Use @Variant(booleanValue = ...) or @WhenTrue/@WhenFalse"        |
-| DOUBLE       | `doubleValue`           | "Use @Variant(doubleValue = @CloseTo(...)) instead"               |
+| Feature Type | Valid @Variant Attribute |                          Error on Invalid                          |
+| ------------ | ------------------------ | ------------------------------------------------------------------ |
+| STRING       | `value`                  | "Feature 'X' declares type STRING but variant Y uses intValue..."  |
+| INT          | `intValue`               | "Feature 'X' declares type INT but variant Y uses string value..." |
+| LONG         | `longValue`              | "Use @Variant(longValue = ...) instead"                            |
+| BOOLEAN      | `booleanValue`           | "Use @Variant(booleanValue = ...) or @WhenTrue/@WhenFalse"         |
+| DOUBLE       | `doubleValue`            | "Use @Variant(doubleValue = @CloseTo(...)) instead"                |
 
 ### BOOLEAN REQUIRED Completeness
 

@@ -9,55 +9,55 @@
 
 ## DESIGN Summary
 
-| Phase                            | Status   | Key Output                                                                                                      |
-| -------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-| Phase 1: Requirements Analysis   | COMPLETE | 8 stories analyzed, all within flagzen-core, no new modules                                                     |
-| Phase 2: Existing System Analysis | COMPLETE | @Feature, @Variant, FlagProvider, FeatureModel, VariantModel, ProxyGenerator identified for modification        |
-| Phase 3: Constraint Analysis     | COMPLETE | Zero reflection maintained, backward compat required, Java 17+, sentinel strategy for annotation defaults       |
-| Phase 4: Architecture Design     | COMPLETE | Typed dispatch strategy, FlagProvider SPI evolution, @CloseTo/@WhenTrue/@WhenFalse, 2 ADRs, updated C4 L3      |
-| Phase 5: Quality Validation      | COMPLETE | All quality gates passed                                                                                        |
-| Phase 6: Peer Review             | COMPLETE | Self-reviewed against critique dimensions                                                                       |
+|               Phase               |  Status  |                                                Key Output                                                 |
+| --------------------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| Phase 1: Requirements Analysis    | COMPLETE | 8 stories analyzed, all within flagzen-core, no new modules                                               |
+| Phase 2: Existing System Analysis | COMPLETE | @Feature, @Variant, FlagProvider, FeatureModel, VariantModel, ProxyGenerator identified for modification  |
+| Phase 3: Constraint Analysis      | COMPLETE | Zero reflection maintained, backward compat required, Java 17+, sentinel strategy for annotation defaults |
+| Phase 4: Architecture Design      | COMPLETE | Typed dispatch strategy, FlagProvider SPI evolution, @CloseTo/@WhenTrue/@WhenFalse, 2 ADRs, updated C4 L3 |
+| Phase 5: Quality Validation       | COMPLETE | All quality gates passed                                                                                  |
+| Phase 6: Peer Review              | COMPLETE | Self-reviewed against critique dimensions                                                                 |
 
 ## Architecture Decisions Made
 
 ### Decided in DESIGN Wave
 
-| #   | Decision                                                     | ADR/Doc       | Rationale                                                             |
-| --- | ------------------------------------------------------------ | ------------- | --------------------------------------------------------------------- |
-| 1   | Per-variant delta with 1e-10 default for @CloseTo            | ADR-013       | Per-variant is strictly more expressive; default covers IEEE 754 errors |
-| 2   | @WhenTrue/@WhenFalse as normalization sugar, not meta-annotations | ADR-014  | Java annotation processing lacks meta-annotation support              |
-| 3   | FlagProvider typed methods as default methods parsing getString | Architecture | Backward compat -- existing providers unchanged                       |
-| 4   | DOUBLE dispatch via iteration (not map lookup)               | Architecture  | Approximate matching cannot hash; O(n) for n=2-5 is negligible       |
-| 5   | Sentinel strategy for @Variant typed attributes              | Architecture  | Java annotations have no null; MIN_VALUE/empty string/NaN sentinels   |
-| 6   | getBoolean strict parsing (only "true"/"false")              | Architecture  | Prevents silent misinterpretation of "1", "yes", etc.                 |
-| 7   | @Variant.value default changed to empty string sentinel      | Architecture  | Allows typed attributes without requiring string value                |
-| 8   | No compile-time overlap detection for DOUBLE deltas          | ADR-013       | Halting-problem-adjacent; ordering resolves ambiguity                 |
+|  #  |                             Decision                              |   ADR/Doc    |                                Rationale                                |
+| --- | ----------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------- |
+| 1   | Per-variant delta with 1e-10 default for @CloseTo                 | ADR-013      | Per-variant is strictly more expressive; default covers IEEE 754 errors |
+| 2   | @WhenTrue/@WhenFalse as normalization sugar, not meta-annotations | ADR-014      | Java annotation processing lacks meta-annotation support                |
+| 3   | FlagProvider typed methods as default methods parsing getString   | Architecture | Backward compat -- existing providers unchanged                         |
+| 4   | DOUBLE dispatch via iteration (not map lookup)                    | Architecture | Approximate matching cannot hash; O(n) for n=2-5 is negligible          |
+| 5   | Sentinel strategy for @Variant typed attributes                   | Architecture | Java annotations have no null; MIN_VALUE/empty string/NaN sentinels     |
+| 6   | getBoolean strict parsing (only "true"/"false")                   | Architecture | Prevents silent misinterpretation of "1", "yes", etc.                   |
+| 7   | @Variant.value default changed to empty string sentinel           | Architecture | Allows typed attributes without requiring string value                  |
+| 8   | No compile-time overlap detection for DOUBLE deltas               | ADR-013      | Halting-problem-adjacent; ordering resolves ambiguity                   |
 
 ### Confirmed from DISCUSS Wave
 
-| #   | Decision                                           | Source        |
-| --- | -------------------------------------------------- | ------------- |
-| 1   | FeatureType enum with STRING, INT, LONG, BOOLEAN, DOUBLE | DISCUSS D1 |
-| 2   | `@Feature(type = FeatureType.X)` attribute         | DISCUSS D2    |
-| 3   | Typed @Variant attributes (intValue, etc.)         | DISCUSS D3    |
-| 4   | @CloseTo for approximate double matching           | DISCUSS D4    |
-| 5   | @WhenTrue/@WhenFalse with of= for multi-feature    | DISCUSS D5   |
-| 6   | FlagProvider returns primitive optionals            | DISCUSS D6    |
-| 7   | Context-aware overloads for all typed methods       | DISCUSS D7   |
-| 8   | Default methods parse from getString()             | DISCUSS D8    |
-| 9   | Map lookup for INT/LONG/BOOLEAN, iterate for DOUBLE | DISCUSS D9  |
-| 10  | Typed variants support order (ADR-008)             | DISCUSS D10   |
+|  #  |                         Decision                         |   Source    |
+| --- | -------------------------------------------------------- | ----------- |
+| 1   | FeatureType enum with STRING, INT, LONG, BOOLEAN, DOUBLE | DISCUSS D1  |
+| 2   | `@Feature(type = FeatureType.X)` attribute               | DISCUSS D2  |
+| 3   | Typed @Variant attributes (intValue, etc.)               | DISCUSS D3  |
+| 4   | @CloseTo for approximate double matching                 | DISCUSS D4  |
+| 5   | @WhenTrue/@WhenFalse with of= for multi-feature          | DISCUSS D5  |
+| 6   | FlagProvider returns primitive optionals                 | DISCUSS D6  |
+| 7   | Context-aware overloads for all typed methods            | DISCUSS D7  |
+| 8   | Default methods parse from getString()                   | DISCUSS D8  |
+| 9   | Map lookup for INT/LONG/BOOLEAN, iterate for DOUBLE      | DISCUSS D9  |
+| 10  | Typed variants support order (ADR-008)                   | DISCUSS D10 |
 
 ## Artifacts Produced
 
-| Artifact             | File                                                           | Status    |
-| -------------------- | -------------------------------------------------------------- | --------- |
-| Architecture Design  | `design/architecture-design.md`                                | Complete  |
-| Data Models          | `design/data-models.md`                                        | Complete  |
-| Component Boundaries | `design/component-boundaries.md`                               | Complete  |
-| Wave Decisions       | `design/wave-decisions.md`                                     | This file |
-| ADR-013              | `adrs/ADR-013-closeto-delta-strategy.md`                       | Accepted  |
-| ADR-014              | `adrs/ADR-014-whentrue-whenfalse-sugar.md`                     | Accepted  |
+|       Artifact       |                    File                    |  Status   |
+| -------------------- | ------------------------------------------ | --------- |
+| Architecture Design  | `design/architecture-design.md`            | Complete  |
+| Data Models          | `design/data-models.md`                    | Complete  |
+| Component Boundaries | `design/component-boundaries.md`           | Complete  |
+| Wave Decisions       | `design/wave-decisions.md`                 | This file |
+| ADR-013              | `adrs/ADR-013-closeto-delta-strategy.md`   | Accepted  |
+| ADR-014              | `adrs/ADR-014-whentrue-whenfalse-sugar.md` | Accepted  |
 
 ## Handoff Package for DISTILL Wave (acceptance-designer)
 
@@ -107,10 +107,10 @@ No new external integrations in this milestone. Provider adapters (LaunchDarkly,
 
 ## Risk Register
 
-| Risk                                                           | Probability | Impact | Mitigation                                                         |
-| -------------------------------------------------------------- | ----------- | ------ | ------------------------------------------------------------------ |
-| Sentinel values (MIN_VALUE) collide with real flag values       | Low         | Medium | Documented limitation; string dispatch available as workaround     |
+|                              Risk                               | Probability | Impact |                                     Mitigation                                     |
+| --------------------------------------------------------------- | ----------- | ------ | ---------------------------------------------------------------------------------- |
+| Sentinel values (MIN_VALUE) collide with real flag values       | Low         | Medium | Documented limitation; string dispatch available as workaround                     |
 | @Variant attribute proliferation (5 mutually exclusive attrs)   | Medium      | Low    | Compile-time validation catches misuse; @WhenTrue/@WhenFalse simplify boolean case |
-| DOUBLE delta overlap causes unexpected dispatch                 | Low         | Medium | Ordering resolves ambiguity; documented behavior                   |
-| Existing @Variant(value) users confused by empty default change | Low         | Low    | STRING features still require value; processor error message guides |
-| ProxyGenerator complexity growth (5 dispatch paths)             | Medium      | Medium | Clean separation per FeatureType; crafter structures internally    |
+| DOUBLE delta overlap causes unexpected dispatch                 | Low         | Medium | Ordering resolves ambiguity; documented behavior                                   |
+| Existing @Variant(value) users confused by empty default change | Low         | Low    | STRING features still require value; processor error message guides                |
+| ProxyGenerator complexity growth (5 dispatch paths)             | Medium      | Medium | Clean separation per FeatureType; crafter structures internally                    |
