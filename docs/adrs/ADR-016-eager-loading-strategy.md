@@ -9,6 +9,7 @@ Accepted
 `EnvironmentVariableFlagProvider` needs to read environment variables and map them to flag keys. The question is when to read `System.getenv()`: eagerly at construction time or lazily on each `getString()` call.
 
 Quality attribute priorities for this module:
+
 - **Performance**: O(1) flag resolution with zero runtime I/O
 - **Testability**: deterministic behavior, easy to verify
 - **Reliability**: thread-safe, predictable

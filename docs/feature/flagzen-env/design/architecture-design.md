@@ -221,6 +221,7 @@ When `ConflictStrategy.WARN` is active and a conflict was detected during constr
 ### Transitive Dependencies
 
 When a developer adds `com.flagzen:flagzen-env`, Gradle resolves:
+
 - `com.flagzen:flagzen-key-mapping` (transitive)
 - `com.flagzen:flagzen-core` (transitive)
 

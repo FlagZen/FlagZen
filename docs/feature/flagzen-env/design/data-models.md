@@ -77,6 +77,7 @@ After construction, the provider holds:
 ### Map Construction Example
 
 Given environment:
+
 - `FLAGZEN_CHECKOUT_FLOW=PREMIUM`
 - `FLAGZEN_MAX_RETRIES=5`
 - `HOME=/Users/kenji`
