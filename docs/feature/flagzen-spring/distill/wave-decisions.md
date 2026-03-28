@@ -28,6 +28,7 @@ Functional acceptance tests only. No Gradle build verification, no JAR content v
 ### Decision 5: Walking Skeleton Scope
 
 Three walking skeletons covering the three essential paths:
+
 1. **Happy path**: FlagProvider bean -> auto-configured dispatcher -> injected proxy -> correct variant dispatches
 2. **Fallback path**: No FlagProvider -> InMemoryFlagProvider fallback -> proxy dispatches to default variant
 3. **Override path**: Custom FeatureDispatcher -> auto-configuration backs off

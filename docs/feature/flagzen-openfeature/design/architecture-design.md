@@ -6,13 +6,13 @@ The `flagzen-openfeature` module is a **driven adapter** in FlagZen's ports-and-
 
 ### Capabilities
 
-| Capability | Description |
-|------------|-------------|
-| String flag resolution | Delegates `getString` to `Client.getStringDetails` with reason-based absence detection |
+|       Capability        |                                          Description                                           |
+| ----------------------- | ---------------------------------------------------------------------------------------------- |
+| String flag resolution  | Delegates `getString` to `Client.getStringDetails` with reason-based absence detection         |
 | Native typed resolution | Delegates `getBoolean`, `getInt`, `getLong`, `getDouble` to OpenFeature's typed detail methods |
-| Context mapping | Converts `com.flagzen.EvaluationContext` to `dev.openfeature.sdk.EvaluationContext` |
-| Auto-discovery | ServiceLoader registration via `META-INF/services/com.flagzen.spi.FlagProvider` |
-| Dual construction | No-arg (global client) and parameterized (explicit client) constructors |
+| Context mapping         | Converts `com.flagzen.EvaluationContext` to `dev.openfeature.sdk.EvaluationContext`            |
+| Auto-discovery          | ServiceLoader registration via `META-INF/services/com.flagzen.spi.FlagProvider`                |
+| Dual construction       | No-arg (global client) and parameterized (explicit client) constructors                        |
 
 ### Constraints
 
@@ -77,8 +77,8 @@ FlagProvider.getInt(key)     -->  Client.getIntegerDetails(key, default)
 FlagProvider.getLong(key)    -->  Client.getIntegerDetails(key, default) + widening
 FlagProvider.getDouble(key)  -->  Client.getDoubleDetails(key, default)
 EvaluationContext            -->  dev.openfeature.sdk.EvaluationContext
-Optional.empty()             <--  reason=DEFAULT | errorCode set
-Optional.of(value)           <--  reason=TARGETING_MATCH | STATIC | SPLIT | etc.
+| Optional.empty()             <--  reason=DEFAULT         | errorCode set |       |      |
+| Optional.of(value)           <--  reason=TARGETING_MATCH | STATIC        | SPLIT | etc. |
 ```
 
 ## 5. OpenFeature SDK API Usage
@@ -87,13 +87,13 @@ Optional.of(value)           <--  reason=TARGETING_MATCH | STATIC | SPLIT | etc.
 
 The adapter uses OpenFeature's `*Details` methods exclusively (not the simpler `get*` methods) because only the detail response includes the `reason` field needed for absent-flag detection.
 
-| FlagProvider method | OpenFeature Client method | Default sentinel | Return mapping |
-|---------------------|--------------------------|------------------|----------------|
-| `getString(key)` | `getStringDetails(key, "")` | `""` | reason-based |
-| `getBoolean(key)` | `getBooleanDetails(key, false)` | `false` | reason-based |
-| `getInt(key)` | `getIntegerDetails(key, 0)` | `0` | reason-based |
-| `getLong(key)` | `getIntegerDetails(key, 0)` | `0` | reason-based, widen `int` to `long` |
-| `getDouble(key)` | `getDoubleDetails(key, 0.0)` | `0.0` | reason-based |
+| FlagProvider method |    OpenFeature Client method    | Default sentinel |           Return mapping            |
+| ------------------- | ------------------------------- | ---------------- | ----------------------------------- |
+| `getString(key)`    | `getStringDetails(key, "")`     | `""`             | reason-based                        |
+| `getBoolean(key)`   | `getBooleanDetails(key, false)` | `false`          | reason-based                        |
+| `getInt(key)`       | `getIntegerDetails(key, 0)`     | `0`              | reason-based                        |
+| `getLong(key)`      | `getIntegerDetails(key, 0)`     | `0`              | reason-based, widen `int` to `long` |
+| `getDouble(key)`    | `getDoubleDetails(key, 0.0)`    | `0.0`            | reason-based                        |
 
 ### Reason-Based Absence Detection
 
@@ -127,13 +127,13 @@ No transitive dependency on any specific OpenFeature provider. The developer sup
 
 ## 7. Technology Stack
 
-| Component | Technology | Version | License | Rationale |
-|-----------|-----------|---------|---------|-----------|
-| Language | Java | 17+ | N/A | Project standard |
-| Build | Gradle (Kotlin DSL) | Project version | Apache 2.0 | Project standard |
-| Core dependency | flagzen-core | Same version | Project license | SPI contract |
-| External SDK | dev.openfeature:sdk | 1.x (latest stable) | Apache 2.0 | Only OpenFeature SDK option; CNCF project |
-| Logging | java.util.logging (JUL) | JDK | N/A | Consistent with flagzen-env; zero added deps |
+|    Component    |       Technology        |       Version       |     License     |                  Rationale                   |
+| --------------- | ----------------------- | ------------------- | --------------- | -------------------------------------------- |
+| Language        | Java                    | 17+                 | N/A             | Project standard                             |
+| Build           | Gradle (Kotlin DSL)     | Project version     | Apache 2.0      | Project standard                             |
+| Core dependency | flagzen-core            | Same version        | Project license | SPI contract                                 |
+| External SDK    | dev.openfeature:sdk     | 1.x (latest stable) | Apache 2.0      | Only OpenFeature SDK option; CNCF project    |
+| Logging         | java.util.logging (JUL) | JDK                 | N/A             | Consistent with flagzen-env; zero added deps |
 
 ### Why `dev.openfeature:sdk`
 
@@ -199,14 +199,14 @@ The OpenFeature SDK is a CNCF project with semver guarantees, but major version 
 
 ## 11. Architectural Enforcement
 
-| Rule | Tool | Enforcement |
-|------|------|-------------|
-| No `java.lang.reflect` in flagzen-openfeature | ArchUnit | `noClasses().that().resideInAPackage("com.flagzen.openfeature..").should().accessClassesThat().resideInAPackage("java.lang.reflect")` |
-| Depends only on flagzen-core (no cross-extension) | Gradle dependency constraints | `build.gradle.kts` -- verify no dependency on flagzen-env, flagzen-spring, etc. |
-| Package structure: `com.flagzen.openfeature` only | ArchUnit | `classes().that().resideInAPackage("com.flagzen.openfeature..").should().onlyDependOnClassesThat()` match allowed packages |
+|                       Rule                        |             Tool              |                                                              Enforcement                                                              |
+| ------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| No `java.lang.reflect` in flagzen-openfeature     | ArchUnit                      | `noClasses().that().resideInAPackage("com.flagzen.openfeature..").should().accessClassesThat().resideInAPackage("java.lang.reflect")` |
+| Depends only on flagzen-core (no cross-extension) | Gradle dependency constraints | `build.gradle.kts` -- verify no dependency on flagzen-env, flagzen-spring, etc.                                                       |
+| Package structure: `com.flagzen.openfeature` only | ArchUnit                      | `classes().that().resideInAPackage("com.flagzen.openfeature..").should().onlyDependOnClassesThat()` match allowed packages            |
 
 ## 12. ADR Index
 
-| ADR | Title | Status |
-|-----|-------|--------|
+|                                ADR                                 |                           Title                           |  Status  |
+| ------------------------------------------------------------------ | --------------------------------------------------------- | -------- |
 | [ADR-020](../../../adrs/ADR-020-absent-flag-detection-strategy.md) | Absent Flag Detection Strategy (Reason-Based vs Sentinel) | Proposed |
