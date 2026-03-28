@@ -13,6 +13,7 @@
   },
   "gitignore": true,
   "ignores": [
-    ".nwave"
+    ".nwave",
+    ".github"
   ]
 }
