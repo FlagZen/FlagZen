@@ -4,6 +4,8 @@ import com.flagzen.FlagContext;
 import com.flagzen.acceptance.fixtures.CheckoutFlowMetadata;
 import com.flagzen.acceptance.fixtures.DarkModeMetadata;
 import com.flagzen.acceptance.fixtures.PaymentMethodMetadata;
+import com.flagzen.acceptance.fixtures.PricingTierMetadata;
+import com.flagzen.acceptance.fixtures.RateLimiterMetadata;
 import com.flagzen.acceptance.fixtures.RetryStrategyMetadata;
 import com.flagzen.acceptance.fixtures.SamplingStrategyMetadata;
 import io.cucumber.java.Before;
@@ -24,6 +26,8 @@ public class ScenarioHooks {
         SharedTypedDispatchHolder.reset();
         RetryStrategyMetadata.reset();
         SamplingStrategyMetadata.reset();
+        PricingTierMetadata.reset();
+        RateLimiterMetadata.reset();
         FlagContext.clear();
     }
 }

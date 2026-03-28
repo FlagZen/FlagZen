@@ -14,6 +14,19 @@ import java.util.function.Supplier;
  */
 public class RateLimiterMetadata implements FeatureMetadata<RateLimiter> {
 
+    private static volatile Map<String, Supplier<RateLimiter>> multiValueVariants = null;
+
+    /**
+     * Configures multi-value variant mappings for acceptance test scenarios.
+     */
+    public static void setMultiValueVariants(Map<String, Supplier<RateLimiter>> variants) {
+        multiValueVariants = variants;
+    }
+
+    public static void reset() {
+        multiValueVariants = null;
+    }
+
     @Override
     public Class<RateLimiter> featureType() {
         return RateLimiter.class;
@@ -31,6 +44,9 @@ public class RateLimiterMetadata implements FeatureMetadata<RateLimiter> {
 
     @Override
     public Map<String, Supplier<RateLimiter>> variantSuppliers() {
+        if (multiValueVariants != null) {
+            return multiValueVariants;
+        }
         return Map.of(
                 "1000", LowVolumeLimit::new,
                 "50000", HighVolumeLimit::new

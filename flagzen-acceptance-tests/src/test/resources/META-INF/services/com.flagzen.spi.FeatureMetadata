@@ -4,3 +4,4 @@ com.flagzen.acceptance.fixtures.PaymentMethodMetadata
 com.flagzen.acceptance.fixtures.RetryStrategyMetadata
 com.flagzen.acceptance.fixtures.RateLimiterMetadata
 com.flagzen.acceptance.fixtures.SamplingStrategyMetadata
+com.flagzen.acceptance.fixtures.PricingTierMetadata

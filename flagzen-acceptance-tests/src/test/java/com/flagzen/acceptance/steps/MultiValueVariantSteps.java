@@ -1,10 +1,19 @@
 package com.flagzen.acceptance.steps;
 
 import com.flagzen.FeatureDispatcher;
+import com.flagzen.UnmatchedVariantException;
+import com.flagzen.acceptance.fixtures.BulkPricing;
 import com.flagzen.acceptance.fixtures.CheckoutFlow;
 import com.flagzen.acceptance.fixtures.CheckoutFlowMetadata;
 import com.flagzen.acceptance.fixtures.ClassicCheckout;
 import com.flagzen.acceptance.fixtures.ModernCheckout;
+import com.flagzen.acceptance.fixtures.PricingTier;
+import com.flagzen.acceptance.fixtures.PricingTierMetadata;
+import com.flagzen.acceptance.fixtures.RateLimiter;
+import com.flagzen.acceptance.fixtures.RateLimiterMetadata;
+import com.flagzen.acceptance.fixtures.StandardPricing;
+import com.flagzen.acceptance.fixtures.ThrottledRate;
+import com.flagzen.acceptance.fixtures.UnlimitedRate;
 import com.flagzen.internal.DefaultFeatureDispatcher;
 import com.flagzen.internal.InMemoryFlagProvider;
 import com.google.testing.compile.Compilation;
@@ -237,15 +246,32 @@ public class MultiValueVariantSteps {
     // --- Runtime dispatch steps for multi-value scenario ---
 
     private final Map<String, Supplier<CheckoutFlow>> multiValueMap = new HashMap<>();
+    private final Map<String, Supplier<PricingTier>> intMultiValueMap = new HashMap<>();
+    private final Map<String, Supplier<RateLimiter>> longMultiValueMap = new HashMap<>();
     private InMemoryFlagProvider flagProvider;
     private FeatureDispatcher dispatcher;
     private CheckoutFlow resolvedProxy;
     private String callResult;
+    private String activeFeatureType;
+    private Exception caughtException;
 
     @Given("a compiled multi-value feature {string} with flag key {string}")
     public void aCompiledMultiValueFeatureWithFlagKey(String featureName, String flagKey) {
         // Fixtures are pre-compiled; metadata will be configured with multi-value mappings
         multiValueMap.clear();
+        activeFeatureType = "STRING";
+    }
+
+    @Given("a compiled multi-value feature {string} with flag key {string} and type INT")
+    public void aCompiledMultiValueFeatureWithFlagKeyAndTypeInt(String featureName, String flagKey) {
+        intMultiValueMap.clear();
+        activeFeatureType = "INT";
+    }
+
+    @Given("a compiled multi-value feature {string} with flag key {string} and type LONG")
+    public void aCompiledMultiValueFeatureWithFlagKeyAndTypeLong(String featureName, String flagKey) {
+        longMultiValueMap.clear();
+        activeFeatureType = "LONG";
     }
 
     @And("{string} mapped to string values {string} and {string}")
@@ -267,12 +293,69 @@ public class MultiValueVariantSteps {
         flagProvider.set(flagKey, flagValue);
     }
 
+    @And("{string} mapped to int values {int} and {int}")
+    public void mappedToIntValuesAnd(String variantClass, int value1, int value2) {
+        Supplier<PricingTier> supplier = resolvePricingTierSupplier(variantClass);
+        intMultiValueMap.put(String.valueOf(value1), supplier);
+        intMultiValueMap.put(String.valueOf(value2), supplier);
+    }
+
+    @And("{string} mapped to int value {int}")
+    public void mappedToIntValue(String variantClass, int value) {
+        Supplier<PricingTier> supplier = resolvePricingTierSupplier(variantClass);
+        intMultiValueMap.put(String.valueOf(value), supplier);
+    }
+
+    @And("{string} mapped to long values {long} and {long}")
+    public void mappedToLongValuesAnd(String variantClass, long value1, long value2) {
+        Supplier<RateLimiter> supplier = resolveRateLimiterSupplier(variantClass);
+        longMultiValueMap.put(String.valueOf(value1), supplier);
+        longMultiValueMap.put(String.valueOf(value2), supplier);
+    }
+
+    @And("{string} mapped to long value {long}")
+    public void mappedToLongValue(String variantClass, long value) {
+        Supplier<RateLimiter> supplier = resolveRateLimiterSupplier(variantClass);
+        longMultiValueMap.put(String.valueOf(value), supplier);
+    }
+
+    @And("the feature uses fallback strategy EXCEPTION")
+    public void theFeatureUsesFallbackStrategyException() {
+        // CheckoutFlowMetadata already declares EXCEPTION as default fallback strategy
+    }
+
     @When("the developer resolves {string} through the multi-value dispatcher")
     public void theDeveloperResolvesThroughTheMultiValueDispatcher(String featureName) {
+        dispatcher = new DefaultFeatureDispatcher(flagProvider);
+        switch (activeFeatureType) {
+            case "INT" -> {
+                PricingTierMetadata.setMultiValueVariants(Map.copyOf(intMultiValueMap));
+                PricingTier proxy = dispatcher.resolve(PricingTier.class);
+                callResult = proxy.execute();
+            }
+            case "LONG" -> {
+                RateLimiterMetadata.setMultiValueVariants(Map.copyOf(longMultiValueMap));
+                RateLimiter proxy = dispatcher.resolve(RateLimiter.class);
+                callResult = proxy.execute();
+            }
+            default -> {
+                CheckoutFlowMetadata.setMultiValueVariants(Map.copyOf(multiValueMap));
+                resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
+                callResult = resolvedProxy.execute();
+            }
+        }
+    }
+
+    @When("the developer resolves {string} through the multi-value dispatcher expecting fallback")
+    public void theDeveloperResolvesThroughTheMultiValueDispatcherExpectingFallback(String featureName) {
         CheckoutFlowMetadata.setMultiValueVariants(Map.copyOf(multiValueMap));
         dispatcher = new DefaultFeatureDispatcher(flagProvider);
-        resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
-        callResult = resolvedProxy.execute();
+        try {
+            resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
+            callResult = resolvedProxy.execute();
+        } catch (Exception e) {
+            caughtException = e;
+        }
     }
 
     @Then("the {string} variant handles the call")
@@ -280,10 +363,32 @@ public class MultiValueVariantSteps {
         assertThat(callResult).isEqualTo(expectedVariant);
     }
 
+    @Then("an unmatched variant error is raised for the multi-value feature")
+    public void anUnmatchedVariantErrorIsRaisedForTheMultiValueFeature() {
+        assertThat(caughtException).isNotNull();
+        assertThat(caughtException).isInstanceOf(UnmatchedVariantException.class);
+    }
+
     private Supplier<CheckoutFlow> resolveVariantSupplier(String variantClass) {
         return switch (variantClass) {
             case "ClassicCheckout" -> ClassicCheckout::new;
             case "ModernCheckout" -> ModernCheckout::new;
+            default -> throw new IllegalArgumentException("Unknown variant: " + variantClass);
+        };
+    }
+
+    private Supplier<PricingTier> resolvePricingTierSupplier(String variantClass) {
+        return switch (variantClass) {
+            case "BulkPricing" -> BulkPricing::new;
+            case "StandardPricing" -> StandardPricing::new;
+            default -> throw new IllegalArgumentException("Unknown variant: " + variantClass);
+        };
+    }
+
+    private Supplier<RateLimiter> resolveRateLimiterSupplier(String variantClass) {
+        return switch (variantClass) {
+            case "ThrottledRate" -> ThrottledRate::new;
+            case "UnlimitedRate" -> UnlimitedRate::new;
             default -> throw new IllegalArgumentException("Unknown variant: " + variantClass);
         };
     }

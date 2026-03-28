@@ -6,7 +6,7 @@ Feature: Runtime dispatch for multi-value variant mappings
 
   # --- String multi-value dispatch ---
 
-  @pending @US-MV-01
+  @US-MV-01
   Scenario: Flag value matching first array element dispatches correctly
     Given a compiled multi-value feature "CheckoutFlow" with flag key "checkout-flow"
     And "ClassicCheckout" mapped to string values "CLASSIC" and "LEGACY"
@@ -15,7 +15,7 @@ Feature: Runtime dispatch for multi-value variant mappings
     When the developer resolves "CheckoutFlow" through the multi-value dispatcher
     Then the "ClassicCheckout" variant handles the call
 
-  @pending @US-MV-01
+  @US-MV-01
   Scenario: Flag value matching second array element dispatches correctly
     Given a compiled multi-value feature "CheckoutFlow" with flag key "checkout-flow"
     And "ClassicCheckout" mapped to string values "CLASSIC" and "LEGACY"
@@ -24,7 +24,7 @@ Feature: Runtime dispatch for multi-value variant mappings
     When the developer resolves "CheckoutFlow" through the multi-value dispatcher
     Then the "ClassicCheckout" variant handles the call
 
-  @pending @US-MV-01
+  @US-MV-01
   Scenario: Flag value matching single-value variant dispatches correctly
     Given a compiled multi-value feature "CheckoutFlow" with flag key "checkout-flow"
     And "ClassicCheckout" mapped to string values "CLASSIC" and "LEGACY"
@@ -35,7 +35,7 @@ Feature: Runtime dispatch for multi-value variant mappings
 
   # --- Int multi-value dispatch ---
 
-  @pending @US-MV-02
+  @US-MV-02
   Scenario: Int flag value matching any array element dispatches correctly
     Given a compiled multi-value feature "PricingTier" with flag key "pricing-tier" and type INT
     And "BulkPricing" mapped to int values 3 and 5
@@ -46,7 +46,7 @@ Feature: Runtime dispatch for multi-value variant mappings
 
   # --- Long multi-value dispatch ---
 
-  @pending @US-MV-04
+  @US-MV-04
   Scenario: Long flag value matching any array element dispatches correctly
     Given a compiled multi-value feature "RateLimit" with flag key "rate-limit" and type LONG
     And "ThrottledRate" mapped to long values 1000 and 2000
@@ -57,7 +57,7 @@ Feature: Runtime dispatch for multi-value variant mappings
 
   # --- Unmatched value with multi-value variants ---
 
-  @pending @US-MV-01
+  @US-MV-01
   Scenario: Unmatched flag value with multi-value variants triggers fallback
     Given a compiled multi-value feature "CheckoutFlow" with flag key "checkout-flow"
     And "ClassicCheckout" mapped to string values "CLASSIC" and "LEGACY"
