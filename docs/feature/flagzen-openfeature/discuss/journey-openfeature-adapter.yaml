@@ -1,0 +1,98 @@
+journey:
+  name: "OpenFeature Adapter Integration"
+  goal: "Resolve FlagZen feature flags through an OpenFeature SDK client"
+  persona: "Ricardo Alves -- senior Java developer using OpenFeature + Flagd"
+
+  emotional_arc:
+    start: "Hopeful -- can I keep my OpenFeature setup?"
+    middle: "Confident -- minimal config, ServiceLoader just works"
+    end: "Satisfied -- polymorphic dispatch works through OpenFeature"
+
+steps:
+  - id: 1
+    name: "Add Dependency"
+    action: "Add flagzen-openfeature to build.gradle.kts"
+    shared_artifacts:
+      - name: "module_artifact_id"
+        source: "build.gradle.kts (flagzen-openfeature)"
+        displayed_as: "com.flagzen:flagzen-openfeature"
+        consumers:
+          - "build.gradle.kts of consuming project"
+          - "Maven Central"
+    emotional_state:
+      entry: "Hopeful"
+      exit: "Ready"
+
+  - id: 2
+    name: "Configure Provider"
+    action: "Let ServiceLoader discover or explicitly construct OpenFeatureFlagProvider"
+    shared_artifacts:
+      - name: "openfeature_client"
+        source: "OpenFeatureAPI.getInstance().getClient()"
+        displayed_as: "${client}"
+        consumers:
+          - "OpenFeatureFlagProvider constructor"
+      - name: "service_loader_registration"
+        source: "META-INF/services/com.flagzen.spi.FlagProvider"
+        displayed_as: "com.flagzen.openfeature.OpenFeatureFlagProvider"
+        consumers:
+          - "FlagZen ServiceLoader discovery"
+    emotional_state:
+      entry: "Ready"
+      exit: "Confident"
+    integration_checkpoint: |
+      OpenFeature client must have a registered provider.
+      ServiceLoader file must contain the FQCN of OpenFeatureFlagProvider.
+
+  - id: 3
+    name: "Resolve String Flags"
+    action: "FlagZen proxy calls getString(key), adapter delegates to OpenFeature"
+    shared_artifacts:
+      - name: "flag_key"
+        source: "@Feature annotation value"
+        displayed_as: "${flag_key}"
+        consumers:
+          - "FlagZen proxy"
+          - "OpenFeatureFlagProvider.getString()"
+          - "OpenFeature client.getStringDetails()"
+    emotional_state:
+      entry: "Confident"
+      exit: "Satisfied"
+    integration_checkpoint: |
+      Flag key used by FlagZen proxy must match key stored in OpenFeature provider.
+      getString returns Optional.empty() when OpenFeature reason is DEFAULT or ERROR.
+
+  - id: 4
+    name: "Resolve with Evaluation Context"
+    action: "Pass FlagZen EvaluationContext, adapter maps to OpenFeature EvaluationContext"
+    shared_artifacts:
+      - name: "targeting_key"
+        source: "com.flagzen.EvaluationContext.targetingKey()"
+        displayed_as: "${targeting_key}"
+        consumers:
+          - "FlagZen EvaluationContext"
+          - "OpenFeature EvaluationContext"
+      - name: "context_attributes"
+        source: "com.flagzen.EvaluationContext.attributes()"
+        displayed_as: "${attributes}"
+        consumers:
+          - "FlagZen EvaluationContext"
+          - "OpenFeature EvaluationContext (as Value objects)"
+    emotional_state:
+      entry: "Satisfied"
+      exit: "Empowered"
+    integration_checkpoint: |
+      FlagZen targeting key maps 1:1 to OpenFeature targeting key.
+      Attribute values must be convertible to OpenFeature Value types.
+
+integration_validation:
+  shared_artifact_consistency:
+    - artifact: "flag_key"
+      must_match_across: [3]
+      failure_message: "Flag key in @Feature annotation must match key in OpenFeature provider"
+    - artifact: "targeting_key"
+      must_match_across: [4]
+      failure_message: "Targeting key must propagate from FlagZen context to OpenFeature context"
+    - artifact: "service_loader_registration"
+      must_match_across: [2]
+      failure_message: "META-INF/services file must contain correct FQCN for ServiceLoader"
