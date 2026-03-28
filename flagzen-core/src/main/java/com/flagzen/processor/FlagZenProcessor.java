@@ -6,6 +6,10 @@ import com.flagzen.Feature;
 import com.flagzen.FeatureType;
 import com.flagzen.Variant;
 import com.flagzen.Variants;
+import com.flagzen.WhenFalse;
+import com.flagzen.WhenFalses;
+import com.flagzen.WhenTrue;
+import com.flagzen.WhenTrues;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -45,7 +49,11 @@ public class FlagZenProcessor extends AbstractProcessor {
                 "com.flagzen.Feature",
                 "com.flagzen.Variant",
                 "com.flagzen.Variants",
-                "com.flagzen.DefaultVariant"
+                "com.flagzen.DefaultVariant",
+                "com.flagzen.WhenTrue",
+                "com.flagzen.WhenTrues",
+                "com.flagzen.WhenFalse",
+                "com.flagzen.WhenFalses"
         );
     }
 
@@ -236,7 +244,88 @@ public class FlagZenProcessor extends AbstractProcessor {
             }
         }
 
+        collectWhenTrueVariants(roundEnv, featureElement, variants);
+        collectWhenFalseVariants(roundEnv, featureElement, variants);
+
         return variants;
+    }
+
+    private void collectWhenTrueVariants(RoundEnvironment roundEnv, TypeElement featureElement,
+                                          List<VariantModel> variants) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(WhenTrue.class)) {
+            TypeMirror target = extractWhenTrueOf(element.getAnnotation(WhenTrue.class));
+            processBooleanVariant(element, target, true, featureElement, variants);
+        }
+        for (Element element : roundEnv.getElementsAnnotatedWith(WhenTrues.class)) {
+            for (WhenTrue annotation : element.getAnnotation(WhenTrues.class).value()) {
+                TypeMirror target = extractWhenTrueOf(annotation);
+                processBooleanVariant(element, target, true, featureElement, variants);
+            }
+        }
+    }
+
+    private void collectWhenFalseVariants(RoundEnvironment roundEnv, TypeElement featureElement,
+                                           List<VariantModel> variants) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(WhenFalse.class)) {
+            TypeMirror target = extractWhenFalseOf(element.getAnnotation(WhenFalse.class));
+            processBooleanVariant(element, target, false, featureElement, variants);
+        }
+        for (Element element : roundEnv.getElementsAnnotatedWith(WhenFalses.class)) {
+            for (WhenFalse annotation : element.getAnnotation(WhenFalses.class).value()) {
+                TypeMirror target = extractWhenFalseOf(annotation);
+                processBooleanVariant(element, target, false, featureElement, variants);
+            }
+        }
+    }
+
+    private void processBooleanVariant(Element element, TypeMirror targetFeature, boolean booleanValue,
+                                        TypeElement featureElement, List<VariantModel> variants) {
+        if (targetFeature == null) {
+            return;
+        }
+        TypeElement targetElement = (TypeElement) processingEnv.getTypeUtils()
+                .asElement(targetFeature);
+        if (targetElement == null || !targetElement.equals(featureElement)) {
+            return;
+        }
+        TypeElement variantElement = (TypeElement) element;
+        if (!implementsInterface(variantElement, featureElement)) {
+            processingEnv.getMessager().printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "Variant class " + variantElement.getSimpleName()
+                            + " must implement the feature interface "
+                            + featureElement.getSimpleName(),
+                    variantElement
+            );
+            return;
+        }
+        variants.add(VariantModel.ofBoolean(variantElement.getQualifiedName().toString(), booleanValue));
+    }
+
+    private TypeMirror extractWhenTrueOf(WhenTrue annotation) {
+        try {
+            annotation.of();
+            return null;
+        } catch (MirroredTypeException e) {
+            TypeMirror mirror = e.getTypeMirror();
+            if (mirror.toString().equals("void")) {
+                return null;
+            }
+            return mirror;
+        }
+    }
+
+    private TypeMirror extractWhenFalseOf(WhenFalse annotation) {
+        try {
+            annotation.of();
+            return null;
+        } catch (MirroredTypeException e) {
+            TypeMirror mirror = e.getTypeMirror();
+            if (mirror.toString().equals("void")) {
+                return null;
+            }
+            return mirror;
+        }
     }
 
     private void processVariantAnnotation(Element element, Variant variantAnnotation,

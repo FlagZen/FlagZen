@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for InMemoryFlagProvider.
- * Test Budget: 2 behaviors x 2 = 4 max unit tests. Using 2.
+ * Test Budget: 3 behaviors x 2 = 6 max unit tests. Using 3.
  */
 class InMemoryFlagProviderTest {
 
@@ -44,5 +44,25 @@ class InMemoryFlagProviderTest {
         Optional<String> result = provider.getString("nonexistent-flag");
 
         assertThat(result).isEmpty();
+    }
+
+    /**
+     * Behavior 3: getBoolean parses string values to boolean.
+     * "true"/"false" (case-insensitive) -> Optional of boolean, anything else -> empty.
+     */
+    @ParameterizedTest
+    @CsvSource({
+            "true,true",
+            "false,false",
+            "TRUE,true",
+            "False,false"
+    })
+    void getBooleanReturnsParsedBooleanForValidValues(String flagValue, boolean expected) {
+        InMemoryFlagProvider provider = new InMemoryFlagProvider();
+        provider.set("dark-mode", flagValue);
+
+        Optional<Boolean> result = provider.getBoolean("dark-mode");
+
+        assertThat(result).contains(expected);
     }
 }

@@ -144,6 +144,9 @@ final class ProxyGenerator {
         if (model.featureType() == FeatureType.INT) {
             return buildIntResolveMethod(model, interfaceType, supplierType);
         }
+        if (model.featureType() == FeatureType.BOOLEAN) {
+            return buildBooleanResolveMethod(model, interfaceType, supplierType);
+        }
         return buildStringResolveMethod(model, interfaceType, supplierType);
     }
 
@@ -175,6 +178,39 @@ final class ProxyGenerator {
                             UnmatchedVariantException.class, model.flagKey())
                     .endControlFlow()
                     .addStatement("throw new $T($S, $T.valueOf(flagValue.getAsInt()), variants.keySet())",
+                            UnmatchedVariantException.class, model.flagKey(), String.class);
+        }
+
+        return builder.build();
+    }
+
+    private MethodSpec buildBooleanResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
+                .addModifiers(Modifier.PRIVATE)
+                .returns(interfaceType)
+                .addStatement("$T context = $T.current()", EvaluationContext.class, FlagContext.class)
+                .addStatement("$T<$T> flagValue = (context != null) ? flagProvider.getBoolean($S, context) : flagProvider.getBoolean($S)",
+                        Optional.class, Boolean.class, model.flagKey(), model.flagKey());
+
+        builder.beginControlFlow("if (flagValue.isPresent())")
+                .addStatement("$T supplier = variants.get(flagValue.get())", supplierType)
+                .beginControlFlow("if (supplier != null)")
+                .addStatement("return supplier.get()")
+                .endControlFlow()
+                .endControlFlow();
+
+        builder.beginControlFlow("if (defaultVariant != null)")
+                .addStatement("return defaultVariant.get()")
+                .endControlFlow();
+
+        if (model.fallbackStrategy() == FallbackStrategy.NOOP) {
+            builder.addStatement("return null");
+        } else {
+            builder.beginControlFlow("if (flagValue.isEmpty())")
+                    .addStatement("throw $T.noFlagValue($S)",
+                            UnmatchedVariantException.class, model.flagKey())
+                    .endControlFlow()
+                    .addStatement("throw new $T($S, $T.valueOf(flagValue.get()), variants.keySet())",
                             UnmatchedVariantException.class, model.flagKey(), String.class);
         }
 
@@ -338,6 +374,17 @@ final class ProxyGenerator {
             builder.addStatement("variants.forEach((k, v) -> intVariants.put($T.parseInt(k), v))", Integer.class);
             builder.addStatement("return new $T(flagProvider, intVariants, defaultVariant, $T.$L)",
                     proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
+        } else if (model.featureType() == FeatureType.BOOLEAN) {
+            // Convert Map<String, Supplier<T>> to Map<Boolean, Supplier<T>>
+            ParameterizedTypeName boolMapType = ParameterizedTypeName.get(
+                    ClassName.get(Map.class),
+                    ClassName.get(Boolean.class),
+                    supplierType
+            );
+            builder.addStatement("$T boolVariants = new $T<>()", boolMapType, ClassName.get("java.util", "HashMap"));
+            builder.addStatement("variants.forEach((k, v) -> boolVariants.put($T.parseBoolean(k), v))", Boolean.class);
+            builder.addStatement("return new $T(flagProvider, boolVariants, defaultVariant, $T.$L)",
+                    proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
         } else {
             builder.addStatement("return new $T(flagProvider, variants, defaultVariant, $T.$L)",
                     proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
@@ -349,6 +396,7 @@ final class ProxyGenerator {
     private static TypeName variantKeyType(FeatureType featureType) {
         return switch (featureType) {
             case INT -> ClassName.get(Integer.class);
+            case BOOLEAN -> ClassName.get(Boolean.class);
             default -> ClassName.get(String.class);
         };
     }

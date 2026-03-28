@@ -33,6 +33,32 @@ public interface FlagProvider {
     }
 
     /**
+     * Returns the current boolean value for the given flag key.
+     * The default implementation parses the string value from {@link #getString(String)}.
+     * Only exact "true" or "false" (case-insensitive) are recognized; anything else returns empty.
+     *
+     * @param key the flag key to look up
+     * @return the boolean flag value, or empty if not set or not parseable as boolean
+     */
+    default Optional<Boolean> getBoolean(String key) {
+        return getString(key)
+                .filter(v -> v.equalsIgnoreCase("true") || v.equalsIgnoreCase("false"))
+                .map(Boolean::parseBoolean);
+    }
+
+    /**
+     * Returns the current boolean value for the given flag key using the provided evaluation context.
+     * The default implementation delegates to {@link #getBoolean(String)}.
+     *
+     * @param key the flag key to look up
+     * @param context the evaluation context for targeted resolution
+     * @return the boolean flag value, or empty if not set or not parseable as boolean
+     */
+    default Optional<Boolean> getBoolean(String key, EvaluationContext context) {
+        return getBoolean(key);
+    }
+
+    /**
      * Returns the current integer value for the given flag key.
      * The default implementation parses the string value from {@link #getString(String)}.
      * Returns empty if the key is not set or the value is not a valid integer.

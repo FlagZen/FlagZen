@@ -19,6 +19,9 @@ public @interface Variant {
     /** The integer variant value that activates this implementation. */
     int intValue() default Integer.MIN_VALUE;
 
+    /** The boolean variant value that activates this implementation. Empty string means not set. */
+    String booleanValue() default "";
+
     /** The feature interface this variant belongs to. */
     Class<?> of() default void.class;
 }
