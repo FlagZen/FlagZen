@@ -5,7 +5,7 @@ Feature: Compile-time detection of overlapping @CloseTo ranges
 
   # --- Inter-variant overlap (across different classes) ---
 
-  @pending @US-MV-07
+  @US-MV-07
   Scenario: Overlapping @CloseTo ranges across variants is rejected
     Given a feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
     And a variant "SmallDiscount" implementing "DiscountRate" with @CloseTo value 0.1 and delta 0.05
@@ -16,7 +16,7 @@ Feature: Compile-time detection of overlapping @CloseTo ranges
     And the error shows the computed ranges
     And the error suggests reducing delta or merging variants
 
-  @pending @US-MV-07
+  @US-MV-07
   Scenario: Non-overlapping @CloseTo ranges across variants compiles successfully
     Given a feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
     And a variant "SmallDiscount" implementing "DiscountRate" with @CloseTo value 0.1 and delta 0.01
@@ -24,17 +24,17 @@ Feature: Compile-time detection of overlapping @CloseTo ranges
     When the project compiles
     Then compilation succeeds
 
-  @pending @US-MV-07
+  @US-MV-07
   Scenario: Overlapping @CloseTo ranges with default delta is detected
     Given a feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
     And a variant "SmallDiscount" implementing "DiscountRate" with @CloseTo value 0.1
-    And a variant "MediumDiscount" implementing "DiscountRate" with @CloseTo value 0.100001
+    And a variant "MediumDiscount" implementing "DiscountRate" with @CloseTo value 0.1000000001
     When the project compiles
     Then compilation fails with error containing "Overlapping @CloseTo ranges"
 
   # --- Intra-variant overlap (within same variant's array) ---
 
-  @pending @US-MV-07
+  @US-MV-07
   Scenario: Overlapping @CloseTo ranges within the same variant array is rejected
     Given a feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
     And a variant "SmallDiscount" implementing "DiscountRate" with @CloseTo values 0.1 delta 0.05 and 0.12 delta 0.05
@@ -43,7 +43,7 @@ Feature: Compile-time detection of overlapping @CloseTo ranges
     And the error shows both ranges
     And the error suggests reducing delta or removing the redundant entry
 
-  @pending @US-MV-07
+  @US-MV-07
   Scenario: Non-overlapping @CloseTo ranges within the same variant array compiles successfully
     Given a feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
     And a variant "SmallDiscount" implementing "DiscountRate" with @CloseTo values 0.1 and 0.5

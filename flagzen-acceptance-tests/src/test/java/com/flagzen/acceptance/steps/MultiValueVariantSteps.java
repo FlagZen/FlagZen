@@ -132,6 +132,87 @@ public class MultiValueVariantSteps {
         assertThat(compilation).hadErrorContaining(expectedError);
     }
 
+    @And("the error identifies {string} as the conflicting value")
+    public void theErrorIdentifiesAsTheConflictingValue(String value) {
+        Compilation compilation = SharedCompilationContext.getCompilation();
+        assertThat(compilation).hadErrorContaining(value);
+    }
+
+    @And("the error names both {string} and {string}")
+    public void theErrorNamesBothAnd(String class1, String class2) {
+        Compilation compilation = SharedCompilationContext.getCompilation();
+        assertThat(compilation).hadErrorContaining(class1);
+        assertThat(compilation).hadErrorContaining(class2);
+    }
+
+    @And("the error names {string} and {string}")
+    public void theErrorNamesAnd(String class1, String class2) {
+        Compilation compilation = SharedCompilationContext.getCompilation();
+        assertThat(compilation).hadErrorContaining(class1);
+        assertThat(compilation).hadErrorContaining(class2);
+    }
+
+    @And("the error shows the computed ranges")
+    public void theErrorShowsTheComputedRanges() {
+        Compilation compilation = SharedCompilationContext.getCompilation();
+        // The error message should include range notation like [x, y]
+        assertThat(compilation).hadErrorContaining("[");
+        assertThat(compilation).hadErrorContaining("]");
+    }
+
+    @And("the error suggests reducing delta or merging variants")
+    public void theErrorSuggestsReducingDeltaOrMergingVariants() {
+        Compilation compilation = SharedCompilationContext.getCompilation();
+        assertThat(compilation).hadErrorContaining("reduce delta");
+    }
+
+    @And("the error shows both ranges")
+    public void theErrorShowsBothRanges() {
+        Compilation compilation = SharedCompilationContext.getCompilation();
+        assertThat(compilation).hadErrorContaining("[");
+        assertThat(compilation).hadErrorContaining("]");
+    }
+
+    @And("the error suggests reducing delta or removing the redundant entry")
+    public void theErrorSuggestsReducingDeltaOrRemovingRedundant() {
+        Compilation compilation = SharedCompilationContext.getCompilation();
+        assertThat(compilation).hadErrorContaining("reduce delta");
+    }
+
+    @And("a variant {string} implementing {string} with @CloseTo value {double} and delta {double}")
+    public void aVariantImplementingWithCloseToValueAndDelta(String variantClass, String interfaceName,
+                                                              double value, double delta) {
+        addVariantSource(variantClass, interfaceName,
+                "doubleValue = @CloseTo(value = %s, delta = %s)".formatted(value, delta),
+                "import com.flagzen.CloseTo;");
+    }
+
+    @And("a variant {string} implementing {string} with @CloseTo value {double}")
+    public void aVariantImplementingWithCloseToValue(String variantClass, String interfaceName,
+                                                      double value) {
+        addVariantSource(variantClass, interfaceName,
+                "doubleValue = @CloseTo(value = %s)".formatted(value),
+                "import com.flagzen.CloseTo;");
+    }
+
+    @And("a variant {string} implementing {string} with @CloseTo values {double} delta {double} and {double} delta {double}")
+    public void aVariantImplementingWithCloseToValuesAndDeltas(String variantClass, String interfaceName,
+                                                                double value1, double delta1,
+                                                                double value2, double delta2) {
+        addVariantSource(variantClass, interfaceName,
+                "doubleValue = {@CloseTo(value = %s, delta = %s), @CloseTo(value = %s, delta = %s)}".formatted(
+                        value1, delta1, value2, delta2),
+                "import com.flagzen.CloseTo;");
+    }
+
+    @And("a variant {string} implementing {string} with @CloseTo values {double} and {double}")
+    public void aVariantImplementingWithCloseToValues(String variantClass, String interfaceName,
+                                                       double value1, double value2) {
+        addVariantSource(variantClass, interfaceName,
+                "doubleValue = {@CloseTo(value = %s), @CloseTo(value = %s)}".formatted(value1, value2),
+                "import com.flagzen.CloseTo;");
+    }
+
     @And("the error mentions missing implementation")
     public void theErrorMentionsMissingImplementation() {
         Compilation compilation = SharedCompilationContext.getCompilation();

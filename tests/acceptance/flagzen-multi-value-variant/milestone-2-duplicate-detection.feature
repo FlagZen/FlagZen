@@ -5,7 +5,7 @@ Feature: Compile-time duplicate detection across multi-value arrays
 
   # --- String duplicate detection ---
 
-  @pending @US-MV-03
+  @US-MV-03
   Scenario: Duplicate string value across different classes is rejected
     Given a feature interface "CheckoutFlow" with flag key "checkout-flow"
     And a variant "ClassicCheckout" implementing "CheckoutFlow" for string values "CLASSIC" and "LEGACY"
@@ -15,7 +15,7 @@ Feature: Compile-time duplicate detection across multi-value arrays
     And the error identifies "LEGACY" as the conflicting value
     And the error names both "ClassicCheckout" and "RetroCheckout"
 
-  @pending @US-MV-03
+  @US-MV-03
   Scenario: Duplicate string value within the same array is rejected
     Given a feature interface "CheckoutFlow" with flag key "checkout-flow"
     And a variant "ClassicCheckout" implementing "CheckoutFlow" for string values "CLASSIC" and "CLASSIC"
@@ -23,7 +23,7 @@ Feature: Compile-time duplicate detection across multi-value arrays
     Then compilation fails with error containing "Duplicate"
     And the error identifies "CLASSIC" as the conflicting value
 
-  @pending @US-MV-03 @US-MV-05
+  @US-MV-03 @US-MV-05
   Scenario: Duplicate between array and repeated annotation is rejected
     Given a feature interface "CheckoutFlow" with flag key "checkout-flow"
     And a variant "ClassicCheckout" implementing "CheckoutFlow" for string values "CLASSIC" and "LEGACY"
@@ -32,7 +32,7 @@ Feature: Compile-time duplicate detection across multi-value arrays
     Then compilation fails with error containing "Duplicate"
     And the error identifies "LEGACY" as the conflicting value
 
-  @pending @US-MV-03
+  @US-MV-03
   Scenario: Different string values across classes compile successfully
     Given a feature interface "CheckoutFlow" with flag key "checkout-flow"
     And a variant "ClassicCheckout" implementing "CheckoutFlow" for string values "CLASSIC" and "LEGACY"
@@ -42,7 +42,7 @@ Feature: Compile-time duplicate detection across multi-value arrays
 
   # --- Int duplicate detection ---
 
-  @pending @US-MV-03
+  @US-MV-03
   Scenario: Duplicate int value across different classes is rejected
     Given a feature interface "PricingTier" with flag key "pricing-tier" and type INT
     And a variant "BulkPricing" implementing "PricingTier" for int values 3 and 5
@@ -53,7 +53,7 @@ Feature: Compile-time duplicate detection across multi-value arrays
 
   # --- Long duplicate detection ---
 
-  @pending @US-MV-03
+  @US-MV-03
   Scenario: Duplicate long value across different classes is rejected
     Given a feature interface "RateLimit" with flag key "rate-limit" and type LONG
     And a variant "ThrottledRate" implementing "RateLimit" for long values 1000 and 2000
@@ -62,7 +62,7 @@ Feature: Compile-time duplicate detection across multi-value arrays
     Then compilation fails with error containing "Duplicate"
     And the error identifies "2000" as the conflicting value
 
-  @pending @US-MV-03
+  @US-MV-03
   Scenario: Duplicate int value within the same array is rejected
     Given a feature interface "PricingTier" with flag key "pricing-tier" and type INT
     And a variant "BulkPricing" implementing "PricingTier" for int values 5 and 5

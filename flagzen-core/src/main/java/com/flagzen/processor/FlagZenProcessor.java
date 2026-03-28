@@ -101,6 +101,9 @@ public class FlagZenProcessor extends AbstractProcessor {
         if (hasDuplicateVariantValues(variants, flagKey, featureElement)) {
             return;
         }
+        if (featureType == FeatureType.DOUBLE && hasOverlappingCloseToRanges(variants, featureElement)) {
+            return;
+        }
         String defaultVariantClassName = findDefaultVariant(roundEnv, featureElement);
 
         List<String> variantEnumValues = collectVariantEnumValues(featureElement);
@@ -650,6 +653,85 @@ public class FlagZenProcessor extends AbstractProcessor {
             }
         }
         return foundDuplicate;
+    }
+
+    private boolean hasOverlappingCloseToRanges(List<VariantModel> variants,
+                                                  TypeElement featureElement) {
+        List<VariantModel> doubleVariants = variants.stream()
+                .filter(v -> v.featureType() == FeatureType.DOUBLE)
+                .toList();
+
+        boolean foundOverlap = false;
+
+        // Check intra-class overlaps first (within same variant class)
+        Map<String, List<VariantModel>> byClass = new HashMap<>();
+        for (VariantModel v : doubleVariants) {
+            byClass.computeIfAbsent(v.qualifiedClassName(), k -> new ArrayList<>()).add(v);
+        }
+        for (Map.Entry<String, List<VariantModel>> entry : byClass.entrySet()) {
+            List<VariantModel> classVariants = entry.getValue();
+            if (classVariants.size() < 2) {
+                continue;
+            }
+            String simpleName = entry.getKey().substring(entry.getKey().lastIndexOf('.') + 1);
+            for (int i = 0; i < classVariants.size(); i++) {
+                for (int j = i + 1; j < classVariants.size(); j++) {
+                    VariantModel v1 = classVariants.get(i);
+                    VariantModel v2 = classVariants.get(j);
+                    double distance = Math.abs(v1.doubleVariantValue() - v2.doubleVariantValue());
+                    double combinedDelta = v1.doubleDelta() + v2.doubleDelta();
+                    if (distance < combinedDelta) {
+                        String range1 = formatRange(v1);
+                        String range2 = formatRange(v2);
+                        processingEnv.getMessager().printMessage(
+                                Diagnostic.Kind.ERROR,
+                                "Overlapping @CloseTo ranges within variant " + simpleName
+                                        + ": " + range1 + " and " + range2
+                                        + ". Consider: reduce delta or remove the redundant entry.",
+                                featureElement
+                        );
+                        foundOverlap = true;
+                    }
+                }
+            }
+        }
+
+        // Check inter-class overlaps (across different variant classes)
+        for (int i = 0; i < doubleVariants.size(); i++) {
+            for (int j = i + 1; j < doubleVariants.size(); j++) {
+                VariantModel v1 = doubleVariants.get(i);
+                VariantModel v2 = doubleVariants.get(j);
+                if (v1.qualifiedClassName().equals(v2.qualifiedClassName())) {
+                    continue;
+                }
+                double distance = Math.abs(v1.doubleVariantValue() - v2.doubleVariantValue());
+                double combinedDelta = v1.doubleDelta() + v2.doubleDelta();
+                if (distance < combinedDelta) {
+                    String name1 = v1.qualifiedClassName()
+                            .substring(v1.qualifiedClassName().lastIndexOf('.') + 1);
+                    String name2 = v2.qualifiedClassName()
+                            .substring(v2.qualifiedClassName().lastIndexOf('.') + 1);
+                    String range1 = formatRange(v1);
+                    String range2 = formatRange(v2);
+                    processingEnv.getMessager().printMessage(
+                            Diagnostic.Kind.ERROR,
+                            "Overlapping @CloseTo ranges between " + name1 + " " + range1
+                                    + " and " + name2 + " " + range2
+                                    + ". Consider: reduce delta or merge variants.",
+                            featureElement
+                    );
+                    foundOverlap = true;
+                }
+            }
+        }
+
+        return foundOverlap;
+    }
+
+    private String formatRange(VariantModel v) {
+        double low = v.doubleVariantValue() - v.doubleDelta();
+        double high = v.doubleVariantValue() + v.doubleDelta();
+        return "[" + low + ", " + high + "]";
     }
 
     private String getPackageName(TypeElement element) {
