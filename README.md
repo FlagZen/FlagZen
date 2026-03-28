@@ -1,7 +1,7 @@
 # FlagZen
 
 [![CI](https://github.com/FlagZen/FlagZen/actions/workflows/ci.yml/badge.svg)](https://github.com/FlagZen/FlagZen/actions/workflows/ci.yml)
-[![Maven Central](https://img.shields.io/maven-central/v/com.flagzen/flagzen-core)](https://central.sonatype.com/artifact/com.flagzen/flagzen-core)
+[![Maven Central](https://img.shields.io/maven-central/v/com.flagzen/flagzen-core)](https://central.sonatype.com/namespace/com.flagzen)
 [![Javadoc](https://javadoc.io/badge2/com.flagzen/flagzen-core/javadoc.svg)](https://javadoc.io/doc/com.flagzen/flagzen-core)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE.txt)
 [![Docs](https://img.shields.io/badge/docs-flagzen.com-blue)](https://flagzen.com)
