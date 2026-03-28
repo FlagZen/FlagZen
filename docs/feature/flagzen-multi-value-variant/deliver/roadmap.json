@@ -1,0 +1,382 @@
+{
+  "roadmap": {
+    "project_id": "flagzen-multi-value-variant",
+    "created_at": "2026-03-28T12:00:00Z",
+    "total_steps": 33,
+    "phases": 5
+  },
+  "phases": [
+    {
+      "id": "01",
+      "name": "Walking Skeleton",
+      "steps": [
+        {
+          "id": "01-01",
+          "name": "Compile-time string array annotation registers all values",
+          "criteria": "A variant annotated with multiple string values compiles successfully and the generated proxy maps each value to the same implementation class",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/walking-skeleton.feature",
+          "scenario_name": "Developer maps multiple string values to one variant implementation",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/Variant.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/VariantModel.java",
+            "flagzen-acceptance-tests/build.gradle.kts",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "01-02",
+          "name": "Runtime dispatch for multi-value string variant",
+          "criteria": "A multi-value string feature resolves to the correct variant when the flag value matches any element in the array",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/walking-skeleton.feature",
+          "scenario_name": "Developer resolves a multi-value string feature to the matching variant at runtime",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "Annotation Schema",
+      "steps": [
+        {
+          "id": "02-01",
+          "name": "Single string value backward compatibility",
+          "criteria": "A variant with a single string value compiles without changes after the array migration",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-1-annotation-schema.feature",
+          "scenario_name": "Single string value still compiles without changes",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "02-02",
+          "name": "Empty string in array is rejected",
+          "criteria": "A variant with an empty string alongside real values in the value array causes a compile error mentioning empty variant values",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-1-annotation-schema.feature",
+          "scenario_name": "Empty string in array is rejected at compile time",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "02-03",
+          "name": "Multiple int values map to one implementation",
+          "criteria": "A variant annotated with multiple int values compiles and the generated proxy maps each int to the same implementation",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-1-annotation-schema.feature",
+          "scenario_name": "Multiple int values map to one implementation",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/Variant.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "02-04",
+          "name": "Single int value backward compatibility",
+          "criteria": "A variant with a single int value compiles without changes after the array migration",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-1-annotation-schema.feature",
+          "scenario_name": "Single int value still compiles without changes",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "02-05",
+          "name": "Integer.MIN_VALUE is a valid int array value",
+          "criteria": "Integer.MIN_VALUE can be used as a valid value in an int array now that sentinel detection uses empty-array instead",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-1-annotation-schema.feature",
+          "scenario_name": "Integer.MIN_VALUE is a valid int array value",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "02-06",
+          "name": "Multiple long values map to one implementation",
+          "criteria": "A variant annotated with multiple long values compiles and the generated proxy maps each long to the same implementation",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-1-annotation-schema.feature",
+          "scenario_name": "Multiple long values map to one implementation",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/Variant.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "02-07",
+          "name": "Single long value backward compatibility",
+          "criteria": "A variant with a single long value compiles without changes after the array migration",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-1-annotation-schema.feature",
+          "scenario_name": "Single long value still compiles without changes",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "02-08",
+          "name": "Multiple CloseTo values map to one implementation",
+          "criteria": "A variant annotated with multiple @CloseTo values compiles and the generated proxy maps each double approximately to the same implementation",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-1-annotation-schema.feature",
+          "scenario_name": "Multiple CloseTo values map to one implementation",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "02-09",
+          "name": "Array values compose with repeated single-value annotation",
+          "criteria": "A class with one array annotation and one repeated single-value annotation compiles and all values are registered in the proxy",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-1-annotation-schema.feature",
+          "scenario_name": "Array values compose with a repeated single-value annotation",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "02-10",
+          "name": "Two arrays on the same class compose all values",
+          "criteria": "A class with two repeated array annotations compiles and all values from both arrays are registered in the proxy",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-1-annotation-schema.feature",
+          "scenario_name": "Two arrays on the same class compose all values",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "02-11",
+          "name": "Multi-value satisfies REQUIRED fallback coverage",
+          "criteria": "A feature with REQUIRED fallback compiles when all enum values are covered across multi-value arrays",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-1-annotation-schema.feature",
+          "scenario_name": "Multi-value satisfies REQUIRED fallback coverage",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "02-12",
+          "name": "Invalid enum value in array is rejected",
+          "criteria": "A variant with an array containing a value not in the Variant enum causes a compile error identifying the invalid value",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-1-annotation-schema.feature",
+          "scenario_name": "Invalid enum value in array is rejected",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "02-13",
+          "name": "Incomplete REQUIRED coverage despite multi-value reports missing variant",
+          "criteria": "A feature with REQUIRED fallback fails compilation when not all enum values are covered and the error identifies the missing value",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-1-annotation-schema.feature",
+          "scenario_name": "Incomplete REQUIRED coverage despite multi-value reports missing variant",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "name": "Duplicate Detection",
+      "steps": [
+        {
+          "id": "03-01",
+          "name": "Duplicate string value across different classes is rejected",
+          "criteria": "Two variant classes claiming the same string value cause a compile error identifying the duplicate value and both class names",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-2-duplicate-detection.feature",
+          "scenario_name": "Duplicate string value across different classes is rejected",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "03-02",
+          "name": "Duplicate string value within the same array is rejected",
+          "criteria": "A variant with the same string value repeated in its array causes a compile error identifying the duplicate",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-2-duplicate-detection.feature",
+          "scenario_name": "Duplicate string value within the same array is rejected",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "03-03",
+          "name": "Duplicate between array and repeated annotation is rejected",
+          "criteria": "A value appearing in both an array annotation and a repeated single-value annotation on the same class causes a compile error",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-2-duplicate-detection.feature",
+          "scenario_name": "Duplicate between array and repeated annotation is rejected",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "03-04",
+          "name": "Different string values across classes compile successfully",
+          "criteria": "Two variant classes with completely distinct string values in their arrays compile without error",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-2-duplicate-detection.feature",
+          "scenario_name": "Different string values across classes compile successfully",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "03-05",
+          "name": "Duplicate int value across different classes is rejected",
+          "criteria": "Two variant classes claiming the same int value cause a compile error identifying the duplicate",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-2-duplicate-detection.feature",
+          "scenario_name": "Duplicate int value across different classes is rejected",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "03-06",
+          "name": "Duplicate long value across different classes is rejected",
+          "criteria": "Two variant classes claiming the same long value cause a compile error identifying the duplicate",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-2-duplicate-detection.feature",
+          "scenario_name": "Duplicate long value across different classes is rejected",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "03-07",
+          "name": "Duplicate int value within the same array is rejected",
+          "criteria": "A variant with the same int value repeated in its array causes a compile error identifying the duplicate",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-2-duplicate-detection.feature",
+          "scenario_name": "Duplicate int value within the same array is rejected",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "name": "CloseTo Overlap Detection",
+      "steps": [
+        {
+          "id": "04-01",
+          "name": "Overlapping CloseTo ranges across variants is rejected",
+          "criteria": "Two variant classes with overlapping @CloseTo ranges cause a compile error naming both classes and showing computed ranges with remediation suggestion",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-3-closeto-overlap.feature",
+          "scenario_name": "Overlapping @CloseTo ranges across variants is rejected",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "04-02",
+          "name": "Non-overlapping CloseTo ranges across variants compiles",
+          "criteria": "Two variant classes with well-separated @CloseTo ranges compile without error",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-3-closeto-overlap.feature",
+          "scenario_name": "Non-overlapping @CloseTo ranges across variants compiles successfully",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "04-03",
+          "name": "Overlapping CloseTo ranges with default delta is detected",
+          "criteria": "Two @CloseTo entries with default delta whose ranges overlap are caught at compile time",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-3-closeto-overlap.feature",
+          "scenario_name": "Overlapping @CloseTo ranges with default delta is detected",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "04-04",
+          "name": "Overlapping CloseTo ranges within same variant array is rejected",
+          "criteria": "A single variant with overlapping @CloseTo entries in its array causes a compile error specific to intra-variant overlap with remediation suggestion",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-3-closeto-overlap.feature",
+          "scenario_name": "Overlapping @CloseTo ranges within the same variant array is rejected",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "04-05",
+          "name": "Non-overlapping CloseTo ranges within same variant array compiles",
+          "criteria": "A single variant with well-separated @CloseTo entries in its array compiles without error",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-3-closeto-overlap.feature",
+          "scenario_name": "Non-overlapping @CloseTo ranges within the same variant array compiles successfully",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "05",
+      "name": "Runtime Dispatch",
+      "steps": [
+        {
+          "id": "05-01",
+          "name": "First array element dispatches correctly",
+          "criteria": "A flag value matching the first element of a multi-value string array dispatches to the correct variant",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-4-runtime-dispatch.feature",
+          "scenario_name": "Flag value matching first array element dispatches correctly",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "05-02",
+          "name": "Second array element dispatches correctly",
+          "criteria": "A flag value matching the second element of a multi-value string array dispatches to the correct variant",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-4-runtime-dispatch.feature",
+          "scenario_name": "Flag value matching second array element dispatches correctly",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "05-03",
+          "name": "Single-value variant dispatches correctly alongside multi-value",
+          "criteria": "A single-value variant coexisting with multi-value variants dispatches correctly when its value matches",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-4-runtime-dispatch.feature",
+          "scenario_name": "Flag value matching single-value variant dispatches correctly",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "05-04",
+          "name": "Int multi-value dispatch works at runtime",
+          "criteria": "A flag value matching any element in a multi-value int array dispatches to the correct variant",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-4-runtime-dispatch.feature",
+          "scenario_name": "Int flag value matching any array element dispatches correctly",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "05-05",
+          "name": "Long multi-value dispatch works at runtime",
+          "criteria": "A flag value matching any element in a multi-value long array dispatches to the correct variant",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-4-runtime-dispatch.feature",
+          "scenario_name": "Long flag value matching any array element dispatches correctly",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        },
+        {
+          "id": "05-06",
+          "name": "Unmatched value with multi-value variants triggers fallback",
+          "criteria": "A flag value not matching any value in any multi-value array triggers the configured fallback strategy",
+          "test_file": "tests/acceptance/flagzen-multi-value-variant/milestone-4-runtime-dispatch.feature",
+          "scenario_name": "Unmatched flag value with multi-value variants triggers fallback",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/MultiValueVariantSteps.java"
+          ]
+        }
+      ]
+    }
+  ]
+}

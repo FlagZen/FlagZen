@@ -406,13 +406,15 @@ public class FlagZenProcessor extends AbstractProcessor {
                 variants.add(VariantModel.ofBoolean(qualifiedName, Boolean.parseBoolean(boolStr)));
             }
         } else {
-            variants.add(new VariantModel(qualifiedName, variantAnnotation.value()));
+            for (String stringValue : variantAnnotation.value()) {
+                variants.add(new VariantModel(qualifiedName, stringValue));
+            }
         }
     }
 
     private boolean hasTypeMismatch(Variant annotation, FeatureType featureType,
                                      String variantName, String flagKey, Element variantElement) {
-        boolean hasString = !annotation.value().isEmpty();
+        boolean hasString = annotation.value().length > 0;
         boolean hasInt = annotation.intValue() != Integer.MIN_VALUE;
         boolean hasLong = annotation.longValue() != Long.MIN_VALUE;
         boolean hasDouble = annotation.doubleValue().length > 0;

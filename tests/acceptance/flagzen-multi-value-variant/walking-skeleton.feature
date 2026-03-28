@@ -19,7 +19,7 @@ Feature: Multi-value variant mapping for feature flags
 
   # Walking Skeleton 2: Runtime dispatch -- flag value matching any array value dispatches correctly
   # Covers: US-MV-01 (runtime dispatch through FeatureDispatcher for multi-value string)
-  @US-MV-01
+  @US-MV-01 @pending
   Scenario: Developer resolves a multi-value string feature to the matching variant at runtime
     Given a compiled multi-value feature "CheckoutFlow" with flag key "checkout-flow"
     And "ClassicCheckout" mapped to string values "CLASSIC" and "LEGACY"

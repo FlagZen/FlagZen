@@ -13,8 +13,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Repeatable(Variants.class)
 public @interface Variant {
-    /** The string variant value that activates this implementation. */
-    String value() default "";
+    /** The string variant value(s) that activate this implementation. */
+    String[] value() default {};
 
     /** The integer variant value that activates this implementation. */
     int intValue() default Integer.MIN_VALUE;
