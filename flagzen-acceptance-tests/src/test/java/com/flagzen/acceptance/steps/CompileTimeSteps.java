@@ -47,6 +47,7 @@ public class CompileTimeSteps {
         this.featureInterfaceName = interfaceName;
         this.flagKey = key;
         this.featureKeyMap.put(interfaceName, key);
+        SharedCompilationContext.setFeatureKey(interfaceName, key);
     }
 
     @Given("a feature interface {string} with flag key {string} and fallback strategy {word}")

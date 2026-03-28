@@ -16,11 +16,11 @@ public @interface Variant {
     /** The string variant value(s) that activate this implementation. */
     String[] value() default {};
 
-    /** The integer variant value that activates this implementation. */
-    int intValue() default Integer.MIN_VALUE;
+    /** The integer variant value(s) that activate this implementation. */
+    int[] intValue() default {};
 
-    /** The long variant value that activates this implementation. */
-    long longValue() default Long.MIN_VALUE;
+    /** The long variant value(s) that activate this implementation. */
+    long[] longValue() default {};
 
     /** The double variant value that activates this implementation, with approximate matching. */
     CloseTo[] doubleValue() default {};

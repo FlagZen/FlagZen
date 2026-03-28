@@ -391,13 +391,15 @@ public class FlagZenProcessor extends AbstractProcessor {
         }
 
         if (featureType == FeatureType.INT) {
-            variants.add(new VariantModel(qualifiedName, "", variantAnnotation.intValue(), featureType));
+            for (int intVal : variantAnnotation.intValue()) {
+                variants.add(new VariantModel(qualifiedName, "", intVal, featureType));
+            }
         } else if (featureType == FeatureType.LONG) {
-            variants.add(VariantModel.ofLong(qualifiedName, variantAnnotation.longValue()));
+            for (long longVal : variantAnnotation.longValue()) {
+                variants.add(VariantModel.ofLong(qualifiedName, longVal));
+            }
         } else if (featureType == FeatureType.DOUBLE) {
-            CloseTo[] closeToValues = variantAnnotation.doubleValue();
-            if (closeToValues.length > 0) {
-                CloseTo closeTo = closeToValues[0];
+            for (CloseTo closeTo : variantAnnotation.doubleValue()) {
                 variants.add(VariantModel.ofDouble(qualifiedName, closeTo.value(), closeTo.delta()));
             }
         } else if (featureType == FeatureType.BOOLEAN) {
@@ -407,6 +409,14 @@ public class FlagZenProcessor extends AbstractProcessor {
             }
         } else {
             for (String stringValue : variantAnnotation.value()) {
+                if (stringValue.isEmpty()) {
+                    processingEnv.getMessager().printMessage(
+                            Diagnostic.Kind.ERROR,
+                            "@Variant on " + variantSimpleName + ": empty variant values are not permitted",
+                            variantElement
+                    );
+                    return;
+                }
                 variants.add(new VariantModel(qualifiedName, stringValue));
             }
         }
@@ -415,8 +425,8 @@ public class FlagZenProcessor extends AbstractProcessor {
     private boolean hasTypeMismatch(Variant annotation, FeatureType featureType,
                                      String variantName, String flagKey, Element variantElement) {
         boolean hasString = annotation.value().length > 0;
-        boolean hasInt = annotation.intValue() != Integer.MIN_VALUE;
-        boolean hasLong = annotation.longValue() != Long.MIN_VALUE;
+        boolean hasInt = annotation.intValue().length > 0;
+        boolean hasLong = annotation.longValue().length > 0;
         boolean hasDouble = annotation.doubleValue().length > 0;
         boolean hasBoolean = !annotation.booleanValue().isEmpty();
 
