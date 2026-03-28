@@ -14,13 +14,23 @@ import java.util.function.Supplier;
 public class CheckoutFlowMetadata implements FeatureMetadata<CheckoutFlow> {
 
     private static volatile Supplier<CheckoutFlow> configuredDefaultVariant = null;
+    private static volatile Map<String, Supplier<CheckoutFlow>> multiValueVariants = null;
 
     public static void setDefaultVariant(Supplier<CheckoutFlow> supplier) {
         configuredDefaultVariant = supplier;
     }
 
+    /**
+     * Configures multi-value variant mappings for acceptance test scenarios.
+     * When set, overrides the default variantSuppliers().
+     */
+    public static void setMultiValueVariants(Map<String, Supplier<CheckoutFlow>> variants) {
+        multiValueVariants = variants;
+    }
+
     public static void reset() {
         configuredDefaultVariant = null;
+        multiValueVariants = null;
     }
 
     @Override
@@ -40,6 +50,9 @@ public class CheckoutFlowMetadata implements FeatureMetadata<CheckoutFlow> {
 
     @Override
     public Map<String, Supplier<CheckoutFlow>> variantSuppliers() {
+        if (multiValueVariants != null) {
+            return multiValueVariants;
+        }
         return Map.of(
                 "CLASSIC", ClassicCheckout::new,
                 "STREAMLINED", StreamlinedCheckout::new,

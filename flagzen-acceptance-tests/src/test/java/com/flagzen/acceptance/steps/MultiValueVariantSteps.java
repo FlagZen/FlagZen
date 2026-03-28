@@ -1,14 +1,27 @@
 package com.flagzen.acceptance.steps;
 
+import com.flagzen.FeatureDispatcher;
+import com.flagzen.acceptance.fixtures.CheckoutFlow;
+import com.flagzen.acceptance.fixtures.CheckoutFlowMetadata;
+import com.flagzen.acceptance.fixtures.ClassicCheckout;
+import com.flagzen.acceptance.fixtures.ModernCheckout;
+import com.flagzen.internal.DefaultFeatureDispatcher;
+import com.flagzen.internal.InMemoryFlagProvider;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 
 import javax.tools.JavaFileObject;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-import static com.google.testing.compile.CompilationSubject.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Step definitions for multi-value variant mapping scenarios.
@@ -37,6 +50,60 @@ public class MultiValueVariantSteps {
                 """.formatted(PACKAGE, value1, value2, interfaceName, variantClass, interfaceName, methodDecl)
         ));
         SharedCompilationContext.markSourceAdded(PACKAGE + "." + variantClass);
+    }
+
+    // --- Runtime dispatch steps for multi-value scenario ---
+
+    private final Map<String, Supplier<CheckoutFlow>> multiValueMap = new HashMap<>();
+    private InMemoryFlagProvider flagProvider;
+    private FeatureDispatcher dispatcher;
+    private CheckoutFlow resolvedProxy;
+    private String callResult;
+
+    @Given("a compiled multi-value feature {string} with flag key {string}")
+    public void aCompiledMultiValueFeatureWithFlagKey(String featureName, String flagKey) {
+        // Fixtures are pre-compiled; metadata will be configured with multi-value mappings
+        multiValueMap.clear();
+    }
+
+    @And("{string} mapped to string values {string} and {string}")
+    public void mappedToStringValuesAnd(String variantClass, String value1, String value2) {
+        Supplier<CheckoutFlow> supplier = resolveVariantSupplier(variantClass);
+        multiValueMap.put(value1, supplier);
+        multiValueMap.put(value2, supplier);
+    }
+
+    @And("{string} mapped to string value {string}")
+    public void mappedToStringValue(String variantClass, String value) {
+        Supplier<CheckoutFlow> supplier = resolveVariantSupplier(variantClass);
+        multiValueMap.put(value, supplier);
+    }
+
+    @And("a flag provider returning {string} for {string}")
+    public void aFlagProviderReturningFor(String flagValue, String flagKey) {
+        flagProvider = new InMemoryFlagProvider();
+        flagProvider.set(flagKey, flagValue);
+    }
+
+    @When("the developer resolves {string} through the multi-value dispatcher")
+    public void theDeveloperResolvesThroughTheMultiValueDispatcher(String featureName) {
+        CheckoutFlowMetadata.setMultiValueVariants(Map.copyOf(multiValueMap));
+        dispatcher = new DefaultFeatureDispatcher(flagProvider);
+        resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
+        callResult = resolvedProxy.execute();
+    }
+
+    @Then("the {string} variant handles the call")
+    public void theVariantHandlesTheCall(String expectedVariant) {
+        assertThat(callResult).isEqualTo(expectedVariant);
+    }
+
+    private Supplier<CheckoutFlow> resolveVariantSupplier(String variantClass) {
+        return switch (variantClass) {
+            case "ClassicCheckout" -> ClassicCheckout::new;
+            case "ModernCheckout" -> ModernCheckout::new;
+            default -> throw new IllegalArgumentException("Unknown variant: " + variantClass);
+        };
     }
 
     @And("the generated proxy maps {string} to {string}")
