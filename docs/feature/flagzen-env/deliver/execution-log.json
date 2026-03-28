@@ -29,6 +29,48 @@
       "s": "EXECUTED",
       "d": "PASS",
       "t": "2026-03-28T14:40:59Z"
+    },
+    {
+      "sid": "01-01",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-28T14:41:23Z"
+    },
+    {
+      "sid": "01-02",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-28T14:43:28Z"
+    },
+    {
+      "sid": "01-02",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS - scenario already green, all step definitions exist from 01-01",
+      "t": "2026-03-28T14:43:29Z"
+    },
+    {
+      "sid": "01-02",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: No new production code - test-only step",
+      "t": "2026-03-28T14:43:45Z"
+    },
+    {
+      "sid": "01-02",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS - all tests green, full build passes",
+      "t": "2026-03-28T14:43:49Z"
+    },
+    {
+      "sid": "01-02",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "No files modified - step definitions from 01-01 already cover this scenario",
+      "t": "2026-03-28T14:43:49Z"
     }
   ]
 }
