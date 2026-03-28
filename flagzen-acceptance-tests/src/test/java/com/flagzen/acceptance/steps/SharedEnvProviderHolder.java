@@ -20,6 +20,8 @@ public final class SharedEnvProviderHolder {
     private static List<Optional<String>> repeatedResults = new ArrayList<>();
     private static List<FlagProvider> discoveredProviders = new ArrayList<>();
     private static EnvironmentVariableFlagProvider.Builder builder;
+    private static final List<String> warnings = new ArrayList<>();
+    private static Exception buildException;
 
     private SharedEnvProviderHolder() {
     }
@@ -72,6 +74,22 @@ public final class SharedEnvProviderHolder {
         return builder;
     }
 
+    public static List<String> getWarnings() {
+        return warnings;
+    }
+
+    public static void addWarning(String warning) {
+        warnings.add(warning);
+    }
+
+    public static void setBuildException(Exception exception) {
+        SharedEnvProviderHolder.buildException = exception;
+    }
+
+    public static Exception getBuildException() {
+        return buildException;
+    }
+
     public static void reset() {
         envVars.clear();
         provider = null;
@@ -79,5 +97,7 @@ public final class SharedEnvProviderHolder {
         repeatedResults = new ArrayList<>();
         discoveredProviders = new ArrayList<>();
         builder = null;
+        warnings.clear();
+        buildException = null;
     }
 }

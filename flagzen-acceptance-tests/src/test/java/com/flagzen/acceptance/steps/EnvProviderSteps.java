@@ -2,6 +2,7 @@ package com.flagzen.acceptance.steps;
 
 import com.flagzen.EvaluationContext;
 import com.flagzen.env.EnvironmentVariableFlagProvider;
+import com.flagzen.keymapping.ConflictStrategy;
 import com.flagzen.keymapping.FlagKeyFormats;
 import com.flagzen.keymapping.FlagKeyParsers;
 import com.flagzen.spi.FlagProvider;
@@ -24,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class EnvProviderSteps {
 
-    @Before("@walking-skeleton or @US-ENV-01 or @US-ENV-02 or @US-ENV-03 or @US-ENV-04")
+    @Before("@walking-skeleton or @US-ENV-01 or @US-ENV-02 or @US-ENV-03 or @US-ENV-04 or @US-ENV-07 or @US-ENV-08 or @US-ENV-09 or @US-ENV-10")
     public void resetState() {
         SharedEnvProviderHolder.reset();
     }
@@ -138,8 +139,6 @@ public class EnvProviderSteps {
 
     @When("the developer resolves flag {string} through the auto-discovered provider")
     public void theDeveloperResolvesFlagThroughTheAutoDiscoveredProvider(String flagKey) {
-        // Build a custom provider with our test env vars (ServiceLoader would use System.getenv)
-        // But we verify discoverability separately; here we test that a discovered provider resolves.
         FlagProvider provider = EnvironmentVariableFlagProvider.builder()
                 .environmentSource(() -> SharedEnvProviderHolder.getEnvVars())
                 .build();
@@ -188,10 +187,14 @@ public class EnvProviderSteps {
     @When("the provider is built")
     public void theProviderIsBuilt() {
         var builder = SharedEnvProviderHolder.getBuilder();
-        SharedEnvProviderHolder.setProvider(builder.build());
+        try {
+            SharedEnvProviderHolder.setProvider(builder.build());
+        } catch (IllegalStateException e) {
+            SharedEnvProviderHolder.setBuildException(e);
+        }
     }
 
-    // --- Error paths: typed accessors ---
+    // --- US-ENV-04: Error paths: typed accessors ---
 
     @Then("looking up integer flag {string} returns no value")
     public void lookingUpIntegerFlagReturnsNoValue(String flagKey) {
@@ -210,4 +213,246 @@ public class EnvProviderSteps {
         var result = SharedEnvProviderHolder.getProvider().getString(flagKey);
         assertThat(result).isPresent().hasValue(expectedValue);
     }
+
+    // --- US-ENV-07: Multiple parsers ---
+
+    @Given("the developer configures parsers for both {string} screaming snake case and {string} camel case")
+    public void theDeveloperConfiguresParsersForBothScreamingSnakeCaseAndCamelCase(
+            String screamingPrefix, String camelPrefix) {
+        SharedEnvProviderHolder.setBuilder(
+                EnvironmentVariableFlagProvider.builder()
+                        .parser(FlagKeyParsers.screamingSnakeCase(screamingPrefix))
+                        .parser(FlagKeyParsers.camelCase(camelPrefix))
+                        .warningConsumer(SharedEnvProviderHolder::addWarning)
+                        .environmentSource(() -> SharedEnvProviderHolder.getEnvVars())
+        );
+    }
+
+    @When("the provider is built with default conflict handling")
+    public void theProviderIsBuiltWithDefaultConflictHandling() {
+        var builder = SharedEnvProviderHolder.getBuilder();
+        SharedEnvProviderHolder.setProvider(builder.build());
+    }
+
+    @And("no {string} prefixed variable maps to {string}")
+    public void noPrefixedVariableMapsTo(String prefix, String flagKey) {
+        // No such env var set - already clean from reset
+    }
+
+    @Then("no conflict warning is produced")
+    public void noConflictWarningIsProduced() {
+        assertThat(SharedEnvProviderHolder.getWarnings()).isEmpty();
+    }
+
+    // --- US-ENV-08: Multiple formatters ---
+
+    @Given("the developer configures formatters for both kebab case and snake case")
+    public void theDeveloperConfiguresFormattersForBothKebabCaseAndSnakeCase() {
+        SharedEnvProviderHolder.setBuilder(
+                EnvironmentVariableFlagProvider.builder()
+                        .formatter(FlagKeyFormats.kebabCase())
+                        .formatter(FlagKeyFormats.snakeCase())
+                        .environmentSource(() -> SharedEnvProviderHolder.getEnvVars())
+        );
+    }
+
+    // --- US-ENV-09: ConflictStrategy cardinality defaults ---
+
+    @Given("the developer configures one parser and one formatter")
+    public void theDeveloperConfiguresOneParserAndOneFormatter() {
+        SharedEnvProviderHolder.setBuilder(
+                EnvironmentVariableFlagProvider.builder()
+                        .parser(FlagKeyParsers.screamingSnakeCase("FLAGZEN_"))
+                        .formatter(FlagKeyFormats.kebabCase())
+                        .environmentSource(() -> SharedEnvProviderHolder.getEnvVars())
+        );
+    }
+
+    @Given("the developer configures two parsers and one formatter")
+    public void theDeveloperConfiguresTwoParsersAndOneFormatter() {
+        SharedEnvProviderHolder.setBuilder(
+                EnvironmentVariableFlagProvider.builder()
+                        .parser(FlagKeyParsers.screamingSnakeCase("FLAGZEN_"))
+                        .parser(FlagKeyParsers.camelCase("myApp"))
+                        .formatter(FlagKeyFormats.kebabCase())
+                        .environmentSource(() -> SharedEnvProviderHolder.getEnvVars())
+        );
+    }
+
+    @Given("the developer configures one parser and two formatters")
+    public void theDeveloperConfiguresOneParserAndTwoFormatters() {
+        SharedEnvProviderHolder.setBuilder(
+                EnvironmentVariableFlagProvider.builder()
+                        .parser(FlagKeyParsers.screamingSnakeCase("FLAGZEN_"))
+                        .formatter(FlagKeyFormats.kebabCase())
+                        .formatter(FlagKeyFormats.snakeCase())
+                        .environmentSource(() -> SharedEnvProviderHolder.getEnvVars())
+        );
+    }
+
+    @Given("the developer configures two parsers and two formatters")
+    public void theDeveloperConfiguresTwoParsersAndTwoFormatters() {
+        SharedEnvProviderHolder.setBuilder(
+                EnvironmentVariableFlagProvider.builder()
+                        .parser(FlagKeyParsers.screamingSnakeCase("FLAGZEN_"))
+                        .parser(FlagKeyParsers.camelCase("myApp"))
+                        .formatter(FlagKeyFormats.kebabCase())
+                        .formatter(FlagKeyFormats.snakeCase())
+                        .environmentSource(() -> SharedEnvProviderHolder.getEnvVars())
+        );
+    }
+
+    @And("no explicit conflict strategy is set")
+    public void noExplicitConflictStrategyIsSet() {
+        // No-op: the builder defaults are already in place
+    }
+
+    @Then("the default conflict strategy is warn")
+    public void theDefaultConflictStrategyIsWarn() {
+        var builder = SharedEnvProviderHolder.getBuilder();
+        assertThat(builder.effectiveConflictStrategy()).isEqualTo(ConflictStrategy.WARN);
+    }
+
+    @Then("the default conflict strategy is error")
+    public void theDefaultConflictStrategyIsError() {
+        var builder = SharedEnvProviderHolder.getBuilder();
+        assertThat(builder.effectiveConflictStrategy()).isEqualTo(ConflictStrategy.ERROR);
+    }
+
+    @And("the conflict strategy is explicitly set to warn")
+    public void theConflictStrategyIsExplicitlySetToWarn() {
+        SharedEnvProviderHolder.getBuilder().onConflict(ConflictStrategy.WARN);
+    }
+
+    @Then("the conflict strategy is warn")
+    public void theConflictStrategyIsWarn() {
+        var builder = SharedEnvProviderHolder.getBuilder();
+        assertThat(builder.effectiveConflictStrategy()).isEqualTo(ConflictStrategy.WARN);
+    }
+
+    // --- US-ENV-09: WARN/ERROR behavior ---
+
+    @Given("the developer configures two parsers mapping to the same flag key")
+    public void theDeveloperConfiguresTwoParsersMappingToTheSameFlagKey() {
+        SharedEnvProviderHolder.setBuilder(
+                EnvironmentVariableFlagProvider.builder()
+                        .parser(FlagKeyParsers.screamingSnakeCase("FLAGZEN_"))
+                        .parser(FlagKeyParsers.camelCase("myApp"))
+                        .warningConsumer(SharedEnvProviderHolder::addWarning)
+                        .environmentSource(() -> SharedEnvProviderHolder.getEnvVars())
+        );
+    }
+
+    @And("the conflict strategy is set to warn")
+    public void theConflictStrategyIsSetToWarn() {
+        SharedEnvProviderHolder.getBuilder().onConflict(ConflictStrategy.WARN);
+    }
+
+    @And("the conflict strategy is set to error")
+    public void theConflictStrategyIsSetToError() {
+        SharedEnvProviderHolder.getBuilder().onConflict(ConflictStrategy.ERROR);
+    }
+
+    @Then("a conflict warning is produced mentioning both environment variable names")
+    public void aConflictWarningIsProducedMentioningBothEnvironmentVariableNames() {
+        assertThat(SharedEnvProviderHolder.getWarnings())
+                .anyMatch(w -> w.contains("FLAGZEN_CHECKOUT_FLOW")
+                        && w.contains("myAppCheckoutFlow"));
+    }
+
+    @And("the provider continues operating normally")
+    public void theProviderContinuesOperatingNormally() {
+        assertThat(SharedEnvProviderHolder.getProvider()).isNotNull();
+        var result = SharedEnvProviderHolder.getProvider().getString("checkout-flow");
+        assertThat(result).isPresent();
+    }
+
+    @Then("construction fails with a conflict error")
+    public void constructionFailsWithAConflictError() {
+        assertThat(SharedEnvProviderHolder.getBuildException())
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @And("the error message mentions both environment variable names and flag key {string}")
+    public void theErrorMessageMentionsBothEnvironmentVariableNamesAndFlagKey(String flagKey) {
+        var exception = SharedEnvProviderHolder.getBuildException();
+        assertThat(exception.getMessage())
+                .contains("FLAGZEN_CHECKOUT_FLOW")
+                .contains("myAppCheckoutFlow")
+                .contains(flagKey);
+    }
+
+    // --- US-ENV-10: First-access conflict warning ---
+
+    @Given("a provider was built with warn strategy and flag key {string} had a conflict")
+    public void aProviderWasBuiltWithWarnStrategyAndFlagKeyHadAConflict(String flagKey) {
+        SharedEnvProviderHolder.setEnvVar("FLAGZEN_CHECKOUT_FLOW", "PREMIUM");
+        SharedEnvProviderHolder.setEnvVar("myAppCheckoutFlow", "BASIC");
+        SharedEnvProviderHolder.setBuilder(
+                EnvironmentVariableFlagProvider.builder()
+                        .parser(FlagKeyParsers.screamingSnakeCase("FLAGZEN_"))
+                        .parser(FlagKeyParsers.camelCase("myApp"))
+                        .onConflict(ConflictStrategy.WARN)
+                        .warningConsumer(SharedEnvProviderHolder::addWarning)
+                        .environmentSource(() -> SharedEnvProviderHolder.getEnvVars())
+        );
+        SharedEnvProviderHolder.setProvider(
+                SharedEnvProviderHolder.getBuilder().build()
+        );
+        // Clear construction warnings so we only see first-access warnings
+        SharedEnvProviderHolder.getWarnings().clear();
+    }
+
+    @When("the developer looks up flag {string} for the first time")
+    public void theDeveloperLooksUpFlagForTheFirstTime(String flagKey) {
+        var result = SharedEnvProviderHolder.getProvider().getString(flagKey);
+        SharedEnvProviderHolder.setLastResult(result);
+    }
+
+    @Then("a conflict warning is produced at the point of use")
+    public void aConflictWarningIsProducedAtThePointOfUse() {
+        assertThat(SharedEnvProviderHolder.getWarnings())
+                .hasSize(1)
+                .anyMatch(w -> w.contains("checkout-flow"));
+    }
+
+    @And("the developer has already looked up flag {string} once")
+    public void theDeveloperHasAlreadyLookedUpFlagOnce(String flagKey) {
+        SharedEnvProviderHolder.getProvider().getString(flagKey);
+        // Clear warnings from first access
+        SharedEnvProviderHolder.getWarnings().clear();
+    }
+
+    @When("the developer looks up flag {string} again")
+    public void theDeveloperLooksUpFlagAgain(String flagKey) {
+        var result = SharedEnvProviderHolder.getProvider().getString(flagKey);
+        SharedEnvProviderHolder.setLastResult(result);
+    }
+
+    @Then("no additional conflict warning is produced")
+    public void noAdditionalConflictWarningIsProduced() {
+        assertThat(SharedEnvProviderHolder.getWarnings()).isEmpty();
+    }
+
+    @Given("a provider was built with warn strategy")
+    public void aProviderWasBuiltWithWarnStrategy() {
+        SharedEnvProviderHolder.setBuilder(
+                EnvironmentVariableFlagProvider.builder()
+                        .parser(FlagKeyParsers.screamingSnakeCase("FLAGZEN_"))
+                        .parser(FlagKeyParsers.camelCase("myApp"))
+                        .onConflict(ConflictStrategy.WARN)
+                        .warningConsumer(SharedEnvProviderHolder::addWarning)
+                        .environmentSource(() -> SharedEnvProviderHolder.getEnvVars())
+        );
+    }
+
+    @And("flag key {string} had no conflict during construction")
+    public void flagKeyHadNoConflictDuringConstruction(String flagKey) {
+        SharedEnvProviderHolder.setEnvVar("FLAGZEN_MAX_RETRIES", "3");
+        SharedEnvProviderHolder.setProvider(
+                SharedEnvProviderHolder.getBuilder().build()
+        );
+        SharedEnvProviderHolder.getWarnings().clear();
+    }
+
 }

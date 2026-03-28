@@ -1,15 +1,23 @@
 package com.flagzen.env;
 
+import com.flagzen.keymapping.ConflictStrategy;
 import com.flagzen.keymapping.FlagKeyFormat;
 import com.flagzen.keymapping.FlagKeyFormats;
 import com.flagzen.keymapping.FlagKeyParser;
 import com.flagzen.keymapping.FlagKeyParsers;
 import com.flagzen.spi.FlagProvider;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 /**
  * A {@link FlagProvider} that resolves flag values from environment variables.
@@ -23,7 +31,13 @@ import java.util.function.Supplier;
  */
 public final class EnvironmentVariableFlagProvider implements FlagProvider {
 
+    private static final Logger LOGGER =
+            Logger.getLogger(EnvironmentVariableFlagProvider.class.getName());
+
     private final Map<String, String> flagMap;
+    private final Set<String> conflictedKeys;
+    private final Set<String> warnedKeys;
+    private final Consumer<String> warningConsumer;
 
     /**
      * Creates a provider with default configuration.
@@ -32,11 +46,14 @@ public final class EnvironmentVariableFlagProvider implements FlagProvider {
      * <p>Equivalent to calling {@link #create()}.
      */
     public EnvironmentVariableFlagProvider() {
-        this(builder().buildFlagMap());
+        this(builder().buildResult());
     }
 
-    private EnvironmentVariableFlagProvider(Map<String, String> flagMap) {
-        this.flagMap = flagMap;
+    private EnvironmentVariableFlagProvider(BuildResult result) {
+        this.flagMap = result.flagMap();
+        this.conflictedKeys = result.conflictedKeys();
+        this.warnedKeys = ConcurrentHashMap.newKeySet();
+        this.warningConsumer = result.warningConsumer();
     }
 
     /**
@@ -61,6 +78,11 @@ public final class EnvironmentVariableFlagProvider implements FlagProvider {
 
     @Override
     public Optional<String> getString(String key) {
+        if (conflictedKeys.contains(key) && warnedKeys.add(key)) {
+            warningConsumer.accept(
+                    "Flag key '" + key + "' was mapped from multiple environment variables"
+            );
+        }
         return Optional.ofNullable(flagMap.get(key));
     }
 
@@ -69,32 +91,38 @@ public final class EnvironmentVariableFlagProvider implements FlagProvider {
      */
     public static final class Builder {
 
-        private FlagKeyParser parser = FlagKeyParsers.screamingSnakeCase("FLAGZEN_");
-        private FlagKeyFormat formatter = FlagKeyFormats.kebabCase();
+        private final List<FlagKeyParser> parsers = new ArrayList<>();
+        private final List<FlagKeyFormat> formatters = new ArrayList<>();
         private Supplier<Map<String, String>> environmentSource = System::getenv;
+        private ConflictStrategy conflictStrategy;
+        private Consumer<String> warningConsumer;
 
         private Builder() {
         }
 
         /**
-         * Sets the parser used to extract key segments from environment variable names.
+         * Adds a parser used to extract key segments from environment variable names.
+         * Multiple parsers can be added; each environment variable is tried against
+         * all parsers.
          *
-         * @param parser the parser to use
+         * @param parser the parser to add
          * @return this builder
          */
         public Builder parser(FlagKeyParser parser) {
-            this.parser = parser;
+            this.parsers.add(parser);
             return this;
         }
 
         /**
-         * Sets the formatter used to produce flag key strings from segments.
+         * Adds a formatter used to produce flag key strings from segments.
+         * Multiple formatters can be added; each parsed result is formatted
+         * by all formatters, potentially producing multiple flag keys.
          *
-         * @param formatter the formatter to use
+         * @param formatter the formatter to add
          * @return this builder
          */
         public Builder formatter(FlagKeyFormat formatter) {
-            this.formatter = formatter;
+            this.formatters.add(formatter);
             return this;
         }
 
@@ -110,20 +138,121 @@ public final class EnvironmentVariableFlagProvider implements FlagProvider {
         }
 
         /**
+         * Sets the conflict strategy, overriding the cardinality-based default.
+         *
+         * @param strategy the conflict strategy to use
+         * @return this builder
+         */
+        public Builder onConflict(ConflictStrategy strategy) {
+            this.conflictStrategy = strategy;
+            return this;
+        }
+
+        /**
+         * Sets the consumer for warning messages. Defaults to JUL logger warning.
+         *
+         * @param consumer the warning consumer
+         * @return this builder
+         */
+        public Builder warningConsumer(Consumer<String> consumer) {
+            this.warningConsumer = consumer;
+            return this;
+        }
+
+        /**
+         * Returns the effective conflict strategy based on explicit setting
+         * or cardinality defaults.
+         *
+         * @return the conflict strategy
+         */
+        public ConflictStrategy effectiveConflictStrategy() {
+            if (conflictStrategy != null) {
+                return conflictStrategy;
+            }
+            int parserCount = parsers.isEmpty() ? 1 : parsers.size();
+            int formatterCount = formatters.isEmpty() ? 1 : formatters.size();
+            if (parserCount > 1 && formatterCount > 1) {
+                return ConflictStrategy.ERROR;
+            }
+            return ConflictStrategy.WARN;
+        }
+
+        /**
          * Builds the immutable flag map from the configured environment source.
          *
          * @return an immutable map of flag keys to values
          */
         Map<String, String> buildFlagMap() {
+            return buildResult().flagMap();
+        }
+
+        BuildResult buildResult() {
+            List<FlagKeyParser> effectiveParsers = parsers.isEmpty()
+                    ? List.of(FlagKeyParsers.screamingSnakeCase("FLAGZEN_"))
+                    : List.copyOf(parsers);
+            List<FlagKeyFormat> effectiveFormatters = formatters.isEmpty()
+                    ? List.of(FlagKeyFormats.kebabCase())
+                    : List.copyOf(formatters);
+            Consumer<String> effectiveWarningConsumer = warningConsumer != null
+                    ? warningConsumer
+                    : LOGGER::warning;
+            ConflictStrategy strategy = effectiveConflictStrategy();
+
             Map<String, String> envVars = environmentSource.get();
             Map<String, String> result = new HashMap<>();
+            Map<String, String> flagKeyToEnvVar = new HashMap<>();
+            Set<String> conflicted = ConcurrentHashMap.newKeySet();
+
             for (var entry : envVars.entrySet()) {
-                parser.parse(entry.getKey()).ifPresent(segments -> {
-                    String flagKey = formatter.format(segments);
-                    result.put(flagKey, entry.getValue());
-                });
+                String envVarName = entry.getKey();
+                String envVarValue = entry.getValue();
+
+                for (FlagKeyParser parser : effectiveParsers) {
+                    parser.parse(envVarName).ifPresent(segments -> {
+                        for (FlagKeyFormat formatter : effectiveFormatters) {
+                            String flagKey = formatter.format(segments);
+                            String previousEnvVar = flagKeyToEnvVar.get(flagKey);
+                            if (previousEnvVar != null
+                                    && !previousEnvVar.equals(envVarName)) {
+                                handleConflict(
+                                        strategy,
+                                        flagKey,
+                                        previousEnvVar,
+                                        envVarName,
+                                        effectiveWarningConsumer,
+                                        conflicted
+                                );
+                            }
+                            flagKeyToEnvVar.put(flagKey, envVarName);
+                            result.put(flagKey, envVarValue);
+                        }
+                    });
+                }
             }
-            return Map.copyOf(result);
+
+            return new BuildResult(
+                    Map.copyOf(result),
+                    Collections.unmodifiableSet(conflicted),
+                    effectiveWarningConsumer
+            );
+        }
+
+        private void handleConflict(
+                ConflictStrategy strategy,
+                String flagKey,
+                String previousEnvVar,
+                String newEnvVar,
+                Consumer<String> warningConsumer,
+                Set<String> conflicted
+        ) {
+            String message = "Flag key '" + flagKey
+                    + "' mapped from env var '" + newEnvVar
+                    + "' overrides previous mapping from '" + previousEnvVar + "'";
+            if (strategy == ConflictStrategy.ERROR) {
+                throw new IllegalStateException(message);
+            }
+            warningConsumer.accept(message);
+            conflicted.add(flagKey);
         }
 
         /**
@@ -132,7 +261,14 @@ public final class EnvironmentVariableFlagProvider implements FlagProvider {
          * @return a new provider with the configured settings
          */
         public EnvironmentVariableFlagProvider build() {
-            return new EnvironmentVariableFlagProvider(buildFlagMap());
+            return new EnvironmentVariableFlagProvider(buildResult());
         }
+    }
+
+    record BuildResult(
+            Map<String, String> flagMap,
+            Set<String> conflictedKeys,
+            Consumer<String> warningConsumer
+    ) {
     }
 }
