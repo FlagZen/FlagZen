@@ -14,25 +14,12 @@ FlagZen turns feature flags into polymorphic dispatch: define a `@Feature` inter
 
 ## Quick Links
 
-<div class="grid cards" markdown>
-
-- :material-school: **[Getting Started](tutorials/getting-started.md)**
-
-    New to FlagZen? Start here.
-
-- :material-book-open-variant: **[How-To Guides](how-to/typed-dispatch.md)**
-
-    Solve specific problems: typed dispatch, Spring Boot, env vars.
-
-- :material-code-tags: **[Reference](reference/annotations.md)**
-
-    Complete API reference for all annotations, interfaces, and modules.
-
-- :material-head-lightbulb: **[Explanation](explanation/architecture.md)**
-
-    Understand the architecture and design decisions behind FlagZen.
-
-</div>
+| | |
+| --- | --- |
+| **[Tutorials](tutorials/getting-started.md)** | New to FlagZen? Start with the getting started guide. |
+| **[How-To Guides](how-to/typed-dispatch.md)** | Solve specific problems: typed dispatch, Spring Boot, env vars. |
+| **[Reference](reference/annotations.md)** | Complete API reference for all annotations, interfaces, and modules. |
+| **[Explanation](explanation/architecture.md)** | Understand the architecture and design decisions behind FlagZen. |
 
 ## Installation
 

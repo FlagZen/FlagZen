@@ -210,7 +210,7 @@ FlagZen chose generation for performance, GraalVM compatibility, and debuggabili
 
 ## Module Dependencies
 
-```
+```text
 flagzen-core (zero external deps)
   ↑
   ├─ flagzen-test (JUnit 5 testing)
@@ -260,7 +260,7 @@ public class MyCustomProvider implements FlagProvider {
 
 2. Register via `ServiceLoader`:
 
-```
+```text
 # In META-INF/services/com.flagzen.spi.FlagProvider
 com.example.MyCustomProvider
 ```
@@ -409,7 +409,7 @@ public class OrderService {
 
 ## Where Code Lives
 
-```
+```text
 src/main/java/com/flagzen/
   Feature.java                  # User-facing annotation
   Variant.java                  # User-facing annotation

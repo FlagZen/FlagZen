@@ -97,7 +97,7 @@ Eager load all environment variables at construction time into an immutable map.
 
 When multiple parsers and/or formatters are configured, different source names can map to the same flag key:
 
-```
+```text
 Parser 1 (SCREAMING_SNAKE_CASE + "FLAGZEN_"):
   FLAGZEN_CHECKOUT_FLOW => checkout-flow
 

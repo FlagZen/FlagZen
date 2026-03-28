@@ -90,7 +90,7 @@ For automatic discovery on the classpath, register your provider in `META-INF/se
 
 Create file: `src/main/resources/META-INF/services/com.flagzen.spi.FlagProvider`
 
-```
+```text
 com.myapp.flags.CustomFlagProvider
 ```
 

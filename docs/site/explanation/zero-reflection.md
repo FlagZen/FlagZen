@@ -149,7 +149,7 @@ When debugging a flag dispatch issue, you want to see **actual code**, not a bla
 
 In a debugger, stepping into a reflection-based variant resolution shows:
 
-```
+```text
 ... (application code)
 > Class.forName("com.example.PremiumCheckout")
   // Stepping into Method.invoke(...) shows HotSpot internals,
@@ -161,7 +161,7 @@ You cannot directly see or step into the variant's constructor or methods. Refle
 
 Stack traces are confusing:
 
-```
+```text
 at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:...)
 at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:...)
@@ -175,7 +175,7 @@ The actual variant code is buried under reflection machinery.
 
 With generated code, your debugger shows your code:
 
-```
+```text
 ... (application code)
 > CheckoutFlow_FlagZenProxy.execute()
   > variantMap.get(flagValue)
@@ -186,7 +186,7 @@ With generated code, your debugger shows your code:
 
 Stack traces are clean:
 
-```
+```text
 at com.example.PremiumCheckout.execute(PremiumCheckout.java:42)
 at com.example.CheckoutFlow_FlagZenProxy.execute(CheckoutFlow_FlagZenProxy.java:18)
 at com.example.OrderService.processOrder(OrderService.java:27)
