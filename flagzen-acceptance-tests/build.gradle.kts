@@ -7,6 +7,8 @@ dependencies {
     testImplementation(project(":flagzen-env"))
     testImplementation(project(":flagzen-test"))
     testImplementation(project(":flagzen-spring"))
+    testImplementation(project(":flagzen-openfeature"))
+    testImplementation("dev.openfeature:sdk:1.12.2")
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

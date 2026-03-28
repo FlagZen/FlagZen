@@ -1,0 +1,301 @@
+{
+  "roadmap": {
+    "project_id": "flagzen-openfeature",
+    "created_at": "2026-03-28T18:00:00Z",
+    "total_steps": 14,
+    "phases": 4
+  },
+  "feature_id": "flagzen-openfeature",
+  "goal": "Implement flagzen-openfeature module providing FlagProvider adapter that delegates to the OpenFeature SDK with reason-based absence detection, native typed resolution, and evaluation context mapping",
+  "phases": [
+    {
+      "id": "01",
+      "name": "Walking Skeleton",
+      "description": "Thinnest E2E slice: Gradle module, OpenFeatureFlagProvider implementing FlagProvider, delegation to OpenFeature Client, reason-based absence detection, ServiceLoader registration. Proves the adapter resolves a string flag and a boolean flag through OpenFeature end-to-end.",
+      "steps": [
+        {
+          "id": "01-01",
+          "name": "String flag resolved through OpenFeature adapter",
+          "description": "Set up the flagzen-openfeature Gradle submodule, add it to settings.gradle.kts, wire the acceptance test dependency and OpenFeature SDK dependency. Implement OpenFeatureFlagProvider with Client constructor injection, getString() delegating to Client.getStringDetails() with reason-based absence detection. Create ServiceLoader registration. Update step definitions to match walking-skeleton feature file wording and implement the string flag setup/resolve/assert steps using InMemoryProvider as the test double.",
+          "criteria": [
+            "settings.gradle.kts includes flagzen-openfeature",
+            "flagzen-openfeature/build.gradle.kts exists with api dependency on flagzen-core and implementation dependency on dev.openfeature:sdk",
+            "flagzen-acceptance-tests/build.gradle.kts includes flagzen-openfeature as testImplementation dependency",
+            "OpenFeatureFlagProvider implements FlagProvider and accepts a Client via create(Client) factory method",
+            "getString(key) delegates to Client.getStringDetails(key, \"\") and returns Optional.empty() when reason is DEFAULT or errorCode is non-null",
+            "getString(key) returns Optional.of(value) for any other reason (TARGETING_MATCH, STATIC, SPLIT, etc.)",
+            "META-INF/services/com.flagzen.spi.FlagProvider contains com.flagzen.openfeature.OpenFeatureFlagProvider",
+            "Step definitions updated to match walking-skeleton.feature wording (resolves/returns vs looks up/value is)",
+            "InMemoryProvider used as test double for upstream flag management service",
+            "Scenario 'Developer resolves a string flag through the OpenFeature adapter' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/walking-skeleton.feature",
+          "scenario_name": "Developer resolves a string flag through the OpenFeature adapter",
+          "files_to_modify": [
+            "settings.gradle.kts",
+            "flagzen-openfeature/build.gradle.kts",
+            "flagzen-acceptance-tests/build.gradle.kts",
+            "flagzen-openfeature/src/main/java/com/flagzen/openfeature/OpenFeatureFlagProvider.java",
+            "flagzen-openfeature/src/main/resources/META-INF/services/com.flagzen.spi.FlagProvider",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SharedOpenFeatureHolder.java"
+          ]
+        },
+        {
+          "id": "01-02",
+          "name": "Boolean flag resolved through OpenFeature adapter",
+          "description": "Add getBoolean(key) to OpenFeatureFlagProvider delegating to Client.getBooleanDetails(key, false) with the same reason-based absence detection. Implement the boolean flag setup and assertion steps.",
+          "criteria": [
+            "getBoolean(key) delegates to Client.getBooleanDetails(key, false) and applies reason-based absence detection",
+            "getBoolean(key) returns Optional.of(true/false) for valid resolutions",
+            "Step definitions for boolean flag setup and assertion implemented",
+            "Scenario 'Developer resolves a boolean flag through the OpenFeature adapter' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/walking-skeleton.feature",
+          "scenario_name": "Developer resolves a boolean flag through the OpenFeature adapter",
+          "files_to_modify": [
+            "flagzen-openfeature/src/main/java/com/flagzen/openfeature/OpenFeatureFlagProvider.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "String Resolution",
+      "description": "Complete string resolution: named client construction, absent flag detection (no flag configured, evaluation error, no provider registered). Exercises all error and edge paths for getString().",
+      "steps": [
+        {
+          "id": "02-01",
+          "name": "Adapter with named client resolves flags through that client",
+          "description": "Implement create(Client) factory wiring for a named/dedicated OpenFeature client. Implement step definitions for dedicated client setup and adapter construction with that specific client.",
+          "criteria": [
+            "OpenFeatureFlagProvider.create(client) accepts any Client instance including named clients",
+            "Step definitions for dedicated client setup and named-client adapter construction implemented",
+            "Scenario 'Adapter constructed with a specific named client resolves flags through that client' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/string-resolution.feature",
+          "scenario_name": "Adapter constructed with a specific named client resolves flags through that client",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        },
+        {
+          "id": "02-02",
+          "name": "Flag not configured returns no value",
+          "description": "Verify that when the upstream InMemoryProvider has no flag for the given key, the reason-based detection returns Optional.empty(). Implement the 'has no flag named' Given step.",
+          "criteria": [
+            "getString returns Optional.empty() when OpenFeature returns reason DEFAULT for an unconfigured flag",
+            "Scenario 'Flag not configured in the upstream service returns no value' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/string-resolution.feature",
+          "scenario_name": "Flag not configured in the upstream service returns no value",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        },
+        {
+          "id": "02-03",
+          "name": "Flag evaluation error returns no value",
+          "description": "Verify that when the upstream service returns an error (errorCode non-null), the adapter returns Optional.empty(). Implement the error-triggering Given step.",
+          "criteria": [
+            "getString returns Optional.empty() when FlagEvaluationDetails has a non-null errorCode",
+            "Scenario 'Flag evaluation error in the upstream service returns no value' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/string-resolution.feature",
+          "scenario_name": "Flag evaluation error in the upstream service returns no value",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        },
+        {
+          "id": "02-04",
+          "name": "No upstream service configured returns no value",
+          "description": "Verify that when no OpenFeature provider is registered, the no-arg constructor adapter returns Optional.empty(). Implement the no-arg constructor path and the 'no flag management service' Given step.",
+          "criteria": [
+            "No-arg constructor calls OpenFeatureAPI.getInstance().getClient() to obtain the global client",
+            "getString returns Optional.empty() when no provider is registered (NoOpProvider returns reason DEFAULT)",
+            "Scenario 'Adapter with no upstream service configured returns no value' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/string-resolution.feature",
+          "scenario_name": "Adapter with no upstream service configured returns no value",
+          "files_to_modify": [
+            "flagzen-openfeature/src/main/java/com/flagzen/openfeature/OpenFeatureFlagProvider.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "name": "Typed Resolution",
+      "description": "Native typed resolution for integer, double, and long flags via OpenFeature's typed detail methods. Long uses integer widening. Error and absent paths for typed flags.",
+      "steps": [
+        {
+          "id": "03-01",
+          "name": "Integer flag resolved natively",
+          "description": "Add getInt(key) delegating to Client.getIntegerDetails(key, 0) with reason-based absence detection. Implement integer flag setup step.",
+          "criteria": [
+            "getInt(key) delegates to Client.getIntegerDetails(key, 0) and applies reason-based absence detection",
+            "getInt(key) returns OptionalInt.of(value) for valid resolutions",
+            "Scenario 'Integer flag resolved natively' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/typed-resolution.feature",
+          "scenario_name": "Integer flag resolved natively",
+          "files_to_modify": [
+            "flagzen-openfeature/src/main/java/com/flagzen/openfeature/OpenFeatureFlagProvider.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        },
+        {
+          "id": "03-02",
+          "name": "Double flag resolved natively",
+          "description": "Add getDouble(key) delegating to Client.getDoubleDetails(key, 0.0) with reason-based absence detection. Implement double flag setup step.",
+          "criteria": [
+            "getDouble(key) delegates to Client.getDoubleDetails(key, 0.0) and applies reason-based absence detection",
+            "getDouble(key) returns OptionalDouble.of(value) for valid resolutions",
+            "Scenario 'Double flag resolved natively' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/typed-resolution.feature",
+          "scenario_name": "Double flag resolved natively",
+          "files_to_modify": [
+            "flagzen-openfeature/src/main/java/com/flagzen/openfeature/OpenFeatureFlagProvider.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        },
+        {
+          "id": "03-03",
+          "name": "Long flag resolved via integer widening",
+          "description": "Add getLong(key) delegating to Client.getIntegerDetails(key, 0) with widening cast from Integer to long. Implement long flag resolve/assert steps.",
+          "criteria": [
+            "getLong(key) delegates to Client.getIntegerDetails(key, 0) and widens the Integer result to long",
+            "getLong(key) returns OptionalLong.of(value) for valid resolutions",
+            "Scenario 'Long flag resolved via integer widening' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/typed-resolution.feature",
+          "scenario_name": "Long flag resolved via integer widening",
+          "files_to_modify": [
+            "flagzen-openfeature/src/main/java/com/flagzen/openfeature/OpenFeatureFlagProvider.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        },
+        {
+          "id": "03-04",
+          "name": "Typed flag evaluation error returns no value",
+          "description": "Verify that errorCode non-null on a typed (boolean) evaluation returns Optional.empty(). Implement the boolean error Given step.",
+          "criteria": [
+            "getBoolean returns Optional.empty() when FlagEvaluationDetails has a non-null errorCode",
+            "Scenario 'Typed flag evaluation error returns no value' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/typed-resolution.feature",
+          "scenario_name": "Typed flag evaluation error returns no value",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        },
+        {
+          "id": "03-05",
+          "name": "Absent typed flag returns no value",
+          "description": "Verify that an unconfigured typed flag (integer) returns empty via reason-based detection.",
+          "criteria": [
+            "getInt returns OptionalInt.empty() when OpenFeature returns reason DEFAULT for an unconfigured flag",
+            "Scenario 'Absent typed flag returns no value' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/typed-resolution.feature",
+          "scenario_name": "Absent typed flag returns no value",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "name": "Context Mapping",
+      "description": "EvaluationContext mapping from FlagZen to OpenFeature SDK. Targeting key, string/numeric/boolean attributes, absent targeting key, unsupported attribute type handling, context-aware typed resolution, and empty context passthrough.",
+      "steps": [
+        {
+          "id": "04-01",
+          "name": "Flag resolved with targeting key and string attribute",
+          "description": "Implement EvaluationContextMapper that converts FlagZen EvaluationContext to OpenFeature EvaluationContext. Add getString(key, context) and all context-aware overrides to OpenFeatureFlagProvider that map the context and pass it to the Client's detail methods. Implement the targeting-key-based Given step for InMemoryProvider.",
+          "criteria": [
+            "EvaluationContextMapper converts FlagZen targeting key to OpenFeature targeting key",
+            "EvaluationContextMapper converts string attributes to OpenFeature context attributes",
+            "getString(key, context) delegates to Client.getStringDetails with mapped OpenFeature EvaluationContext",
+            "Scenario 'Flag resolved with targeting key and string attribute' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/context-mapping.feature",
+          "scenario_name": "Flag resolved with targeting key and string attribute",
+          "files_to_modify": [
+            "flagzen-openfeature/src/main/java/com/flagzen/openfeature/OpenFeatureFlagProvider.java",
+            "flagzen-openfeature/src/main/java/com/flagzen/openfeature/EvaluationContextMapper.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        },
+        {
+          "id": "04-02",
+          "name": "Flag resolved with numeric and boolean attributes",
+          "description": "Extend EvaluationContextMapper to handle integer and boolean attribute types. Implement the attribute-based targeting Given step.",
+          "criteria": [
+            "EvaluationContextMapper converts integer attributes to OpenFeature integer attributes",
+            "EvaluationContextMapper converts boolean attributes to OpenFeature boolean attributes",
+            "Scenario 'Flag resolved with numeric and boolean attributes' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/context-mapping.feature",
+          "scenario_name": "Flag resolved with numeric and boolean attributes",
+          "files_to_modify": [
+            "flagzen-openfeature/src/main/java/com/flagzen/openfeature/EvaluationContextMapper.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        },
+        {
+          "id": "04-03",
+          "name": "Flag resolved without a targeting key",
+          "description": "Verify that a FlagZen context with no targeting key produces an OpenFeature context with no targeting key. Implement the string-attribute-only targeting Given step.",
+          "criteria": [
+            "EvaluationContextMapper omits targeting key from OpenFeature context when FlagZen context has none",
+            "Scenario 'Flag resolved without a targeting key' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/context-mapping.feature",
+          "scenario_name": "Flag resolved without a targeting key",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        },
+        {
+          "id": "04-04",
+          "name": "Unsupported attribute type skipped with warning",
+          "description": "Verify that unsupported attribute types (e.g., Instant) are skipped during context mapping and a JUL warning is logged. Implement log capture in the step definition.",
+          "criteria": [
+            "EvaluationContextMapper skips attributes with unsupported types (not String, Integer, Long, Double, Boolean)",
+            "A java.util.logging WARNING is emitted naming the unsupported attribute type",
+            "Flag resolution still succeeds (unsupported attribute does not cause failure)",
+            "Scenario 'Unsupported attribute type is skipped during context mapping' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/context-mapping.feature",
+          "scenario_name": "Unsupported attribute type is skipped during context mapping",
+          "files_to_modify": [
+            "flagzen-openfeature/src/main/java/com/flagzen/openfeature/EvaluationContextMapper.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        },
+        {
+          "id": "04-05",
+          "name": "Context-aware typed resolution and empty context",
+          "description": "Verify that context-aware typed methods (getBoolean with context) pass the mapped context through, and that an empty evaluation context does not disrupt resolution.",
+          "criteria": [
+            "getBoolean(key, context) delegates to Client.getBooleanDetails with mapped OpenFeature EvaluationContext",
+            "Empty FlagZen EvaluationContext maps to an empty OpenFeature EvaluationContext without errors",
+            "Scenario 'Context-aware typed resolution passes context through' passes",
+            "Scenario 'Empty evaluation context does not disrupt flag resolution' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-openfeature/context-mapping.feature",
+          "scenario_name": "Context-aware typed resolution passes context through",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/OpenFeatureSteps.java"
+          ]
+        }
+      ]
+    }
+  ]
+}
