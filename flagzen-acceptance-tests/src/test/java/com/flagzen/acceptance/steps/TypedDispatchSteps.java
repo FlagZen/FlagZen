@@ -428,6 +428,50 @@ public class TypedDispatchSteps {
         readDouble = flagProvider.getDouble(key);
     }
 
+    // --- Context-aware conditional API steps (Phase 05) ---
+
+    @And("it returns string {string} for targeting key {string}")
+    public void itReturnsStringForTargetingKey(String value, String targetingKey) {
+        contextAwareFlagProvider = new FlagProvider() {
+            @Override
+            public Optional<String> getString(String key) {
+                return Optional.empty();
+            }
+
+            @Override
+            public Optional<String> getString(String key, EvaluationContext context) {
+                if (context != null && targetingKey.equals(context.targetingKey())) {
+                    return Optional.of(value);
+                }
+                return getString(key);
+            }
+        };
+    }
+
+    @When("the developer reads the integer value for {string} with context targeting {string}")
+    public void readsIntegerValueWithContext(String key, String targetingKey) {
+        EvaluationContext ctx = EvaluationContext.builder().targetingKey(targetingKey).build();
+        readInt = contextAwareFlagProvider.getInt(key, ctx);
+    }
+
+    @When("the developer reads the boolean value for {string} with context targeting {string}")
+    public void readsBooleanValueWithContext(String key, String targetingKey) {
+        EvaluationContext ctx = EvaluationContext.builder().targetingKey(targetingKey).build();
+        readBoolean = contextAwareFlagProvider.getBoolean(key, ctx);
+    }
+
+    @When("the developer reads the long value for {string} with context targeting {string}")
+    public void readsLongValueWithContext(String key, String targetingKey) {
+        EvaluationContext ctx = EvaluationContext.builder().targetingKey(targetingKey).build();
+        readLong = contextAwareFlagProvider.getLong(key, ctx);
+    }
+
+    @When("the developer reads the double value for {string} with context targeting {string}")
+    public void readsDoubleValueWithContext(String key, String targetingKey) {
+        EvaluationContext ctx = EvaluationContext.builder().targetingKey(targetingKey).build();
+        readDouble = contextAwareFlagProvider.getDouble(key, ctx);
+    }
+
     // --- Assertions (Then steps) ---
 
     @Then("{string} handles the method call")
@@ -516,6 +560,18 @@ public class TypedDispatchSteps {
     public void booleanTrueIsReturned() {
         assertThat(readBoolean).isPresent();
         assertThat(readBoolean.get()).isTrue();
+    }
+
+    @Then("boolean false is returned")
+    public void booleanFalseIsReturned() {
+        assertThat(readBoolean).isPresent();
+        assertThat(readBoolean.get()).isFalse();
+    }
+
+    @Then("long {long} is returned")
+    public void longIsReturned(long expected) {
+        assertThat(readLong).isPresent();
+        assertThat(readLong.getAsLong()).isEqualTo(expected);
     }
 
     @Then("no value is returned")
