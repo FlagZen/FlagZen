@@ -41,7 +41,7 @@ Feature: Key mapping from source names to flag keys
     When it parses the name "FLAGZEN_CHECKOUT_FLOW"
     Then no segments are returned
 
-  @pending @US-ENV-05
+  @US-ENV-05
   Scenario: Camel case parser without prefix parses bare camel case name
     Given a camel case parser without prefix
     When it parses the name "checkoutFlow"
@@ -49,7 +49,7 @@ Feature: Key mapping from source names to flag keys
 
   # --- US-ENV-06: Built-in formatters ---
 
-  @pending @US-ENV-06
+  @US-ENV-06
   Scenario Outline: Built-in formatter produces correct flag key
     Given a <formatter> formatter
     When it formats the segments "checkout" and "flow"
@@ -64,13 +64,13 @@ Feature: Key mapping from source names to flag keys
       | dot case   | checkout.flow  |
       | colon case | checkout:flow  |
 
-  @pending @US-ENV-06
+  @US-ENV-06
   Scenario: Formatter handles single segment without delimiter
     Given a kebab case formatter
     When it formats the single segment "darkmode"
     Then the flag key is "darkmode"
 
-  @pending @US-ENV-06
+  @US-ENV-06
   Scenario: Custom lambda formatter applies custom delimiter
     Given a custom formatter that joins segments with "/"
     When it formats the segments "checkout" and "flow"

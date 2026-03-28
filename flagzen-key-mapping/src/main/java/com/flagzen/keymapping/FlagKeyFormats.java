@@ -27,7 +27,7 @@ public final class FlagKeyFormats {
      * @return a snake-case formatter
      */
     public static FlagKeyFormat snakeCase() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return segments -> String.join("_", segments);
     }
 
     /**
@@ -39,7 +39,18 @@ public final class FlagKeyFormats {
      * @return a camelCase formatter
      */
     public static FlagKeyFormat camelCase() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return segments -> {
+            if (segments.isEmpty()) {
+                return "";
+            }
+            StringBuilder result = new StringBuilder(segments.get(0));
+            for (int i = 1; i < segments.size(); i++) {
+                String segment = segments.get(i);
+                result.append(Character.toUpperCase(segment.charAt(0)))
+                      .append(segment.substring(1));
+            }
+            return result.toString();
+        };
     }
 
     /**
@@ -51,7 +62,14 @@ public final class FlagKeyFormats {
      * @return a PascalCase formatter
      */
     public static FlagKeyFormat pascalCase() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return segments -> {
+            StringBuilder result = new StringBuilder();
+            for (String segment : segments) {
+                result.append(Character.toUpperCase(segment.charAt(0)))
+                      .append(segment.substring(1));
+            }
+            return result.toString();
+        };
     }
 
     /**
@@ -62,7 +80,7 @@ public final class FlagKeyFormats {
      * @return a dot-case formatter
      */
     public static FlagKeyFormat dotCase() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return segments -> String.join(".", segments);
     }
 
     /**
@@ -73,6 +91,6 @@ public final class FlagKeyFormats {
      * @return a colon-case formatter
      */
     public static FlagKeyFormat colonCase() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return segments -> String.join(":", segments);
     }
 }

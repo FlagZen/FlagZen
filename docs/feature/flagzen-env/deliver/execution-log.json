@@ -204,6 +204,146 @@
       "s": "EXECUTED",
       "d": "PASS",
       "t": "2026-03-28T14:50:58Z"
+    },
+    {
+      "sid": "02-07",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-28T14:55:40Z"
+    },
+    {
+      "sid": "02-07",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS - scenario already passes with existing step defs and parser",
+      "t": "2026-03-28T14:55:40Z"
+    },
+    {
+      "sid": "02-07",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: Production code exists",
+      "t": "2026-03-28T14:55:52Z"
+    },
+    {
+      "sid": "02-07",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS - all step defs existed, parser camelCase() no-arg works",
+      "t": "2026-03-28T14:55:52Z"
+    },
+    {
+      "sid": "02-07",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "Batched with 02-08 through 02-10",
+      "t": "2026-03-28T14:55:52Z"
+    },
+    {
+      "sid": "02-08",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-28T14:56:00Z"
+    },
+    {
+      "sid": "02-08",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS - 5 of 6 examples fail with UnsupportedOperationException",
+      "t": "2026-03-28T14:56:00Z"
+    },
+    {
+      "sid": "02-08",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: Acceptance test drives implementation directly",
+      "t": "2026-03-28T14:56:00Z"
+    },
+    {
+      "sid": "02-08",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS - implemented snakeCase, camelCase, pascalCase, dotCase, colonCase formatters",
+      "t": "2026-03-28T14:56:00Z"
+    },
+    {
+      "sid": "02-08",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "Batched with 02-07, 02-09, 02-10",
+      "t": "2026-03-28T14:56:00Z"
+    },
+    {
+      "sid": "02-09",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-28T14:56:07Z"
+    },
+    {
+      "sid": "02-09",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS - scenario passes immediately with existing kebab formatter",
+      "t": "2026-03-28T14:56:07Z"
+    },
+    {
+      "sid": "02-09",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: Production code exists",
+      "t": "2026-03-28T14:56:08Z"
+    },
+    {
+      "sid": "02-09",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS - single segment handled by String.join",
+      "t": "2026-03-28T14:56:08Z"
+    },
+    {
+      "sid": "02-09",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "Batched with 02-07, 02-08, 02-10",
+      "t": "2026-03-28T14:56:08Z"
+    },
+    {
+      "sid": "02-10",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-28T14:56:14Z"
+    },
+    {
+      "sid": "02-10",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS - scenario passes immediately with lambda step def",
+      "t": "2026-03-28T14:56:15Z"
+    },
+    {
+      "sid": "02-10",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: Production code exists",
+      "t": "2026-03-28T14:56:15Z"
+    },
+    {
+      "sid": "02-10",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS - FlagKeyFormat is SAM, lambda works directly",
+      "t": "2026-03-28T14:56:15Z"
+    },
+    {
+      "sid": "02-10",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "Batched with 02-07, 02-08, 02-09",
+      "t": "2026-03-28T14:56:15Z"
     }
   ]
 }
