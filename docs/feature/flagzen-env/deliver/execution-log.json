@@ -823,10 +823,101 @@
     },
     {
       "sid": "03-01",
-      "p": "COMMIT",
-      "s": "EXECUTED",
-      "d": "git-add-done",
-      "t": "2026-03-28T15:02:15Z"
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: No new production code needed, existing functionality already passes",
+      "t": "2026-03-28T15:02:50Z"
+    },
+    {
+      "sid": "03-02",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: No new production code needed, existing functionality already passes",
+      "t": "2026-03-28T15:02:50Z"
+    },
+    {
+      "sid": "03-03",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: No new production code needed, existing functionality already passes",
+      "t": "2026-03-28T15:02:50Z"
+    },
+    {
+      "sid": "03-04",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: No new production code needed, existing functionality already passes",
+      "t": "2026-03-28T15:02:50Z"
+    },
+    {
+      "sid": "03-05",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: No new production code needed, existing functionality already passes",
+      "t": "2026-03-28T15:02:50Z"
+    },
+    {
+      "sid": "03-06",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: No new production code needed, existing functionality already passes",
+      "t": "2026-03-28T15:02:50Z"
+    },
+    {
+      "sid": "03-07",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: ServiceLoader wiring tested through acceptance test directly",
+      "t": "2026-03-28T15:02:56Z"
+    },
+    {
+      "sid": "03-08",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: ServiceLoader wiring tested through acceptance test directly",
+      "t": "2026-03-28T15:02:56Z"
+    },
+    {
+      "sid": "03-09",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: Builder API already existed, no new production code",
+      "t": "2026-03-28T15:03:01Z"
+    },
+    {
+      "sid": "03-10",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: Builder API already existed, no new production code",
+      "t": "2026-03-28T15:03:01Z"
+    },
+    {
+      "sid": "03-11",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: Builder API already existed, no new production code",
+      "t": "2026-03-28T15:03:02Z"
+    },
+    {
+      "sid": "03-12",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: Builder API already existed, no new production code",
+      "t": "2026-03-28T15:03:02Z"
+    },
+    {
+      "sid": "03-13",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: Typed accessors are default methods on FlagProvider interface",
+      "t": "2026-03-28T15:03:06Z"
+    },
+    {
+      "sid": "03-14",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: Typed accessors are default methods on FlagProvider interface",
+      "t": "2026-03-28T15:03:06Z"
     }
   ]
 }
