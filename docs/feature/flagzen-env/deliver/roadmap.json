@@ -1,0 +1,641 @@
+{
+  "feature_id": "flagzen-env",
+  "goal": "Implement flagzen-key-mapping and flagzen-env modules providing environment-variable-based flag resolution with reusable key-mapping infrastructure",
+  "phases": [
+    {
+      "id": "01",
+      "name": "Walking Skeleton",
+      "description": "Thinnest E2E slice: Gradle module setup for flagzen-key-mapping and flagzen-env, default screaming-snake-case parser, default kebab-case formatter, eager loading into immutable map, FlagProvider contract. Proves the entire pipeline end-to-end.",
+      "steps": [
+        {
+          "id": "01-01",
+          "name": "Zero-config flag resolution from environment variable",
+          "description": "Set up both Gradle submodules (flagzen-key-mapping, flagzen-env), wire acceptance test infrastructure, implement the thinnest slice: FLAGZEN_ prefix screaming-snake-case parser, kebab-case formatter, eager loading pipeline, and FlagProvider.getString(). One env var in, one flag value out.",
+          "criteria": [
+            "settings.gradle.kts includes flagzen-key-mapping and flagzen-env",
+            "flagzen-key-mapping/build.gradle.kts exists with java-library plugin and zero production dependencies",
+            "flagzen-env/build.gradle.kts exists with api dependency on flagzen-key-mapping and implementation dependency on flagzen-core",
+            "flagzen-acceptance-tests/build.gradle.kts includes flagzen-env as testImplementation dependency and adds flagzen-env feature path to cucumber.features",
+            "FlagKeyParser SAM interface exists in com.flagzen.keymapping",
+            "FlagKeyParsers.screamingSnakeCase(String prefix) factory method exists",
+            "FlagKeyFormat SAM interface exists in com.flagzen.keymapping",
+            "FlagKeyFormats.kebabCase() factory method exists",
+            "EnvironmentVariableFlagProvider.create() constructs a provider with default parser and formatter",
+            "Provider eagerly loads env vars at construction into immutable map",
+            "getString(key) returns Optional with the value for a matching FLAGZEN_ prefixed env var",
+            "Scenario 'Developer resolves a flag from an environment variable with zero configuration' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/walking-skeleton.feature",
+          "scenario_name": "Developer resolves a flag from an environment variable with zero configuration",
+          "files_to_modify": [
+            "settings.gradle.kts",
+            "flagzen-key-mapping/build.gradle.kts",
+            "flagzen-env/build.gradle.kts",
+            "flagzen-acceptance-tests/build.gradle.kts",
+            "flagzen-key-mapping/src/main/java/com/flagzen/keymapping/FlagKeyParser.java",
+            "flagzen-key-mapping/src/main/java/com/flagzen/keymapping/FlagKeyParsers.java",
+            "flagzen-key-mapping/src/main/java/com/flagzen/keymapping/FlagKeyFormat.java",
+            "flagzen-key-mapping/src/main/java/com/flagzen/keymapping/FlagKeyFormats.java",
+            "flagzen-env/src/main/java/com/flagzen/env/EnvironmentVariableFlagProvider.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SharedEnvProviderHolder.java"
+          ]
+        },
+        {
+          "id": "01-02",
+          "name": "Missing flag key returns no value",
+          "description": "Verify that looking up a flag key with no matching environment variable returns Optional.empty(). Proves the negative path of the immutable map lookup.",
+          "criteria": [
+            "getString(key) returns Optional.empty() when no env var maps to the given flag key",
+            "Scenario 'Missing flag key returns no value' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/walking-skeleton.feature",
+          "scenario_name": "Missing flag key returns no value",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "Key Mapping",
+      "description": "Complete the flagzen-key-mapping module: all built-in parsers (screaming snake case, camel case, snake case with/without prefix), all built-in formatters (kebab, snake, camel, pascal, dot, colon), single-segment handling, and custom lambda support.",
+      "steps": [
+        {
+          "id": "02-01",
+          "name": "Screaming snake case parser with prefix extracts segments",
+          "description": "Verify that the screaming-snake-case parser with a given prefix strips the prefix and splits on underscores into lowercase segments.",
+          "criteria": [
+            "screamingSnakeCase('FLAGZEN_') parser parses 'FLAGZEN_CHECKOUT_FLOW' into segments ['checkout', 'flow']",
+            "Scenario 'Screaming snake case parser with prefix extracts segments' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-1-key-mapping.feature",
+          "scenario_name": "Screaming snake case parser with prefix extracts segments",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/KeyMappingSteps.java"
+          ]
+        },
+        {
+          "id": "02-02",
+          "name": "Screaming snake case parser rejects names without matching prefix",
+          "description": "Verify that the screaming-snake-case parser returns Optional.empty() when the input does not start with the configured prefix.",
+          "criteria": [
+            "screamingSnakeCase('FLAGZEN_') parser returns Optional.empty() for 'HOME'",
+            "Scenario 'Screaming snake case parser rejects names without matching prefix' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-1-key-mapping.feature",
+          "scenario_name": "Screaming snake case parser rejects names without matching prefix",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/KeyMappingSteps.java"
+          ]
+        },
+        {
+          "id": "02-03",
+          "name": "Screaming snake case parser without prefix parses any screaming snake name",
+          "description": "Verify that the no-prefix variant of the screaming-snake-case parser matches any ALL_CAPS_UNDERSCORE name.",
+          "criteria": [
+            "screamingSnakeCase() parser parses 'CHECKOUT_FLOW' into segments ['checkout', 'flow']",
+            "Scenario 'Screaming snake case parser without prefix parses any screaming snake name' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-1-key-mapping.feature",
+          "scenario_name": "Screaming snake case parser without prefix parses any screaming snake name",
+          "files_to_modify": [
+            "flagzen-key-mapping/src/main/java/com/flagzen/keymapping/FlagKeyParsers.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/KeyMappingSteps.java"
+          ]
+        },
+        {
+          "id": "02-04",
+          "name": "Screaming snake case parser handles single-segment name",
+          "description": "Verify that a single-segment name (no underscore after prefix) produces a list with one segment.",
+          "criteria": [
+            "screamingSnakeCase('FLAGZEN_') parser parses 'FLAGZEN_DARKMODE' into single segment ['darkmode']",
+            "Scenario 'Screaming snake case parser handles single-segment name' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-1-key-mapping.feature",
+          "scenario_name": "Screaming snake case parser handles single-segment name",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/KeyMappingSteps.java"
+          ]
+        },
+        {
+          "id": "02-05",
+          "name": "Camel case parser with prefix extracts segments",
+          "description": "Implement camelCase(String prefix) parser that strips the prefix and splits on uppercase boundaries into lowercase segments.",
+          "criteria": [
+            "camelCase('myApp') parser parses 'myAppCheckoutFlow' into segments ['checkout', 'flow']",
+            "Scenario 'Camel case parser with prefix extracts segments' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-1-key-mapping.feature",
+          "scenario_name": "Camel case parser with prefix extracts segments",
+          "files_to_modify": [
+            "flagzen-key-mapping/src/main/java/com/flagzen/keymapping/FlagKeyParsers.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/KeyMappingSteps.java"
+          ]
+        },
+        {
+          "id": "02-06",
+          "name": "Camel case parser rejects names without matching prefix",
+          "description": "Verify that camelCase parser returns Optional.empty() when the input does not start with the configured prefix.",
+          "criteria": [
+            "camelCase('myApp') parser returns Optional.empty() for 'FLAGZEN_CHECKOUT_FLOW'",
+            "Scenario 'Camel case parser rejects names without matching prefix' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-1-key-mapping.feature",
+          "scenario_name": "Camel case parser rejects names without matching prefix",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/KeyMappingSteps.java"
+          ]
+        },
+        {
+          "id": "02-07",
+          "name": "Camel case parser without prefix parses bare camel case name",
+          "description": "Implement camelCase() no-prefix variant that splits any camelCase name on uppercase boundaries.",
+          "criteria": [
+            "camelCase() parser parses 'checkoutFlow' into segments ['checkout', 'flow']",
+            "Scenario 'Camel case parser without prefix parses bare camel case name' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-1-key-mapping.feature",
+          "scenario_name": "Camel case parser without prefix parses bare camel case name",
+          "files_to_modify": [
+            "flagzen-key-mapping/src/main/java/com/flagzen/keymapping/FlagKeyParsers.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/KeyMappingSteps.java"
+          ]
+        },
+        {
+          "id": "02-08",
+          "name": "Built-in formatters produce correct flag keys",
+          "description": "Implement all six built-in formatters (kebab, snake, camel, pascal, dot, colon) and verify each produces the correct flag key from segments. This is one Scenario Outline covering 6 examples.",
+          "criteria": [
+            "kebabCase() formats ['checkout', 'flow'] to 'checkout-flow'",
+            "snakeCase() formats ['checkout', 'flow'] to 'checkout_flow'",
+            "camelCase() formats ['checkout', 'flow'] to 'checkoutFlow'",
+            "pascalCase() formats ['checkout', 'flow'] to 'CheckoutFlow'",
+            "dotCase() formats ['checkout', 'flow'] to 'checkout.flow'",
+            "colonCase() formats ['checkout', 'flow'] to 'checkout:flow'",
+            "Scenario Outline 'Built-in formatter produces correct flag key' passes for all 6 examples"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-1-key-mapping.feature",
+          "scenario_name": "Built-in formatter produces correct flag key",
+          "files_to_modify": [
+            "flagzen-key-mapping/src/main/java/com/flagzen/keymapping/FlagKeyFormats.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/KeyMappingSteps.java"
+          ]
+        },
+        {
+          "id": "02-09",
+          "name": "Formatter handles single segment without delimiter",
+          "description": "Verify that formatting a single segment produces the segment itself with no delimiter appended.",
+          "criteria": [
+            "kebabCase() formats ['darkmode'] to 'darkmode'",
+            "Scenario 'Formatter handles single segment without delimiter' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-1-key-mapping.feature",
+          "scenario_name": "Formatter handles single segment without delimiter",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/KeyMappingSteps.java"
+          ]
+        },
+        {
+          "id": "02-10",
+          "name": "Custom lambda formatter applies custom delimiter",
+          "description": "Verify that a custom FlagKeyFormat lambda can be provided to join segments with an arbitrary delimiter.",
+          "criteria": [
+            "A custom formatter joining with '/' formats ['checkout', 'flow'] to 'checkout/flow'",
+            "Scenario 'Custom lambda formatter applies custom delimiter' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-1-key-mapping.feature",
+          "scenario_name": "Custom lambda formatter applies custom delimiter",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/KeyMappingSteps.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "name": "Env Provider",
+      "description": "Complete the flagzen-env module: default configuration scenarios, eager loading and immutable map guarantees, ServiceLoader discovery, builder API with custom parsers and formatters, and error paths for unparseable typed values.",
+      "steps": [
+        {
+          "id": "03-01",
+          "name": "Default configuration resolves multi-segment flag key",
+          "description": "Verify that default-configured provider correctly resolves a multi-segment FLAGZEN_ env var to a kebab-case flag key.",
+          "criteria": [
+            "FLAGZEN_MAX_RETRY_COUNT=5 resolves to flag 'max-retry-count' with value '5'",
+            "Scenario 'Default configuration resolves multi-segment flag key' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-2-env-provider.feature",
+          "scenario_name": "Default configuration resolves multi-segment flag key",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        },
+        {
+          "id": "03-02",
+          "name": "Default configuration resolves single-segment flag key",
+          "description": "Verify that a single-segment FLAGZEN_ env var resolves correctly without delimiters.",
+          "criteria": [
+            "FLAGZEN_DARKMODE=on resolves to flag 'darkmode' with value 'on'",
+            "Scenario 'Default configuration resolves single-segment flag key' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-2-env-provider.feature",
+          "scenario_name": "Default configuration resolves single-segment flag key",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        },
+        {
+          "id": "03-03",
+          "name": "Non-matching environment variables are excluded from flag map",
+          "description": "Verify that env vars without the FLAGZEN_ prefix are excluded and do not appear in flag lookups.",
+          "criteria": [
+            "HOME=/Users/kenji is excluded from the flag map",
+            "FLAGZEN_DARK_MODE=true maps to flag 'dark-mode'",
+            "Looking up 'home' returns no value",
+            "Scenario 'Non-matching environment variables are excluded from flag map' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-2-env-provider.feature",
+          "scenario_name": "Non-matching environment variables are excluded from flag map",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        },
+        {
+          "id": "03-04",
+          "name": "Flag lookups are consistent after construction",
+          "description": "Verify that repeated lookups of the same key always return the same value, proving immutability.",
+          "criteria": [
+            "Multiple getString() calls for the same key return identical values",
+            "Scenario 'Flag lookups are consistent after construction' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-2-env-provider.feature",
+          "scenario_name": "Flag lookups are consistent after construction",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        },
+        {
+          "id": "03-05",
+          "name": "Empty environment variable value is preserved",
+          "description": "Verify that an env var set to an empty string is preserved as an empty string (not treated as missing).",
+          "criteria": [
+            "FLAGZEN_CHECKOUT_FLOW='' resolves to flag 'checkout-flow' with value ''",
+            "getString() returns Optional.of('') not Optional.empty()",
+            "Scenario 'Empty environment variable value is preserved' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-2-env-provider.feature",
+          "scenario_name": "Empty environment variable value is preserved",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        },
+        {
+          "id": "03-06",
+          "name": "Context-aware lookup ignores evaluation context for static env vars",
+          "description": "Verify that getString(key, context) delegates to getString(key), ignoring the evaluation context since env vars are static.",
+          "criteria": [
+            "getString(key, context) returns same value as getString(key)",
+            "Scenario 'Context-aware lookup ignores evaluation context for static env vars' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-2-env-provider.feature",
+          "scenario_name": "Context-aware lookup ignores evaluation context for static env vars",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        },
+        {
+          "id": "03-07",
+          "name": "Provider is discoverable via service loading",
+          "description": "Register EnvironmentVariableFlagProvider in META-INF/services and verify ServiceLoader discovers it.",
+          "criteria": [
+            "META-INF/services/com.flagzen.spi.FlagProvider contains com.flagzen.env.EnvironmentVariableFlagProvider",
+            "ServiceLoader.load(FlagProvider.class) includes EnvironmentVariableFlagProvider",
+            "Scenario 'Provider is discoverable via service loading' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-2-env-provider.feature",
+          "scenario_name": "Provider is discoverable via service loading",
+          "files_to_modify": [
+            "flagzen-env/src/main/resources/META-INF/services/com.flagzen.spi.FlagProvider",
+            "flagzen-env/src/main/java/com/flagzen/env/EnvironmentVariableFlagProvider.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        },
+        {
+          "id": "03-08",
+          "name": "Auto-discovered provider resolves flags with default configuration",
+          "description": "Verify that the ServiceLoader-discovered instance resolves flags using default configuration.",
+          "criteria": [
+            "Auto-discovered provider resolves FLAGZEN_CHECKOUT_FLOW=STREAMLINED to flag 'checkout-flow'",
+            "Scenario 'Auto-discovered provider resolves flags with default configuration' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-2-env-provider.feature",
+          "scenario_name": "Auto-discovered provider resolves flags with default configuration",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        },
+        {
+          "id": "03-09",
+          "name": "Builder accepts a custom prefix parser",
+          "description": "Implement the builder API and verify that a custom prefix parser (e.g., FF_) replaces the default FLAGZEN_ parser.",
+          "criteria": [
+            "builder().parser(screamingSnakeCase('FF_')).build() resolves FF_ prefixed env vars",
+            "Scenario 'Builder accepts a custom prefix parser' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-2-env-provider.feature",
+          "scenario_name": "Builder accepts a custom prefix parser",
+          "files_to_modify": [
+            "flagzen-env/src/main/java/com/flagzen/env/EnvironmentVariableFlagProvider.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        },
+        {
+          "id": "03-10",
+          "name": "Custom prefix parser excludes non-matching environment variables",
+          "description": "Verify that when using a custom prefix parser, env vars with the old default prefix are excluded.",
+          "criteria": [
+            "Provider with FF_ parser does not resolve FLAGZEN_ prefixed env vars",
+            "Scenario 'Custom prefix parser excludes non-matching environment variables' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-2-env-provider.feature",
+          "scenario_name": "Custom prefix parser excludes non-matching environment variables",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        },
+        {
+          "id": "03-11",
+          "name": "Builder accepts a custom lambda parser",
+          "description": "Verify that a custom FlagKeyParser lambda can be provided to the builder for arbitrary parsing logic.",
+          "criteria": [
+            "Custom lambda parser for 'FEAT_' prefix works through the builder",
+            "Scenario 'Builder accepts a custom lambda parser' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-2-env-provider.feature",
+          "scenario_name": "Builder accepts a custom lambda parser",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        },
+        {
+          "id": "03-12",
+          "name": "Builder accepts a custom formatter",
+          "description": "Verify that a custom formatter (e.g., snake case) can replace the default kebab-case formatter via the builder.",
+          "criteria": [
+            "builder().formatter(snakeCase()).build() formats flag keys with underscores",
+            "Scenario 'Builder accepts a custom formatter' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-2-env-provider.feature",
+          "scenario_name": "Builder accepts a custom formatter",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        },
+        {
+          "id": "03-13",
+          "name": "Unparseable integer value returns no typed result but string is available",
+          "description": "Verify that getInt() returns empty for non-numeric strings while getString() still returns the raw value.",
+          "criteria": [
+            "getInt('max-retries') returns Optional.empty() when value is 'not-a-number'",
+            "getString('max-retries') returns 'not-a-number'",
+            "Scenario 'Unparseable integer value returns no typed result but string is available' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-2-env-provider.feature",
+          "scenario_name": "Unparseable integer value returns no typed result but string is available",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        },
+        {
+          "id": "03-14",
+          "name": "Unparseable boolean value returns no typed result but string is available",
+          "description": "Verify that getBoolean() returns empty for non-boolean strings while getString() still returns the raw value.",
+          "criteria": [
+            "getBoolean('dark-mode') returns Optional.empty() when value is 'maybe'",
+            "getString('dark-mode') returns 'maybe'",
+            "Scenario 'Unparseable boolean value returns no typed result but string is available' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-2-env-provider.feature",
+          "scenario_name": "Unparseable boolean value returns no typed result but string is available",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/EnvProviderSteps.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "name": "Conflict Strategy",
+      "description": "Complete conflict handling: multiple parsers contributing flags, multiple formatters producing multiple keys, cardinality-based default strategy selection, WARN and ERROR behavior at construction time, and first-access warnings for conflicted keys.",
+      "steps": [
+        {
+          "id": "04-01",
+          "name": "Multiple parsers contribute different flags from different conventions",
+          "description": "Verify that configuring multiple parsers allows resolving flags from different naming conventions simultaneously.",
+          "criteria": [
+            "FLAGZEN_ and myApp parsers together resolve flags from both conventions",
+            "Scenario 'Multiple parsers contribute different flags from different conventions' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-3-conflict-strategy.feature",
+          "scenario_name": "Multiple parsers contribute different flags from different conventions",
+          "files_to_modify": [
+            "flagzen-env/src/main/java/com/flagzen/env/EnvironmentVariableFlagProvider.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/ConflictStrategySteps.java"
+          ]
+        },
+        {
+          "id": "04-02",
+          "name": "Multiple parsers with no overlapping flags produce no conflict",
+          "description": "Verify that when multiple parsers each match different env vars with no flag key overlap, no conflict is raised.",
+          "criteria": [
+            "Two parsers matching non-overlapping env vars produce no conflict warning",
+            "Scenario 'Multiple parsers with no overlapping flags produce no conflict' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-3-conflict-strategy.feature",
+          "scenario_name": "Multiple parsers with no overlapping flags produce no conflict",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/ConflictStrategySteps.java"
+          ]
+        },
+        {
+          "id": "04-03",
+          "name": "Multiple formatters produce multiple flag keys from one environment variable",
+          "description": "Verify that configuring multiple formatters produces multiple flag key entries from a single env var.",
+          "criteria": [
+            "kebab and snake formatters together produce both 'checkout-flow' and 'checkout_flow' from FLAGZEN_CHECKOUT_FLOW",
+            "Scenario 'Multiple formatters produce multiple flag keys from one environment variable' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-3-conflict-strategy.feature",
+          "scenario_name": "Multiple formatters produce multiple flag keys from one environment variable",
+          "files_to_modify": [
+            "flagzen-env/src/main/java/com/flagzen/env/EnvironmentVariableFlagProvider.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/ConflictStrategySteps.java"
+          ]
+        },
+        {
+          "id": "04-04",
+          "name": "Single-segment key resolves identically from both formatters",
+          "description": "Verify that a single-segment name (no delimiter) resolves to the same key from both formatters without conflict.",
+          "criteria": [
+            "FLAGZEN_DARKMODE with kebab+snake formatters both produce 'darkmode' -- same value, no real conflict",
+            "Scenario 'Single-segment key resolves identically from both formatters' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-3-conflict-strategy.feature",
+          "scenario_name": "Single-segment key resolves identically from both formatters",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/ConflictStrategySteps.java"
+          ]
+        },
+        {
+          "id": "04-05",
+          "name": "Single parser and single formatter default to warn on conflict",
+          "description": "Implement cardinality-based default strategy selection. 1 parser + 1 formatter defaults to WARN.",
+          "criteria": [
+            "Builder with 1 parser and 1 formatter and no explicit strategy defaults to WARN",
+            "Scenario 'Single parser and single formatter default to warn on conflict' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-3-conflict-strategy.feature",
+          "scenario_name": "Single parser and single formatter default to warn on conflict",
+          "files_to_modify": [
+            "flagzen-key-mapping/src/main/java/com/flagzen/keymapping/ConflictStrategy.java",
+            "flagzen-env/src/main/java/com/flagzen/env/EnvironmentVariableFlagProvider.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/ConflictStrategySteps.java"
+          ]
+        },
+        {
+          "id": "04-06",
+          "name": "Multiple parsers and single formatter default to warn on conflict",
+          "description": "Verify that N parsers + 1 formatter defaults to WARN.",
+          "criteria": [
+            "Builder with 2 parsers and 1 formatter and no explicit strategy defaults to WARN",
+            "Scenario 'Multiple parsers and single formatter default to warn on conflict' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-3-conflict-strategy.feature",
+          "scenario_name": "Multiple parsers and single formatter default to warn on conflict",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/ConflictStrategySteps.java"
+          ]
+        },
+        {
+          "id": "04-07",
+          "name": "Single parser and multiple formatters default to warn on conflict",
+          "description": "Verify that 1 parser + N formatters defaults to WARN.",
+          "criteria": [
+            "Builder with 1 parser and 2 formatters and no explicit strategy defaults to WARN",
+            "Scenario 'Single parser and multiple formatters default to warn on conflict' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-3-conflict-strategy.feature",
+          "scenario_name": "Single parser and multiple formatters default to warn on conflict",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/ConflictStrategySteps.java"
+          ]
+        },
+        {
+          "id": "04-08",
+          "name": "Multiple parsers and multiple formatters default to error on conflict",
+          "description": "Verify that N parsers + N formatters (cartesian explosion risk) defaults to ERROR.",
+          "criteria": [
+            "Builder with 2 parsers and 2 formatters and no explicit strategy defaults to ERROR",
+            "Scenario 'Multiple parsers and multiple formatters default to error on conflict' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-3-conflict-strategy.feature",
+          "scenario_name": "Multiple parsers and multiple formatters default to error on conflict",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/ConflictStrategySteps.java"
+          ]
+        },
+        {
+          "id": "04-09",
+          "name": "Multiple parsers and multiple formatters can be overridden to warn",
+          "description": "Verify that the N x N default of ERROR can be explicitly overridden to WARN via onConflict().",
+          "criteria": [
+            "builder().onConflict(WARN) overrides the N x N default of ERROR",
+            "Scenario 'Multiple parsers and multiple formatters can be overridden to warn' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-3-conflict-strategy.feature",
+          "scenario_name": "Multiple parsers and multiple formatters can be overridden to warn",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/ConflictStrategySteps.java"
+          ]
+        },
+        {
+          "id": "04-10",
+          "name": "Warn strategy logs conflict and continues operating",
+          "description": "Verify that WARN strategy logs a conflict warning with both env var names and continues operating normally.",
+          "criteria": [
+            "WARN strategy produces a log warning mentioning both conflicting env var names",
+            "Provider continues operating after conflict",
+            "Scenario 'Warn strategy logs conflict and continues operating' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-3-conflict-strategy.feature",
+          "scenario_name": "Warn strategy logs conflict and continues operating",
+          "files_to_modify": [
+            "flagzen-env/src/main/java/com/flagzen/env/EnvironmentVariableFlagProvider.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/ConflictStrategySteps.java"
+          ]
+        },
+        {
+          "id": "04-11",
+          "name": "Error strategy rejects construction when conflict is detected",
+          "description": "Verify that ERROR strategy throws IllegalStateException with both env var names and the flag key in the message.",
+          "criteria": [
+            "ERROR strategy throws IllegalStateException at construction",
+            "Error message mentions both env var names and the conflicted flag key",
+            "Scenario 'Error strategy rejects construction when conflict is detected' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-3-conflict-strategy.feature",
+          "scenario_name": "Error strategy rejects construction when conflict is detected",
+          "files_to_modify": [
+            "flagzen-env/src/main/java/com/flagzen/env/EnvironmentVariableFlagProvider.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/ConflictStrategySteps.java"
+          ]
+        },
+        {
+          "id": "04-12",
+          "name": "First access of a conflicted flag key produces a warning",
+          "description": "Implement first-access warning: on the first getString() call for a conflicted key, log a warning.",
+          "criteria": [
+            "First getString() call on a conflicted key produces a warning log",
+            "Scenario 'First access of a conflicted flag key produces a warning' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-3-conflict-strategy.feature",
+          "scenario_name": "First access of a conflicted flag key produces a warning",
+          "files_to_modify": [
+            "flagzen-env/src/main/java/com/flagzen/env/EnvironmentVariableFlagProvider.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/ConflictStrategySteps.java"
+          ]
+        },
+        {
+          "id": "04-13",
+          "name": "Subsequent access of the same conflicted flag key produces no warning",
+          "description": "Verify that the second and subsequent getString() calls for the same conflicted key produce no additional warning.",
+          "criteria": [
+            "Second getString() call on the same conflicted key produces no warning",
+            "Scenario 'Subsequent access of the same conflicted flag key produces no warning' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-3-conflict-strategy.feature",
+          "scenario_name": "Subsequent access of the same conflicted flag key produces no warning",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/ConflictStrategySteps.java"
+          ]
+        },
+        {
+          "id": "04-14",
+          "name": "Non-conflicted flag key produces no warning on access",
+          "description": "Verify that getString() for a non-conflicted key produces no warning at any time.",
+          "criteria": [
+            "getString() for a non-conflicted key never produces a warning",
+            "Scenario 'Non-conflicted flag key produces no warning on access' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-env/milestone-3-conflict-strategy.feature",
+          "scenario_name": "Non-conflicted flag key produces no warning on access",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/ConflictStrategySteps.java"
+          ]
+        }
+      ]
+    }
+  ]
+}

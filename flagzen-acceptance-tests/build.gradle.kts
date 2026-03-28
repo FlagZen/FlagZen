@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     testImplementation(project(":flagzen-core"))
+    testImplementation(project(":flagzen-env"))
     testImplementation(project(":flagzen-test"))
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -19,7 +20,8 @@ tasks.withType<Test> {
     systemProperty("cucumber.features", listOf(
         rootProject.projectDir.resolve("tests/acceptance/flagzen").absolutePath,
         rootProject.projectDir.resolve("tests/acceptance/flagzen-eval-context").absolutePath,
-        rootProject.projectDir.resolve("tests/acceptance/flagzen-typed-variants").absolutePath
+        rootProject.projectDir.resolve("tests/acceptance/flagzen-typed-variants").absolutePath,
+        rootProject.projectDir.resolve("tests/acceptance/flagzen-env").absolutePath
     ).joinToString(","))
     systemProperty("cucumber.glue", "com.flagzen.acceptance.steps")
     systemProperty("cucumber.plugin", "pretty")
