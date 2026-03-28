@@ -1,0 +1,69 @@
+{
+  "schema_version": "3.0",
+  "feature_id": "flagzen-spring",
+  "events": [
+    {
+      "sid": "01-01",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-28T18:32:20Z"
+    },
+    {
+      "sid": "01-01",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-28T18:33:56Z"
+    },
+    {
+      "sid": "01-01",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: Walking skeleton - skip inner TDD loop",
+      "t": "2026-03-28T18:34:10Z"
+    },
+    {
+      "sid": "01-01",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-28T18:36:20Z"
+    },
+    {
+      "sid": "01-02",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-28T18:36:24Z"
+    },
+    {
+      "sid": "01-02",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-28T18:37:14Z"
+    },
+    {
+      "sid": "01-02",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: Walking skeleton - skip inner TDD loop",
+      "t": "2026-03-28T18:37:15Z"
+    },
+    {
+      "sid": "01-02",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-28T18:37:15Z"
+    },
+    {
+      "sid": "01-03",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-28T18:37:20Z"
+    }
+  ]
+}

@@ -1,0 +1,427 @@
+{
+  "roadmap": {
+    "project_id": "flagzen-spring",
+    "created_at": "2026-03-28T16:00:00Z",
+    "total_steps": 24,
+    "phases": 5
+  },
+  "phases": [
+    {
+      "id": "01",
+      "name": "Walking Skeleton",
+      "description": "Thinnest E2E slice through flagzen-spring: Gradle module, auto-configuration discovery, FlagProvider-to-FeatureDispatcher wiring, proxy bean registration, and runtime dispatch through Spring DI. Proves the entire auto-configuration pipeline works end-to-end.",
+      "steps": [
+        {
+          "id": "01-01",
+          "name": "Inject feature proxy and dispatch to active variant via Spring DI",
+          "description": "Set up flagzen-spring Gradle submodule with build.gradle.kts (api on flagzen-core, implementation on spring-boot-autoconfigure), add module to settings.gradle.kts, create FlagZenAutoConfiguration with @AutoConfiguration, create FeatureProxyRegistrar with ImportBeanDefinitionRegistrar, create AutoConfiguration.imports resource, wire acceptance test infrastructure with spring-boot-starter-test and Cucumber Spring integration. One FlagProvider bean in, one injected proxy dispatching out.",
+          "criteria": [
+            "settings.gradle.kts includes flagzen-spring",
+            "flagzen-spring/build.gradle.kts exists with api dependency on flagzen-core and implementation dependency on spring-boot-autoconfigure",
+            "FlagZenAutoConfiguration exists in com.flagzen.spring with @AutoConfiguration annotation",
+            "FlagZenAutoConfiguration creates FeatureDispatcher bean from FlagProvider with @ConditionalOnMissingBean guard",
+            "FlagZenAutoConfiguration imports FeatureProxyRegistrar via @Import",
+            "FeatureProxyRegistrar implements ImportBeanDefinitionRegistrar and discovers FeatureMetadata via ServiceLoader",
+            "FeatureProxyRegistrar registers a lazy singleton bean definition per discovered feature interface",
+            "META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports contains com.flagzen.spring.FlagZenAutoConfiguration",
+            "flagzen-acceptance-tests/build.gradle.kts includes flagzen-spring and spring-boot-starter-test as testImplementation dependencies",
+            "flagzen-acceptance-tests cucumber.features includes flagzen-spring feature path",
+            "Developer can inject CheckoutFlow via @Autowired and calling a method dispatches to the correct variant",
+            "Scenario 'Developer injects a feature proxy and dispatches to the active variant' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/walking-skeleton.feature",
+          "scenario_name": "Developer injects a feature proxy and dispatches to the active variant",
+          "files_to_modify": [
+            "settings.gradle.kts",
+            "flagzen-spring/build.gradle.kts",
+            "flagzen-spring/src/main/java/com/flagzen/spring/FlagZenAutoConfiguration.java",
+            "flagzen-spring/src/main/java/com/flagzen/spring/FeatureProxyRegistrar.java",
+            "flagzen-spring/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports",
+            "flagzen-acceptance-tests/build.gradle.kts",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringTestConfiguration.java"
+          ]
+        },
+        {
+          "id": "01-02",
+          "name": "Application starts with fallback provider when no FlagProvider defined",
+          "description": "Add InMemoryFlagProvider fallback bean creation to FlagZenAutoConfiguration with @ConditionalOnMissingBean(FlagProvider.class). Application starts without any explicit FlagProvider and dispatches to default variant.",
+          "criteria": [
+            "FlagZenAutoConfiguration creates InMemoryFlagProvider fallback when no FlagProvider bean exists",
+            "InMemoryFlagProvider fallback has @ConditionalOnMissingBean(FlagProvider.class) guard",
+            "Injected proxy dispatches to default variant with fallback provider",
+            "Scenario 'Application starts with fallback provider when no explicit provider is defined' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/walking-skeleton.feature",
+          "scenario_name": "Application starts with fallback provider when no explicit provider is defined",
+          "files_to_modify": [
+            "flagzen-spring/src/main/java/com/flagzen/spring/FlagZenAutoConfiguration.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "01-03",
+          "name": "Custom dispatcher takes precedence over auto-configured one",
+          "description": "Verify @ConditionalOnMissingBean(FeatureDispatcher.class) on the auto-configured dispatcher bean. When user defines a custom FeatureDispatcher, auto-configuration backs off.",
+          "criteria": [
+            "When a custom FeatureDispatcher bean is defined, auto-configuration does not create a second one",
+            "Only the custom FeatureDispatcher exists in the application context",
+            "Scenario 'Custom dispatcher takes precedence over auto-configured one' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/walking-skeleton.feature",
+          "scenario_name": "Custom dispatcher takes precedence over auto-configured one",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "Auto-Configuration",
+      "description": "Complete FeatureDispatcher auto-configuration: explicit FlagProvider detection, back-off when custom dispatcher exists, Spring Boot imports discovery mechanism, profile-specific provider selection, ambiguous bean error handling, and cross-module FlagProvider auto-detection.",
+      "steps": [
+        {
+          "id": "02-01",
+          "name": "FeatureDispatcher bean created from explicit FlagProvider bean",
+          "description": "Verify that when a named FlagProvider bean exists, FeatureDispatcher is auto-created using that specific provider.",
+          "criteria": [
+            "FeatureDispatcher bean exists in the application context",
+            "FeatureDispatcher uses the named FlagProvider bean",
+            "Scenario 'FeatureDispatcher bean created from explicit FlagProvider bean' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/auto-configuration.feature",
+          "scenario_name": "FeatureDispatcher bean created from explicit FlagProvider bean",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "02-02",
+          "name": "Auto-configuration backs off when FeatureDispatcher already exists",
+          "description": "Verify that when both a custom FeatureDispatcher and a FlagProvider bean exist, auto-configuration does not create a second dispatcher.",
+          "criteria": [
+            "Only the custom FeatureDispatcher bean exists when both custom dispatcher and FlagProvider are defined",
+            "Auto-configuration does not create a second dispatcher",
+            "Scenario 'Auto-configuration backs off when FeatureDispatcher already exists' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/auto-configuration.feature",
+          "scenario_name": "Auto-configuration backs off when FeatureDispatcher already exists",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "02-03",
+          "name": "Auto-configuration discovered via Spring Boot imports mechanism",
+          "description": "Verify that the AutoConfiguration.imports file is correctly structured and Spring Boot discovers FlagZenAutoConfiguration through it.",
+          "criteria": [
+            "FlagZenAutoConfiguration is discovered and processed by Spring Boot auto-configuration scan",
+            "Scenario 'Auto-configuration discovered via Spring Boot imports mechanism' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/auto-configuration.feature",
+          "scenario_name": "Auto-configuration discovered via Spring Boot imports mechanism",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "02-04",
+          "name": "Profile-specific FlagProvider is used for the active profile",
+          "description": "Verify Spring profile-based FlagProvider selection works with auto-configuration. When multiple FlagProviders are registered under different profiles, the active profile's provider is used.",
+          "criteria": [
+            "FeatureDispatcher uses the FlagProvider associated with the active Spring profile",
+            "Scenario 'Profile-specific FlagProvider is used for the active profile' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/auto-configuration.feature",
+          "scenario_name": "Profile-specific FlagProvider is used for the active profile",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "02-05",
+          "name": "Ambiguous FlagProvider beans fail with clear error",
+          "description": "Verify that when two FlagProvider beans exist without @Primary designation, the application fails to start with an error identifying both beans.",
+          "criteria": [
+            "Application fails to start when two FlagProvider beans exist with no @Primary",
+            "Error message identifies both conflicting FlagProvider beans",
+            "Scenario 'Ambiguous FlagProvider beans fail with a clear error' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/auto-configuration.feature",
+          "scenario_name": "Ambiguous FlagProvider beans fail with a clear error",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "02-06",
+          "name": "FlagProvider from another FlagZen module is auto-detected",
+          "description": "Verify that a FlagProvider bean registered by another module (e.g., flagzen-env) is automatically picked up by flagzen-spring auto-configuration with zero developer configuration.",
+          "criteria": [
+            "FeatureDispatcher uses the FlagProvider from the other FlagZen module",
+            "Developer writes zero provider configuration code",
+            "Scenario 'FlagProvider from another FlagZen module is auto-detected' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/auto-configuration.feature",
+          "scenario_name": "FlagProvider from another FlagZen module is auto-detected",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "name": "Feature Proxy Injection",
+      "description": "Complete feature proxy bean registration and injection: single proxy from metadata, multiple proxies, constructor injection, dynamic dispatch on flag change, and graceful handling of zero metadata.",
+      "steps": [
+        {
+          "id": "03-01",
+          "name": "Feature proxy bean registered from discovered feature metadata",
+          "description": "Verify that FeatureProxyRegistrar discovers FeatureMetadata via ServiceLoader and registers the corresponding proxy bean in the application context.",
+          "criteria": [
+            "CheckoutFlow bean is available in the application context",
+            "The bean is the dispatch proxy created by FeatureDispatcher",
+            "Scenario 'Feature proxy bean registered from discovered feature metadata' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/feature-proxy-injection.feature",
+          "scenario_name": "Feature proxy bean registered from discovered feature metadata",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "03-02",
+          "name": "Multiple feature proxy beans registered for multiple feature interfaces",
+          "description": "Verify that when multiple feature interfaces exist with generated metadata, each gets its own distinct proxy bean registered.",
+          "criteria": [
+            "Both CheckoutFlow and ShippingMethod beans are available in the application context",
+            "Each bean is a distinct dispatch proxy",
+            "Scenario 'Multiple feature proxy beans registered for multiple feature interfaces' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/feature-proxy-injection.feature",
+          "scenario_name": "Multiple feature proxy beans registered for multiple feature interfaces",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "03-03",
+          "name": "Feature proxy injected via constructor autowiring",
+          "description": "Verify that a Spring service declaring a @Feature interface as a constructor dependency receives the FlagZen dispatch proxy.",
+          "criteria": [
+            "PaymentService receives the FlagZen dispatch proxy via constructor injection",
+            "PaymentService can call methods on the injected CheckoutFlow",
+            "Scenario 'Feature proxy injected via constructor autowiring' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/feature-proxy-injection.feature",
+          "scenario_name": "Feature proxy injected via constructor autowiring",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "03-04",
+          "name": "Injected proxy dispatches dynamically as flag values change",
+          "description": "Verify that the injected proxy is not a snapshot -- when the underlying flag value changes, the same proxy dispatches to the new variant.",
+          "criteria": [
+            "When flag value is CLASSIC, proxy dispatches to Classic variant",
+            "When flag value changes to EXPRESS, same proxy dispatches to Express variant",
+            "Scenario 'Injected proxy dispatches dynamically as flag values change' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/feature-proxy-injection.feature",
+          "scenario_name": "Injected proxy dispatches dynamically as flag values change",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "03-05",
+          "name": "No feature metadata found logs informational message and starts normally",
+          "description": "Verify graceful handling when ServiceLoader finds zero FeatureMetadata implementations. Application starts, no proxy beans registered, informational log emitted.",
+          "criteria": [
+            "No feature proxy beans are registered when no FeatureMetadata exists",
+            "Application logs that no feature metadata was found",
+            "Application starts and runs successfully",
+            "Scenario 'No feature metadata found logs informational message and starts normally' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/feature-proxy-injection.feature",
+          "scenario_name": "No feature metadata found logs informational message and starts normally",
+          "files_to_modify": [
+            "flagzen-spring/src/main/java/com/flagzen/spring/FeatureProxyRegistrar.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "name": "Fallback and Overrides",
+      "description": "Complete InMemoryFlagProvider fallback behavior with diagnostic warning, and @ConditionalOnMissingBean guard verification for all auto-configured beans: fallback creation, warning logging, default variant dispatch, no-fallback-when-explicit, custom provider override, custom dispatcher override, and full override scenario.",
+      "steps": [
+        {
+          "id": "04-01",
+          "name": "Fallback provider created when no FlagProvider bean is defined",
+          "description": "Verify that InMemoryFlagProvider is created as a fallback when no FlagProvider bean exists, and FeatureDispatcher is created using it.",
+          "criteria": [
+            "InMemoryFlagProvider fallback is active when no FlagProvider bean is defined",
+            "FeatureDispatcher bean is created using the fallback provider",
+            "Scenario 'Fallback provider created when no FlagProvider bean is defined' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/fallback-provider.feature",
+          "scenario_name": "Fallback provider created when no FlagProvider bean is defined",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "04-02",
+          "name": "Warning logged when fallback provider is activated",
+          "description": "Verify that activating the InMemoryFlagProvider fallback emits a WARN log with specific messaging about missing provider and dev/test-only usage.",
+          "criteria": [
+            "WARN log contains 'No FlagProvider bean found'",
+            "WARN log mentions 'InMemoryFlagProvider'",
+            "WARN log mentions 'dev/test only'",
+            "Scenario 'Warning logged when fallback provider is activated' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/fallback-provider.feature",
+          "scenario_name": "Warning logged when fallback provider is activated",
+          "files_to_modify": [
+            "flagzen-spring/src/main/java/com/flagzen/spring/FlagZenAutoConfiguration.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "04-03",
+          "name": "Features dispatch to default variant with fallback provider",
+          "description": "Verify that with InMemoryFlagProvider fallback active, feature proxies dispatch to the default variant.",
+          "criteria": [
+            "CheckoutFlow dispatches to default variant when fallback provider is active",
+            "Scenario 'Features dispatch to default variant with fallback provider' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/fallback-provider.feature",
+          "scenario_name": "Features dispatch to default variant with fallback provider",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "04-04",
+          "name": "No fallback provider created when explicit FlagProvider exists",
+          "description": "Verify that InMemoryFlagProvider fallback is NOT created when an explicit FlagProvider bean is defined, and no warning is logged.",
+          "criteria": [
+            "No InMemoryFlagProvider fallback is created when explicit provider exists",
+            "No 'No FlagProvider bean found' warning is logged",
+            "Scenario 'No fallback provider created when explicit FlagProvider exists' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/fallback-provider.feature",
+          "scenario_name": "No fallback provider created when explicit FlagProvider exists",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "04-05",
+          "name": "Custom FlagProvider prevents fallback provider creation",
+          "description": "Verify @ConditionalOnMissingBean guard: custom FlagProvider bean causes auto-configuration to use it instead of creating fallback.",
+          "criteria": [
+            "FeatureDispatcher uses the custom FlagProvider",
+            "No InMemoryFlagProvider fallback is created",
+            "Scenario 'Custom FlagProvider prevents fallback provider creation' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/fallback-provider.feature",
+          "scenario_name": "Custom FlagProvider prevents fallback provider creation",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "04-06",
+          "name": "Feature proxy beans use custom FeatureDispatcher when provided",
+          "description": "Verify that when a custom FeatureDispatcher bean is defined, proxy beans are resolved through it rather than an auto-configured dispatcher.",
+          "criteria": [
+            "CheckoutFlow proxy bean is resolved through the custom dispatcher",
+            "Scenario 'Feature proxy beans use custom FeatureDispatcher when provided' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/fallback-provider.feature",
+          "scenario_name": "Feature proxy beans use custom FeatureDispatcher when provided",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "04-07",
+          "name": "Full override with all custom beans causes zero auto-configuration",
+          "description": "Verify that when the developer provides custom FlagProvider, custom FeatureDispatcher, and custom feature proxy beans, auto-configuration creates nothing.",
+          "criteria": [
+            "Auto-configuration creates no beans when all custom beans are provided",
+            "All custom beans are used throughout the application",
+            "Scenario 'Full override with all custom beans causes zero auto-configuration' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/fallback-provider.feature",
+          "scenario_name": "Full override with all custom beans causes zero auto-configuration",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "05",
+      "name": "Startup Diagnostics",
+      "description": "Startup logging: INFO summary with provider name, feature count, and feature names; zero-feature edge case; DEBUG per-feature registration logging.",
+      "steps": [
+        {
+          "id": "05-01",
+          "name": "Startup summary logged with provider and feature details",
+          "description": "Add INFO-level startup summary to FlagZenAutoConfiguration that logs provider class name, registered feature count, and feature interface names.",
+          "criteria": [
+            "INFO startup summary is logged after auto-configuration completes",
+            "Summary includes the provider class name",
+            "Summary lists the feature interface names",
+            "Summary includes the count of registered proxy beans",
+            "Scenario 'Startup summary logged with provider and feature details' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/startup-diagnostics.feature",
+          "scenario_name": "Startup summary logged with provider and feature details",
+          "files_to_modify": [
+            "flagzen-spring/src/main/java/com/flagzen/spring/FlagZenAutoConfiguration.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "05-02",
+          "name": "Zero features logged clearly in startup summary",
+          "description": "Verify that when no feature interfaces exist, the startup summary indicates zero feature proxies registered without error.",
+          "criteria": [
+            "Startup summary indicates zero feature proxies registered",
+            "Application starts successfully",
+            "Scenario 'Zero features logged clearly in startup summary' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/startup-diagnostics.feature",
+          "scenario_name": "Zero features logged clearly in startup summary",
+          "files_to_modify": [
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        },
+        {
+          "id": "05-03",
+          "name": "Individual feature registration logged at debug level",
+          "description": "Add DEBUG-level per-feature logging to FeatureProxyRegistrar that logs each feature interface name and its flag key during registration.",
+          "criteria": [
+            "DEBUG message logs the registration of each feature interface",
+            "DEBUG message includes the flag key for the feature",
+            "Scenario 'Individual feature registration logged at debug level' passes"
+          ],
+          "test_file": "tests/acceptance/flagzen-spring/startup-diagnostics.feature",
+          "scenario_name": "Individual feature registration logged at debug level",
+          "files_to_modify": [
+            "flagzen-spring/src/main/java/com/flagzen/spring/FeatureProxyRegistrar.java",
+            "flagzen-acceptance-tests/src/test/java/com/flagzen/acceptance/steps/SpringSteps.java"
+          ]
+        }
+      ]
+    }
+  ]
+}
