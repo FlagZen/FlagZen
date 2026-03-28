@@ -141,6 +141,47 @@ final class ProxyGenerator {
     }
 
     private MethodSpec buildResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
+        if (model.featureType() == FeatureType.INT) {
+            return buildIntResolveMethod(model, interfaceType, supplierType);
+        }
+        return buildStringResolveMethod(model, interfaceType, supplierType);
+    }
+
+    private MethodSpec buildIntResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
+        ClassName optionalIntType = ClassName.get("java.util", "OptionalInt");
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
+                .addModifiers(Modifier.PRIVATE)
+                .returns(interfaceType)
+                .addStatement("$T context = $T.current()", EvaluationContext.class, FlagContext.class)
+                .addStatement("$T flagValue = (context != null) ? flagProvider.getInt($S, context) : flagProvider.getInt($S)",
+                        optionalIntType, model.flagKey(), model.flagKey());
+
+        builder.beginControlFlow("if (flagValue.isPresent())")
+                .addStatement("$T supplier = variants.get(flagValue.getAsInt())", supplierType)
+                .beginControlFlow("if (supplier != null)")
+                .addStatement("return supplier.get()")
+                .endControlFlow()
+                .endControlFlow();
+
+        builder.beginControlFlow("if (defaultVariant != null)")
+                .addStatement("return defaultVariant.get()")
+                .endControlFlow();
+
+        if (model.fallbackStrategy() == FallbackStrategy.NOOP) {
+            builder.addStatement("return null");
+        } else {
+            builder.beginControlFlow("if (flagValue.isEmpty())")
+                    .addStatement("throw $T.noFlagValue($S)",
+                            UnmatchedVariantException.class, model.flagKey())
+                    .endControlFlow()
+                    .addStatement("throw new $T($S, $T.valueOf(flagValue.getAsInt()), variants.keySet())",
+                            UnmatchedVariantException.class, model.flagKey(), String.class);
+        }
+
+        return builder.build();
+    }
+
+    private MethodSpec buildStringResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
                 .addModifiers(Modifier.PRIVATE)
                 .returns(interfaceType)
@@ -149,22 +190,12 @@ final class ProxyGenerator {
                         Optional.class, String.class, model.flagKey(), model.flagKey())
                 .addStatement("$T rawValue = flagValue.orElse(null)", String.class);
 
-        if (model.featureType() == FeatureType.INT) {
-            builder.beginControlFlow("if (rawValue != null)")
-                    .addStatement("$T key = $T.parseInt(rawValue)", int.class, Integer.class)
-                    .addStatement("$T supplier = variants.get(key)", supplierType)
-                    .beginControlFlow("if (supplier != null)")
-                    .addStatement("return supplier.get()")
-                    .endControlFlow()
-                    .endControlFlow();
-        } else {
-            builder.beginControlFlow("if (rawValue != null)")
-                    .addStatement("$T supplier = variants.get(rawValue)", supplierType)
-                    .beginControlFlow("if (supplier != null)")
-                    .addStatement("return supplier.get()")
-                    .endControlFlow()
-                    .endControlFlow();
-        }
+        builder.beginControlFlow("if (rawValue != null)")
+                .addStatement("$T supplier = variants.get(rawValue)", supplierType)
+                .beginControlFlow("if (supplier != null)")
+                .addStatement("return supplier.get()")
+                .endControlFlow()
+                .endControlFlow();
 
         builder.beginControlFlow("if (defaultVariant != null)")
                 .addStatement("return defaultVariant.get()")

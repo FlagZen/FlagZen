@@ -3,6 +3,7 @@ package com.flagzen.spi;
 import com.flagzen.EvaluationContext;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 
 /**
  * SPI for providing flag values at runtime.
@@ -29,5 +30,36 @@ public interface FlagProvider {
      */
     default Optional<String> getString(String key, EvaluationContext context) {
         return getString(key);
+    }
+
+    /**
+     * Returns the current integer value for the given flag key.
+     * The default implementation parses the string value from {@link #getString(String)}.
+     * Returns empty if the key is not set or the value is not a valid integer.
+     *
+     * @param key the flag key to look up
+     * @return the integer flag value, or empty if not set or not parseable
+     */
+    default OptionalInt getInt(String key) {
+        try {
+            return getString(key)
+                    .map(Integer::parseInt)
+                    .map(OptionalInt::of)
+                    .orElse(OptionalInt.empty());
+        } catch (NumberFormatException e) {
+            return OptionalInt.empty();
+        }
+    }
+
+    /**
+     * Returns the current integer value for the given flag key using the provided evaluation context.
+     * The default implementation delegates to {@link #getInt(String)}.
+     *
+     * @param key the flag key to look up
+     * @param context the evaluation context for targeted resolution
+     * @return the integer flag value, or empty if not set or not parseable
+     */
+    default OptionalInt getInt(String key, EvaluationContext context) {
+        return getInt(key);
     }
 }
