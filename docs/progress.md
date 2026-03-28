@@ -74,32 +74,32 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 
 ### M2: Typed Variants and Conditional API — `flagzen-typed-variants`
 
-**Status: NOT STARTED** | **Release: v1.1.0** | Depends on: M0
+**Status: DONE** | **Release: v1.1.0** | Depends on: M0 | [Artifacts](feature/flagzen-typed-variants/)
 
 #### Typed Polymorphic Dispatch
 
-- [ ] `FeatureType` enum (STRING, INT, BOOLEAN) — or inferred from `@Variant` attribute used
-- [ ] `@Feature(type = FeatureType.INT)` attribute (default STRING for backward compat)
-- [ ] `@Variant(intValue = 42)` for int-typed features
-- [ ] `@Variant(booleanValue = true)` for boolean-typed features
-- [ ] `@WhenTrue` / `@WhenFalse` convenience annotations (with `of` for multi-feature)
-- [ ] Compile-time validation: all variants of a feature use the same type
-- [ ] Compile-time validation: `@Variant` attribute matches `@Feature(type = ...)`
-- [ ] `@Variant(longValue = ...)` for long-typed features
-- [ ] `@Variant(doubleValue = @CloseTo(value = 0.3))` for double-typed features
-- [ ] `@CloseTo` annotation with `value` and `delta` (default 1e-10) for approximate double matching
-- [ ] `FeatureType` extended with LONG and DOUBLE
-- [ ] Proxy dispatches on typed value (int/long/boolean lookup, double approximate match)
-- [ ] REQUIRED strategy works with boolean features (exactly 2 variants: true + false)
+- [x] `FeatureType` enum (STRING, INT, BOOLEAN) — or inferred from `@Variant` attribute used
+- [x] `@Feature(type = FeatureType.INT)` attribute (default STRING for backward compat)
+- [x] `@Variant(intValue = 42)` for int-typed features
+- [x] `@Variant(booleanValue = true)` for boolean-typed features
+- [x] `@WhenTrue` / `@WhenFalse` convenience annotations (with `of` for multi-feature)
+- [x] Compile-time validation: all variants of a feature use the same type
+- [x] Compile-time validation: `@Variant` attribute matches `@Feature(type = ...)`
+- [x] `@Variant(longValue = ...)` for long-typed features
+- [x] `@Variant(doubleValue = @CloseTo(value = 0.3))` for double-typed features
+- [x] `@CloseTo` annotation with `value` and `delta` (default 1e-10) for approximate double matching
+- [x] `FeatureType` extended with LONG and DOUBLE
+- [x] Proxy dispatches on typed value (int/long/boolean lookup, double approximate match)
+- [x] REQUIRED strategy works with boolean features (exactly 2 variants: true + false)
 
 #### Conditional API (Non-Polymorphic)
 
-- [ ] `FlagProvider.getBoolean(String key)` → `Optional<Boolean>`
-- [ ] `FlagProvider.getInt(String key)` → `OptionalInt`
-- [ ] `FlagProvider.getLong(String key)` → `OptionalLong`
-- [ ] `FlagProvider.getDouble(String key)` → `OptionalDouble`
-- [ ] `FlagProvider.getString(String key)` remains the primitive (typed methods delegate + parse)
-- [ ] Context-aware overloads for all typed methods
+- [x] `FlagProvider.getBoolean(String key)` → `Optional<Boolean>`
+- [x] `FlagProvider.getInt(String key)` → `OptionalInt`
+- [x] `FlagProvider.getLong(String key)` → `OptionalLong`
+- [x] `FlagProvider.getDouble(String key)` → `OptionalDouble`
+- [x] `FlagProvider.getString(String key)` remains the primitive (typed methods delegate + parse)
+- [x] Context-aware overloads for all typed methods
 
 ### M3: Environment Variable Provider — `flagzen-env`
 
