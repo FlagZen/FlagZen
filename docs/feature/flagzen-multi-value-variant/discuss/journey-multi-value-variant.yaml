@@ -1,0 +1,88 @@
+journey:
+  name: "Multi-Value Variant Mapping"
+  goal: "Map multiple flag values to one variant implementation declaratively"
+  persona: "Kenji Nakamura -- senior Java developer maintaining checkout service with 12 feature flags"
+
+  emotional_arc:
+    start: "Mildly annoyed -- repeated annotations feel like unnecessary boilerplate"
+    middle: "Focused and confident -- array syntax is standard Java, expects it to work"
+    end: "Satisfied -- cleaner code, same compile-time safety, no runtime change"
+
+steps:
+  - id: 1
+    name: "Annotate with Array Values"
+    action: "Developer changes @Variant annotation to use array syntax"
+
+    shared_artifacts:
+      - name: "variant_annotation"
+        source: "com.flagzen.Variant"
+        displayed_as: "@Variant(value = {\"CLASSIC\", \"LEGACY\"})"
+        consumers:
+          - "Annotation processor (FlagZenProcessor)"
+          - "Generated proxy class"
+
+    emotional_state:
+      entry: "Annoyed by boilerplate"
+      exit: "Confident -- standard Java annotation syntax"
+
+    integration_checkpoint: |
+      Annotation element types changed from scalar to array.
+      Source compatibility: single-value usage auto-wraps to array.
+      Binary compatibility: NOT maintained (pre-1.0 acceptable).
+
+  - id: 2
+    name: "Compile and Validate"
+    action: "Annotation processor reads array values, registers each, detects duplicates"
+
+    shared_artifacts:
+      - name: "variant_values"
+        source: "@Variant annotation array elements"
+        displayed_as: "String[] from value(), int[] from intValue(), long[] from longValue()"
+        consumers:
+          - "FlagZenProcessor.collectVariants()"
+          - "FlagZenProcessor.hasDuplicateVariantValues()"
+          - "ProxyGenerator.generateProxy()"
+          - "ProxyGenerator.generateMetadata()"
+
+      - name: "variant_model_list"
+        source: "FlagZenProcessor.collectVariants()"
+        displayed_as: "List<VariantModel> -- one entry per value, same qualifiedClassName"
+        consumers:
+          - "ProxyGenerator -- map entries in variants map"
+          - "Duplicate detection -- groupBy variantKeyLiteral"
+
+    emotional_state:
+      entry: "Expectant -- should compile cleanly"
+      exit: "Reassured -- compiler validates, errors are clear"
+
+    integration_checkpoint: |
+      VariantModel now produces multiple instances per @Variant annotation (one per array element).
+      Duplicate detection must span: values within a single @Variant array + values across repeated @Variant annotations + values across different implementation classes.
+
+  - id: 3
+    name: "Runtime Dispatch"
+    action: "Generated proxy dispatches to correct implementation for any mapped value"
+
+    shared_artifacts:
+      - name: "variants_map"
+        source: "Generated proxy constructor"
+        displayed_as: "Map<KeyType, Supplier<Feature>> with one entry per value"
+        consumers:
+          - "Proxy resolve() method"
+
+    emotional_state:
+      entry: "Expectant -- should behave identically to repeated annotations"
+      exit: "Satisfied -- all values dispatch correctly, zero behavior change"
+
+    integration_checkpoint: |
+      No runtime behavior change. The proxy's variants map has more entries, all pointing to the same Supplier. Map lookup is identical.
+
+integration_validation:
+  shared_artifact_consistency:
+    - artifact: "variant_values"
+      must_match_across: [1, 2, 3]
+      failure_message: "Array values from annotation must all appear in VariantModel list and in generated proxy map"
+
+    - artifact: "duplicate_detection_scope"
+      must_match_across: [2]
+      failure_message: "Duplicate detection must cover intra-array, inter-annotation (repeated), and inter-class scopes"
