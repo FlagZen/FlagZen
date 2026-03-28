@@ -1,5 +1,7 @@
 # flagzen-test
 
+[![Javadoc](https://javadoc.io/badge2/com.flagzen/flagzen-test/javadoc.svg)](https://javadoc.io/doc/com.flagzen/flagzen-test)
+
 JUnit 5 extension for testing FlagZen feature flags with pinned values and parameterized flag sources.
 
 ## Installation

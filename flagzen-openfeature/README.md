@@ -1,5 +1,7 @@
 # flagzen-openfeature
 
+[![Javadoc](https://javadoc.io/badge2/com.flagzen/flagzen-openfeature/javadoc.svg)](https://javadoc.io/doc/com.flagzen/flagzen-openfeature)
+
 `FlagProvider` adapter that delegates to the [OpenFeature](https://openfeature.dev/) SDK.
 
 Bridges FlagZen's `FlagProvider` SPI to the OpenFeature `Client`, so any OpenFeature-compatible backend (LaunchDarkly, Flagd, Split, etc.) can serve FlagZen feature flags.

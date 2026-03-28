@@ -1,5 +1,7 @@
 # flagzen-key-mapping
 
+[![Javadoc](https://javadoc.io/badge2/com.flagzen/flagzen-key-mapping/javadoc.svg)](https://javadoc.io/doc/com.flagzen/flagzen-key-mapping)
+
 Reusable key format parsing and formatting for mapping flag keys between naming conventions.
 
 This module provides the building blocks for converting flag keys like `checkout-flow` to environment variable names like `FLAGZEN_CHECKOUT_FLOW` (or any other convention). It is a dependency of [flagzen-env](../flagzen-env/README.md) and can be used independently for custom providers that need key translation.

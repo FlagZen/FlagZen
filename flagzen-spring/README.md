@@ -1,5 +1,7 @@
 # flagzen-spring
 
+[![Javadoc](https://javadoc.io/badge2/com.flagzen/flagzen-spring/javadoc.svg)](https://javadoc.io/doc/com.flagzen/flagzen-spring)
+
 Spring Boot auto-configuration that registers every `@Feature` proxy as a Spring bean.
 
 Add this module to your classpath and all generated FlagZen proxies become injectable via `@Autowired`. No manual bean registration required.

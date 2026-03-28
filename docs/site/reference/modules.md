@@ -377,18 +377,18 @@ dependencies {
 
 ## Support Matrix
 
-|        Module        | Java | Spring Boot |             Notes              |
-| -------------------- | ---- | ----------- | ------------------------------ |
-| flagzen-core         | 17+  | N/A         | Zero external dependencies     |
-| flagzen-test         | 17+  | N/A         | JUnit 5 only                   |
-| flagzen-key-mapping  | 17+  | N/A         | Zero external dependencies     |
-| flagzen-env          | 17+  | N/A         | Pure Java, no Spring required  |
-| flagzen-spring       | 17+  | 2.7+        | Tested with 2.7 LTS and 3.x    |
-| flagzen-reactor      | 17+  | N/A         | Works standalone or in Spring  |
-| flagzen-mutiny       | 17+  | N/A         | Works standalone or in Quarkus |
-| flagzen-launchdarkly | 17+  | N/A         | LaunchDarkly SDK 7.0+          |
-| flagzen-togglz       | 17+  | N/A         | Togglz 2.x                     |
-| flagzen-openfeature  | 17+  | N/A         | OpenFeature SDK 1.0+           |
+|        Module        | Java | Spring Boot |             Notes              | Javadoc                                                              |
+| -------------------- | ---- | ----------- | ------------------------------ | -------------------------------------------------------------------- |
+| flagzen-core         | 17+  | N/A         | Zero external dependencies     | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-core)          |
+| flagzen-test         | 17+  | N/A         | JUnit 5 only                   | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-test)          |
+| flagzen-key-mapping  | 17+  | N/A         | Zero external dependencies     | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-key-mapping)   |
+| flagzen-env          | 17+  | N/A         | Pure Java, no Spring required  | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-env)           |
+| flagzen-spring       | 17+  | 2.7+        | Tested with 2.7 LTS and 3.x   | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-spring)        |
+| flagzen-reactor      | 17+  | N/A         | Works standalone or in Spring  | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-reactor)       |
+| flagzen-mutiny       | 17+  | N/A         | Works standalone or in Quarkus | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-mutiny)        |
+| flagzen-launchdarkly | 17+  | N/A         | LaunchDarkly SDK 7.0+          | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-launchdarkly)  |
+| flagzen-togglz       | 17+  | N/A         | Togglz 2.x                    | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-togglz)        |
+| flagzen-openfeature  | 17+  | N/A         | OpenFeature SDK 1.0+           | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-openfeature)   |
 
 ## Minimal Setup
 

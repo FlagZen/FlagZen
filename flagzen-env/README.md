@@ -1,5 +1,7 @@
 # flagzen-env
 
+[![Javadoc](https://javadoc.io/badge2/com.flagzen/flagzen-env/javadoc.svg)](https://javadoc.io/doc/com.flagzen/flagzen-env)
+
 `FlagProvider` implementation that reads feature flag values from environment variables.
 
 Eagerly loads and parses env vars at startup into an immutable map. Supports configurable key parsers, formatters, prefixes, and conflict resolution strategies for multi-convention codebases.

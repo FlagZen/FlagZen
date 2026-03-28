@@ -1,5 +1,7 @@
 # flagzen-core
 
+[![Javadoc](https://javadoc.io/badge2/com.flagzen/flagzen-core/javadoc.svg)](https://javadoc.io/doc/com.flagzen/flagzen-core)
+
 Compile-time annotation processor and runtime dispatch engine for FlagZen feature flags.
 
 This is the foundation module. It provides the `@Feature` / `@Variant` annotations, the annotation processor that generates proxy classes, and the `FeatureDispatcher` that routes method calls to the active variant at runtime. Zero runtime reflection.
