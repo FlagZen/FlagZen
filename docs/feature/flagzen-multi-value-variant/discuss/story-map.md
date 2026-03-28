@@ -6,13 +6,13 @@
 
 ## Backbone
 
-| Define Annotation Schema | Process Multi-Value Arrays | Detect Duplicates | Generate Proxy Code |
-|--------------------------|---------------------------|-------------------|---------------------|
-| Change `String value()` to `String[] value()` | Expand each array element into a VariantModel | Cross-array duplicate detection | Map entries for all values to same Supplier |
-| Change `int intValue()` to `int[] intValue()` | Handle mixed array + repeated annotations | Cross-class duplicate detection | No runtime change to dispatch |
-| Change `long longValue()` to `long[] longValue()` | Validate array elements against inner enum | Intra-array duplicate detection | Metadata lists all values |
-| Document `doubleValue` already supports arrays | REQUIRED fallback counts multi-value coverage | Clear error messages with all class names | |
-| Skip `booleanValue` multi-value | | | |
+|             Define Annotation Schema              |          Process Multi-Value Arrays           |             Detect Duplicates             |             Generate Proxy Code             |
+| ------------------------------------------------- | --------------------------------------------- | ----------------------------------------- | ------------------------------------------- |
+| Change `String value()` to `String[] value()`     | Expand each array element into a VariantModel | Cross-array duplicate detection           | Map entries for all values to same Supplier |
+| Change `int intValue()` to `int[] intValue()`     | Handle mixed array + repeated annotations     | Cross-class duplicate detection           | No runtime change to dispatch               |
+| Change `long longValue()` to `long[] longValue()` | Validate array elements against inner enum    | Intra-array duplicate detection           | Metadata lists all values                   |
+| Document `doubleValue` already supports arrays    | REQUIRED fallback counts multi-value coverage | Clear error messages with all class names |                                             |
+| Skip `booleanValue` multi-value                   |                                               |                                           |                                             |
 
 ---
 

@@ -8,11 +8,11 @@ Java developers can declaratively map multiple flag values to one variant implem
 
 ### Outcome KPIs
 
-| # | Who | Does What | By How Much | Baseline | Measured By | Type |
-|---|-----|-----------|-------------|----------|-------------|------|
-| 1 | Java developers with multi-value variants | Use array syntax instead of repeated annotations | 100% of repeated-for-same-class annotations eliminated | Requires N repeated annotations for N values | Source code comparison + test suite | Leading |
-| 2 | Java developers defining variants | Receive compile-time error for duplicate values across arrays | 100% of duplicates caught at compile time | Duplicates in single-value annotations caught; cross-array not applicable | Negative compilation tests | Leading |
-| 3 | Java developers with existing single-value @Variant | Compile without source changes after annotation schema change | 0 source changes required for existing code | N/A (new feature) | Existing test suite passes unchanged | Leading (guardrail) |
+|  #  |                         Who                         |                           Does What                           |                      By How Much                       |                                 Baseline                                  |             Measured By              |        Type         |
+| --- | --------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------- | ------------------------------------ | ------------------- |
+| 1   | Java developers with multi-value variants           | Use array syntax instead of repeated annotations              | 100% of repeated-for-same-class annotations eliminated | Requires N repeated annotations for N values                              | Source code comparison + test suite  | Leading             |
+| 2   | Java developers defining variants                   | Receive compile-time error for duplicate values across arrays | 100% of duplicates caught at compile time              | Duplicates in single-value annotations caught; cross-array not applicable | Negative compilation tests           | Leading             |
+| 3   | Java developers with existing single-value @Variant | Compile without source changes after annotation schema change | 0 source changes required for existing code            | N/A (new feature)                                                         | Existing test suite passes unchanged | Leading (guardrail) |
 
 ### Metric Hierarchy
 
@@ -22,12 +22,12 @@ Java developers can declaratively map multiple flag values to one variant implem
 
 ### Measurement Plan
 
-| KPI | Data Source | Collection Method | Frequency | Owner |
-|-----|------------|-------------------|-----------|-------|
-| Backward compatibility | Existing test suite | Gradle build | Every commit | CI |
-| Multi-value correctness | New BDD scenarios | Gradle build | Every commit | CI |
-| Duplicate detection coverage | Negative compilation tests | Gradle build | Every commit | CI |
-| Mutation kill rate | PITest report | CI pipeline | Every PR | CI |
+|             KPI              |        Data Source         | Collection Method |  Frequency   | Owner |
+| ---------------------------- | -------------------------- | ----------------- | ------------ | ----- |
+| Backward compatibility       | Existing test suite        | Gradle build      | Every commit | CI    |
+| Multi-value correctness      | New BDD scenarios          | Gradle build      | Every commit | CI    |
+| Duplicate detection coverage | Negative compilation tests | Gradle build      | Every commit | CI    |
+| Mutation kill rate           | PITest report              | CI pipeline       | Every PR     | CI    |
 
 ### Hypothesis
 

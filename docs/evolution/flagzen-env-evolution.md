@@ -4,10 +4,10 @@
 
 Delivered two new Gradle modules providing environment-variable-based flag resolution with reusable key-mapping infrastructure.
 
-| Module | Package | Types |
-|--------|---------|-------|
+|        Module         |         Package          |                                          Types                                           |
+| --------------------- | ------------------------ | ---------------------------------------------------------------------------------------- |
 | `flagzen-key-mapping` | `com.flagzen.keymapping` | `FlagKeyParser`, `FlagKeyParsers`, `FlagKeyFormat`, `FlagKeyFormats`, `ConflictStrategy` |
-| `flagzen-env` | `com.flagzen.env` | `EnvironmentVariableFlagProvider` (with nested `Builder`) |
+| `flagzen-env`         | `com.flagzen.env`        | `EnvironmentVariableFlagProvider` (with nested `Builder`)                                |
 
 ## Timeline
 
@@ -33,18 +33,18 @@ Delivered two new Gradle modules providing environment-variable-based flag resol
 
 ## Quality Gates
 
-| Gate | Result |
-|------|--------|
-| Acceptance tests (33 scenarios) | PASS |
-| PITest mutation testing (flagzen-core) | 86% kill rate (gate: ≥80%) |
-| DES integrity verification (40 steps) | PASS |
-| Adversarial review | PASS (2 HIGH fixed, 3 MEDIUM fixed) |
+|                  Gate                  |               Result                |
+| -------------------------------------- | ----------------------------------- |
+| Acceptance tests (33 scenarios)        | PASS                                |
+| PITest mutation testing (flagzen-core) | 86% kill rate (gate: ≥80%)          |
+| DES integrity verification (40 steps)  | PASS                                |
+| Adversarial review                     | PASS (2 HIGH fixed, 3 MEDIUM fixed) |
 
 ## Acceptance Test Coverage
 
-| Milestone | Scenarios | Status |
-|-----------|-----------|--------|
-| Walking skeleton | 2 | PASS |
-| Key mapping (parsers + formatters) | 11 | PASS |
-| Env provider (defaults, builder, ServiceLoader) | 15 | PASS |
-| Conflict strategy (WARN/ERROR, first-access) | 15 | PASS |
+|                    Milestone                    | Scenarios | Status |
+| ----------------------------------------------- | --------- | ------ |
+| Walking skeleton                                | 2         | PASS   |
+| Key mapping (parsers + formatters)              | 11        | PASS   |
+| Env provider (defaults, builder, ServiceLoader) | 15        | PASS   |
+| Conflict strategy (WARN/ERROR, first-access)    | 15        | PASS   |

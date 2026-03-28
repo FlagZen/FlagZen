@@ -15,12 +15,12 @@ Both map to flag key `checkout-flow` but with different values. The system must 
 
 Additionally, the conflict risk varies by configuration cardinality:
 
-| Parsers | Formatters | Conflict Risk |
-| --- | --- | --- |
-| 1 | 1 | Low (only from env var collisions after prefix stripping) |
-| N | 1 | Medium (different parsers may match overlapping env vars) |
-| 1 | N | Medium (multiple formatters produce multiple keys, reducing collision chance, but different env vars can still collide) |
-| N | N | High (cartesian product of parsers and formatters maximizes collision surface) |
+| Parsers | Formatters |                                                      Conflict Risk                                                      |
+| ------- | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 1       | 1          | Low (only from env var collisions after prefix stripping)                                                               |
+| N       | 1          | Medium (different parsers may match overlapping env vars)                                                               |
+| 1       | N          | Medium (multiple formatters produce multiple keys, reducing collision chance, but different env vars can still collide) |
+| N       | N          | High (cartesian product of parsers and formatters maximizes collision surface)                                          |
 
 ## Decision
 
@@ -32,11 +32,11 @@ Introduce a `ConflictStrategy` enum with two values:
 Default strategy is computed from parser/formatter cardinality:
 
 | Parsers | Formatters | Default |
-| --- | --- | --- |
-| 1 | 1 | WARN |
-| N | 1 | WARN |
-| 1 | N | WARN |
-| N | N | ERROR |
+| ------- | ---------- | ------- |
+| 1       | 1          | WARN    |
+| N       | 1          | WARN    |
+| 1       | N          | WARN    |
+| N       | N          | ERROR   |
 
 The default can be overridden via `.onConflict(ConflictStrategy)` on the builder.
 
