@@ -59,7 +59,7 @@ See `docs/adrs/` for architectural decision records.
 
 ## Mutation Testing Strategy
 
-This project uses **per-feature** mutation testing. PITest runs in CI after the build job succeeds, scoped to `com.flagzen.*` classes in flagzen-core. Kill rate gate: >= 80%. Current baseline: 84% kill rate.
+This project uses **per-feature** mutation testing. PITest runs in CI after the build job succeeds, scoped to `com.flagzen.*` classes in flagzen-core. Kill rate gate: >= 80%. Current baseline: 86% kill rate.
 
 ## Progress Tracking
 

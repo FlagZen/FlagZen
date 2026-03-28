@@ -1,4 +1,10 @@
 {
+  "roadmap": {
+    "project_id": "flagzen-env",
+    "created_at": "2026-03-28T15:30:00Z",
+    "total_steps": 40,
+    "phases": 4
+  },
   "feature_id": "flagzen-env",
   "goal": "Implement flagzen-key-mapping and flagzen-env modules providing environment-variable-based flag resolution with reusable key-mapping infrastructure",
   "phases": [
