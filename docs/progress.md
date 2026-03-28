@@ -156,29 +156,38 @@ Documentation is updated with every release. Each release adds docs for its new 
 
 #### Documentation Site
 
-- [ ] GitHub Pages site hosted at flagzen.com (custom domain)
-- [ ] Documentation repository/submodule with static site generator
-- [ ] Getting started tutorial
-- [ ] API reference
-- [ ] Architecture guide
-- [ ] Provider integration guides
+| Item                                   | Status |
+| -------------------------------------- | ------ |
+| GitHub Pages site at flagzen.com       | -      |
+| Static site generator setup            | -      |
+| Getting started tutorial               | -      |
+| API reference                          | -      |
+| Architecture guide                     | -      |
+| Provider integration guides            | -      |
 
 #### In-Repo Documentation
 
-- [ ] README with quick start guide
-- [ ] Javadoc on all public API types
+| Item                      | M0 | M1 | M2 | M3 | M4 | M5 | M13 |
+| ------------------------- | -- | -- | -- | -- | -- | -- | --- |
+| README quick start guide  | -  | -  | -  | -  | -  | -  | -   |
+| Javadoc on public API     | -  | -  | -  | -  | -  | -  | -   |
 
 #### Examples Module — `flagzen-examples`
 
-- [ ] `flagzen-examples` Gradle submodule (not published to Maven Central)
-- [ ] Example: basic polymorphic dispatch (`@Feature` + `@Variant` + `FeatureDispatcher`)
-- [ ] Example: typed dispatch (INT, BOOLEAN, LONG, DOUBLE with `@CloseTo`)
-- [ ] Example: evaluation context (explicit, block-scoped, accessor)
-- [ ] Example: testing with `@PinFlag`, `@FlagSource`, `TestFlagContext`
-- [ ] Example: Spring Boot integration (`@Autowired` feature injection)
-- [ ] Example: custom `FlagProvider` implementation
-- [ ] Example: condition predicates (`@Condition(matches = ...)` with JDK predicates)
-- [ ] Every example has a corresponding test that compiles and runs
+| Example                                                           | Milestone | Status |
+| ----------------------------------------------------------------- | --------- | ------ |
+| `flagzen-examples` Gradle submodule (not published)               | -         | -      |
+| Basic polymorphic dispatch (`@Feature` + `@Variant`)              | M0        | -      |
+| Typed dispatch (INT, BOOLEAN, LONG, DOUBLE with `@CloseTo`)       | M2        | -      |
+| Multi-value variants (`@Variant(value = {"A", "B"})`)             | M13       | -      |
+| Evaluation context (explicit, block-scoped, accessor)             | M1        | -      |
+| Testing with `@PinFlag`, `@FlagSource`, `TestFlagContext`         | M0        | -      |
+| Spring Boot integration (`@Autowired` feature injection)          | M4        | -      |
+| Environment variable provider (`flagzen-env` + key mapping)       | M3        | -      |
+| OpenFeature adapter (`flagzen-openfeature`)                       | M5        | -      |
+| Custom `FlagProvider` implementation                              | M0        | -      |
+| Condition predicates (`@Condition(matches = ...)` with JDK preds) | M6        | -      |
+| Every example has a corresponding test that compiles and runs     | -         | -      |
 
 ---
 
