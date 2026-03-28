@@ -2,7 +2,6 @@ plugins {
     java
     `maven-publish`
     signing
-    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
 }
 
 allprojects {
@@ -11,17 +10,6 @@ allprojects {
 
     repositories {
         mavenCentral()
-    }
-}
-
-nexusPublishing {
-    repositories {
-        sonatype {
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-            username.set(providers.environmentVariable("SONATYPE_USERNAME"))
-            password.set(providers.environmentVariable("SONATYPE_PASSWORD"))
-        }
     }
 }
 
@@ -53,8 +41,8 @@ subprojects {
         }
     }
 
-    // Only publish library modules, not acceptance tests
-    val isPublishable = project.name != "flagzen-acceptance-tests"
+    // Only publish library modules, not acceptance tests or examples
+    val isPublishable = project.name != "flagzen-acceptance-tests" && project.name != "flagzen-examples"
 
     if (isPublishable) {
         configure<PublishingExtension> {
@@ -65,7 +53,7 @@ subprojects {
                     pom {
                         name.set(project.name)
                         description.set("Type-safe polymorphic dispatch for feature flags in Java")
-                        url.set("https://github.com/attila-kiss/flagzen")
+                        url.set("https://github.com/FlagZen/FlagZen")
 
                         licenses {
                             license {
@@ -82,10 +70,22 @@ subprojects {
                         }
 
                         scm {
-                            connection.set("scm:git:git://github.com/attila-kiss/flagzen.git")
-                            developerConnection.set("scm:git:ssh://github.com/attila-kiss/flagzen.git")
-                            url.set("https://github.com/attila-kiss/flagzen")
+                            connection.set("scm:git:git://github.com/FlagZen/FlagZen.git")
+                            developerConnection.set("scm:git:ssh://github.com/FlagZen/FlagZen.git")
+                            url.set("https://github.com/FlagZen/FlagZen")
                         }
+                    }
+                }
+            }
+
+            repositories {
+                maven {
+                    name = "centralPortal"
+                    url = uri("https://central.sonatype.com/api/v1/publisher/deployments/download/")
+
+                    credentials {
+                        username = providers.environmentVariable("SONATYPE_USERNAME").orNull
+                        password = providers.environmentVariable("SONATYPE_PASSWORD").orNull
                     }
                 }
             }
