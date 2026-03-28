@@ -27,6 +27,12 @@ jobs:
         with:
           python-version: '3.12'
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npx markdownlint-cli2 "docs/site/**/*.md"
+
       - run: pip install mkdocs mkdocs-material
 
       - run: mkdocs build --strict
