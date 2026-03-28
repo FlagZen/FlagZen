@@ -64,20 +64,27 @@ public class CompileTimeSteps {
     @And("a method {string} declared on {string}")
     public void aMethodDeclaredOn(String method, String interfaceName) {
         this.methodName = method;
+        SharedCompilationContext.setFeatureMethod(interfaceName, method);
         featureSourcesAdded.add(interfaceName);
-        sourceFiles.add(JavaFileObjects.forSourceString(
-                PACKAGE + "." + interfaceName,
-                """
-                package %s;
+        String featureType = SharedCompilationContext.getFeatureType(interfaceName);
+        String key = featureKeyMap.getOrDefault(interfaceName, flagKey);
+        if (featureType != null) {
+            // TypeAnnotationSteps handles this feature via deferred hook — don't duplicate
+        } else {
+            sourceFiles.add(JavaFileObjects.forSourceString(
+                    PACKAGE + "." + interfaceName,
+                    """
+                    package %s;
 
-                import com.flagzen.Feature;
+                    import com.flagzen.Feature;
 
-                @Feature("%s")
-                public interface %s {
-                    void %s();
-                }
-                """.formatted(PACKAGE, flagKey, interfaceName, method)
-        ));
+                    @Feature("%s")
+                    public interface %s {
+                        void %s();
+                    }
+                    """.formatted(PACKAGE, key, interfaceName, method)
+                    ));
+        }
     }
 
     @And("a variant {string} implementing {string} for value {string}")
@@ -185,9 +192,22 @@ public class CompileTimeSteps {
 
     @When("the project compiles")
     public void theProjectCompiles() {
+        SharedCompilationContext.runPreCompileHooks();
+        // Local sources take priority (may have methods); skip shared sources with same URI
+        Set<String> localUris = new HashSet<>();
+        for (JavaFileObject src : sourceFiles) {
+            localUris.add(src.toUri().toString());
+        }
+        List<JavaFileObject> allSources = new ArrayList<>(sourceFiles);
+        for (JavaFileObject shared : SharedCompilationContext.getSourceFiles()) {
+            if (!localUris.contains(shared.toUri().toString())) {
+                allSources.add(shared);
+            }
+        }
         compilation = javac()
                 .withProcessors(new FlagZenProcessor())
-                .compile(sourceFiles.toArray(new JavaFileObject[0]));
+                .compile(allSources.toArray(new JavaFileObject[0]));
+        SharedCompilationContext.setCompilation(compilation);
     }
 
     @Then("compilation succeeds")

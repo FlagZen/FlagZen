@@ -18,6 +18,7 @@ public class ScenarioHooks {
         DarkModeMetadata.reset();
         CheckoutFlowMetadata.reset();
         PaymentMethodMetadata.reset();
+        SharedCompilationContext.reset();
         FlagContext.clear();
     }
 }

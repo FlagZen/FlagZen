@@ -19,6 +19,12 @@ public @interface Variant {
     /** The integer variant value that activates this implementation. */
     int intValue() default Integer.MIN_VALUE;
 
+    /** The long variant value that activates this implementation. */
+    long longValue() default Long.MIN_VALUE;
+
+    /** The double variant value that activates this implementation, with approximate matching. */
+    CloseTo[] doubleValue() default {};
+
     /** The boolean variant value that activates this implementation. Empty string means not set. */
     String booleanValue() default "";
 

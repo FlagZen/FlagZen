@@ -1,5 +1,6 @@
 package com.flagzen.processor;
 
+import com.flagzen.CloseTo;
 import com.flagzen.DefaultVariant;
 import com.flagzen.FallbackStrategy;
 import com.flagzen.Feature;
@@ -254,6 +255,9 @@ public class FlagZenProcessor extends AbstractProcessor {
                                           List<VariantModel> variants) {
         for (Element element : roundEnv.getElementsAnnotatedWith(WhenTrue.class)) {
             TypeMirror target = extractWhenTrueOf(element.getAnnotation(WhenTrue.class));
+            if (target == null) {
+                target = inferFeatureTarget(element, featureElement);
+            }
             processBooleanVariant(element, target, true, featureElement, variants);
         }
         for (Element element : roundEnv.getElementsAnnotatedWith(WhenTrues.class)) {
@@ -268,6 +272,9 @@ public class FlagZenProcessor extends AbstractProcessor {
                                            List<VariantModel> variants) {
         for (Element element : roundEnv.getElementsAnnotatedWith(WhenFalse.class)) {
             TypeMirror target = extractWhenFalseOf(element.getAnnotation(WhenFalse.class));
+            if (target == null) {
+                target = inferFeatureTarget(element, featureElement);
+            }
             processBooleanVariant(element, target, false, featureElement, variants);
         }
         for (Element element : roundEnv.getElementsAnnotatedWith(WhenFalses.class)) {
@@ -276,6 +283,20 @@ public class FlagZenProcessor extends AbstractProcessor {
                 processBooleanVariant(element, target, false, featureElement, variants);
             }
         }
+    }
+
+    private TypeMirror inferFeatureTarget(Element element, TypeElement featureElement) {
+        if (element.getKind() != ElementKind.CLASS) {
+            return null;
+        }
+        TypeElement classElement = (TypeElement) element;
+        for (TypeMirror iface : classElement.getInterfaces()) {
+            TypeElement ifaceElement = (TypeElement) processingEnv.getTypeUtils().asElement(iface);
+            if (ifaceElement != null && ifaceElement.equals(featureElement)) {
+                return iface;
+            }
+        }
+        return null;
     }
 
     private void processBooleanVariant(Element element, TypeMirror targetFeature, boolean booleanValue,
@@ -354,6 +375,19 @@ public class FlagZenProcessor extends AbstractProcessor {
         String qualifiedName = variantElement.getQualifiedName().toString();
         if (featureType == FeatureType.INT) {
             variants.add(new VariantModel(qualifiedName, "", variantAnnotation.intValue(), featureType));
+        } else if (featureType == FeatureType.LONG) {
+            variants.add(VariantModel.ofLong(qualifiedName, variantAnnotation.longValue()));
+        } else if (featureType == FeatureType.DOUBLE) {
+            CloseTo[] closeToValues = variantAnnotation.doubleValue();
+            if (closeToValues.length > 0) {
+                CloseTo closeTo = closeToValues[0];
+                variants.add(VariantModel.ofDouble(qualifiedName, closeTo.value(), closeTo.delta()));
+            }
+        } else if (featureType == FeatureType.BOOLEAN) {
+            String boolStr = variantAnnotation.booleanValue();
+            if (!boolStr.isEmpty()) {
+                variants.add(VariantModel.ofBoolean(qualifiedName, Boolean.parseBoolean(boolStr)));
+            }
         } else {
             variants.add(new VariantModel(qualifiedName, variantAnnotation.value()));
         }

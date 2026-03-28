@@ -18,7 +18,8 @@ tasks.withType<Test> {
     useJUnitPlatform()
     systemProperty("cucumber.features", listOf(
         rootProject.projectDir.resolve("tests/acceptance/flagzen").absolutePath,
-        rootProject.projectDir.resolve("tests/acceptance/flagzen-eval-context").absolutePath
+        rootProject.projectDir.resolve("tests/acceptance/flagzen-eval-context").absolutePath,
+        rootProject.projectDir.resolve("tests/acceptance/flagzen-typed-variants").absolutePath
     ).joinToString(","))
     systemProperty("cucumber.glue", "com.flagzen.acceptance.steps")
     systemProperty("cucumber.plugin", "pretty")

@@ -8,6 +8,7 @@ import com.flagzen.acceptance.fixtures.CheckoutFlowMetadata;
 import com.flagzen.acceptance.fixtures.DarkMode;
 import com.flagzen.acceptance.fixtures.DarkModeMetadata;
 import com.flagzen.acceptance.fixtures.DefaultCheckout;
+import com.flagzen.acceptance.fixtures.RetryStrategy;
 import com.flagzen.internal.DefaultFeatureDispatcher;
 import com.flagzen.internal.InMemoryFlagProvider;
 import com.flagzen.spi.FlagProvider;
@@ -34,6 +35,7 @@ public class RuntimeDispatchSteps {
     private CheckoutFlow resolvedProxy;
     private CheckoutFlow secondResolvedProxy;
     private DarkMode darkModeProxy;
+    private RetryStrategy retryStrategyProxy;
     private String callResult;
     private Object methodResult;
     private Exception caughtException;
@@ -49,6 +51,32 @@ public class RuntimeDispatchSteps {
     public void aCompiledFeatureWithVariants(String featureName, String variant1, String variant2) {
         // Fixtures are pre-compiled and registered via ServiceLoader
         // (CheckoutFlowMetadata in META-INF/services)
+    }
+
+    @Given("a compiled feature {string} with integer variants {int} and {int}")
+    public void aCompiledFeatureWithIntegerVariants(String featureName, int v1, int v2) {
+        activeFeature = featureName;
+        // RetryStrategy fixtures are pre-compiled and registered via ServiceLoader
+    }
+
+    @Given("a flag provider with {string} returning integer value {int}")
+    public void aFlagProviderWithReturningIntegerValue(String key, int value) {
+        flagProvider = new InMemoryFlagProvider();
+        flagProvider.set(key, String.valueOf(value));
+    }
+
+    @Given("a flag provider with {string} returning boolean true")
+    public void aFlagProviderWithReturningBooleanTrue(String key) {
+        flagProvider = new InMemoryFlagProvider();
+        flagProvider.set(key, "true");
+        DarkModeMetadata.enableBooleanDispatch();
+    }
+
+    @Given("a flag provider with {string} returning boolean false")
+    public void aFlagProviderWithReturningBooleanFalse(String key) {
+        flagProvider = new InMemoryFlagProvider();
+        flagProvider.set(key, "false");
+        DarkModeMetadata.enableBooleanDispatch();
     }
 
     @Given("a compiled feature {string} with a void method {string} and a boolean method {string}")
@@ -107,9 +135,24 @@ public class RuntimeDispatchSteps {
         try {
             if (noProviderConfigured) {
                 dispatcher = FlagZen.dispatcher(config -> { /* no provider */ });
+            } else if (dispatcher == null && flagProvider != null) {
+                dispatcher = new DefaultFeatureDispatcher(flagProvider);
             }
-            resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
-            SharedProxyHolder.set(resolvedProxy);
+            activeFeature = featureName;
+            switch (featureName) {
+                case "RetryStrategy" -> {
+                    retryStrategyProxy = dispatcher.resolve(RetryStrategy.class);
+                }
+                case "DarkMode" -> {
+                    darkModeProxy = dispatcher.resolve(DarkMode.class);
+                    // For boolean dispatch scenarios, derive variant identity from behavior
+                    callResult = darkModeProxy.isEnabled() ? "DarkModeOn" : "DarkModeOff";
+                }
+                default -> {
+                    resolvedProxy = dispatcher.resolve(CheckoutFlow.class);
+                    SharedProxyHolder.set(resolvedProxy);
+                }
+            }
         } catch (Exception e) {
             caughtException = e;
         }
@@ -117,7 +160,11 @@ public class RuntimeDispatchSteps {
 
     @And("calls {string} on the resolved proxy")
     public void callsOnTheResolvedProxy(String methodName) {
-        callResult = resolvedProxy.execute();
+        if ("RetryStrategy".equals(activeFeature)) {
+            callResult = retryStrategyProxy.execute();
+        } else {
+            callResult = resolvedProxy.execute();
+        }
     }
 
     @When("the developer resolves {string} through the dispatcher twice")

@@ -3,7 +3,9 @@ package com.flagzen.spi;
 import com.flagzen.EvaluationContext;
 
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.OptionalLong;
 
 /**
  * SPI for providing flag values at runtime.
@@ -87,5 +89,67 @@ public interface FlagProvider {
      */
     default OptionalInt getInt(String key, EvaluationContext context) {
         return getInt(key);
+    }
+
+    /**
+     * Returns the current long value for the given flag key.
+     * The default implementation parses the string value from {@link #getString(String)}.
+     * Returns empty if the key is not set or the value is not a valid long.
+     *
+     * @param key the flag key to look up
+     * @return the long flag value, or empty if not set or not parseable
+     */
+    default OptionalLong getLong(String key) {
+        try {
+            return getString(key)
+                    .map(Long::parseLong)
+                    .map(OptionalLong::of)
+                    .orElse(OptionalLong.empty());
+        } catch (NumberFormatException e) {
+            return OptionalLong.empty();
+        }
+    }
+
+    /**
+     * Returns the current long value for the given flag key using the provided evaluation context.
+     * The default implementation delegates to {@link #getLong(String)}.
+     *
+     * @param key the flag key to look up
+     * @param context the evaluation context for targeted resolution
+     * @return the long flag value, or empty if not set or not parseable
+     */
+    default OptionalLong getLong(String key, EvaluationContext context) {
+        return getLong(key);
+    }
+
+    /**
+     * Returns the current double value for the given flag key.
+     * The default implementation parses the string value from {@link #getString(String)}.
+     * Returns empty if the key is not set or the value is not a valid double.
+     *
+     * @param key the flag key to look up
+     * @return the double flag value, or empty if not set or not parseable
+     */
+    default OptionalDouble getDouble(String key) {
+        try {
+            return getString(key)
+                    .map(Double::parseDouble)
+                    .map(OptionalDouble::of)
+                    .orElse(OptionalDouble.empty());
+        } catch (NumberFormatException e) {
+            return OptionalDouble.empty();
+        }
+    }
+
+    /**
+     * Returns the current double value for the given flag key using the provided evaluation context.
+     * The default implementation delegates to {@link #getDouble(String)}.
+     *
+     * @param key the flag key to look up
+     * @param context the evaluation context for targeted resolution
+     * @return the double flag value, or empty if not set or not parseable
+     */
+    default OptionalDouble getDouble(String key, EvaluationContext context) {
+        return getDouble(key);
     }
 }

@@ -141,13 +141,13 @@ final class ProxyGenerator {
     }
 
     private MethodSpec buildResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
-        if (model.featureType() == FeatureType.INT) {
-            return buildIntResolveMethod(model, interfaceType, supplierType);
-        }
-        if (model.featureType() == FeatureType.BOOLEAN) {
-            return buildBooleanResolveMethod(model, interfaceType, supplierType);
-        }
-        return buildStringResolveMethod(model, interfaceType, supplierType);
+        return switch (model.featureType()) {
+            case INT -> buildIntResolveMethod(model, interfaceType, supplierType);
+            case LONG -> buildLongResolveMethod(model, interfaceType, supplierType);
+            case BOOLEAN -> buildBooleanResolveMethod(model, interfaceType, supplierType);
+            case DOUBLE -> buildDoubleResolveMethod(model, interfaceType, supplierType);
+            default -> buildStringResolveMethod(model, interfaceType, supplierType);
+        };
     }
 
     private MethodSpec buildIntResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
@@ -178,6 +178,75 @@ final class ProxyGenerator {
                             UnmatchedVariantException.class, model.flagKey())
                     .endControlFlow()
                     .addStatement("throw new $T($S, $T.valueOf(flagValue.getAsInt()), variants.keySet())",
+                            UnmatchedVariantException.class, model.flagKey(), String.class);
+        }
+
+        return builder.build();
+    }
+
+    private MethodSpec buildLongResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
+        ClassName optionalLongType = ClassName.get("java.util", "OptionalLong");
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
+                .addModifiers(Modifier.PRIVATE)
+                .returns(interfaceType)
+                .addStatement("$T context = $T.current()", EvaluationContext.class, FlagContext.class)
+                .addStatement("$T flagValue = (context != null) ? flagProvider.getLong($S, context) : flagProvider.getLong($S)",
+                        optionalLongType, model.flagKey(), model.flagKey());
+
+        builder.beginControlFlow("if (flagValue.isPresent())")
+                .addStatement("$T supplier = variants.get(flagValue.getAsLong())", supplierType)
+                .beginControlFlow("if (supplier != null)")
+                .addStatement("return supplier.get()")
+                .endControlFlow()
+                .endControlFlow();
+
+        builder.beginControlFlow("if (defaultVariant != null)")
+                .addStatement("return defaultVariant.get()")
+                .endControlFlow();
+
+        if (model.fallbackStrategy() == FallbackStrategy.NOOP) {
+            builder.addStatement("return null");
+        } else {
+            builder.beginControlFlow("if (flagValue.isEmpty())")
+                    .addStatement("throw $T.noFlagValue($S)",
+                            UnmatchedVariantException.class, model.flagKey())
+                    .endControlFlow()
+                    .addStatement("throw new $T($S, $T.valueOf(flagValue.getAsLong()), variants.keySet())",
+                            UnmatchedVariantException.class, model.flagKey(), String.class);
+        }
+
+        return builder.build();
+    }
+
+    private MethodSpec buildDoubleResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
+        ClassName optionalDoubleType = ClassName.get("java.util", "OptionalDouble");
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
+                .addModifiers(Modifier.PRIVATE)
+                .returns(interfaceType)
+                .addStatement("$T context = $T.current()", EvaluationContext.class, FlagContext.class)
+                .addStatement("$T flagValue = (context != null) ? flagProvider.getDouble($S, context) : flagProvider.getDouble($S)",
+                        optionalDoubleType, model.flagKey(), model.flagKey());
+
+        builder.beginControlFlow("if (flagValue.isPresent())")
+                .addStatement("double rawValue = flagValue.getAsDouble()")
+                .addStatement("$T supplier = variants.get(rawValue)", supplierType)
+                .beginControlFlow("if (supplier != null)")
+                .addStatement("return supplier.get()")
+                .endControlFlow()
+                .endControlFlow();
+
+        builder.beginControlFlow("if (defaultVariant != null)")
+                .addStatement("return defaultVariant.get()")
+                .endControlFlow();
+
+        if (model.fallbackStrategy() == FallbackStrategy.NOOP) {
+            builder.addStatement("return null");
+        } else {
+            builder.beginControlFlow("if (flagValue.isEmpty())")
+                    .addStatement("throw $T.noFlagValue($S)",
+                            UnmatchedVariantException.class, model.flagKey())
+                    .endControlFlow()
+                    .addStatement("throw new $T($S, $T.valueOf(flagValue.getAsDouble()), variants.keySet())",
                             UnmatchedVariantException.class, model.flagKey(), String.class);
         }
 
@@ -374,6 +443,28 @@ final class ProxyGenerator {
             builder.addStatement("variants.forEach((k, v) -> intVariants.put($T.parseInt(k), v))", Integer.class);
             builder.addStatement("return new $T(flagProvider, intVariants, defaultVariant, $T.$L)",
                     proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
+        } else if (model.featureType() == FeatureType.LONG) {
+            // Convert Map<String, Supplier<T>> to Map<Long, Supplier<T>>
+            ParameterizedTypeName longMapType = ParameterizedTypeName.get(
+                    ClassName.get(Map.class),
+                    ClassName.get(Long.class),
+                    supplierType
+            );
+            builder.addStatement("$T longVariants = new $T<>()", longMapType, ClassName.get("java.util", "HashMap"));
+            builder.addStatement("variants.forEach((k, v) -> longVariants.put($T.parseLong(k), v))", Long.class);
+            builder.addStatement("return new $T(flagProvider, longVariants, defaultVariant, $T.$L)",
+                    proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
+        } else if (model.featureType() == FeatureType.DOUBLE) {
+            // Convert Map<String, Supplier<T>> to Map<Double, Supplier<T>>
+            ParameterizedTypeName doubleMapType = ParameterizedTypeName.get(
+                    ClassName.get(Map.class),
+                    ClassName.get(Double.class),
+                    supplierType
+            );
+            builder.addStatement("$T doubleVariants = new $T<>()", doubleMapType, ClassName.get("java.util", "HashMap"));
+            builder.addStatement("variants.forEach((k, v) -> doubleVariants.put($T.parseDouble(k), v))", Double.class);
+            builder.addStatement("return new $T(flagProvider, doubleVariants, defaultVariant, $T.$L)",
+                    proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
         } else if (model.featureType() == FeatureType.BOOLEAN) {
             // Convert Map<String, Supplier<T>> to Map<Boolean, Supplier<T>>
             ParameterizedTypeName boolMapType = ParameterizedTypeName.get(
@@ -396,7 +487,9 @@ final class ProxyGenerator {
     private static TypeName variantKeyType(FeatureType featureType) {
         return switch (featureType) {
             case INT -> ClassName.get(Integer.class);
+            case LONG -> ClassName.get(Long.class);
             case BOOLEAN -> ClassName.get(Boolean.class);
+            case DOUBLE -> ClassName.get(Double.class);
             default -> ClassName.get(String.class);
         };
     }
