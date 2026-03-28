@@ -1,0 +1,81 @@
+site_name: FlagZen
+site_url: https://flagzen.com
+site_description: Compile-time, zero-reflection feature flag framework for Java 17+
+site_author: FlagZen Contributors
+
+repo_name: FlagZen/FlagZen
+repo_url: https://github.com/FlagZen/FlagZen
+
+docs_dir: docs/site
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+  - attr_list
+
+nav:
+  - Home: index.md
+  - Tutorials:
+      - Getting Started: tutorials/getting-started.md
+      - Your First Feature Flag: tutorials/first-feature-flag.md
+      - Testing with FlagZen: tutorials/testing.md
+  - How-To Guides:
+      - Use Typed Dispatch: how-to/typed-dispatch.md
+      - Map Multiple Values to One Variant: how-to/multi-value-variants.md
+      - Read Flags from Environment Variables: how-to/environment-variables.md
+      - Integrate with Spring Boot: how-to/spring-boot.md
+      - Connect to OpenFeature: how-to/openfeature.md
+      - Write a Custom FlagProvider: how-to/custom-provider.md
+      - Use Evaluation Context for Targeting: how-to/evaluation-context.md
+  - Reference:
+      - Annotations: reference/annotations.md
+      - FlagProvider SPI: reference/flag-provider.md
+      - FeatureDispatcher: reference/feature-dispatcher.md
+      - Key Mapping: reference/key-mapping.md
+      - Conflict Strategy: reference/conflict-strategy.md
+      - Testing API: reference/testing-api.md
+      - Spring Auto-Configuration: reference/spring-auto-configuration.md
+      - Module Index: reference/modules.md
+  - Explanation:
+      - Architecture: explanation/architecture.md
+      - Why Zero Reflection: explanation/zero-reflection.md
+      - Design Decisions: explanation/design-decisions.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/FlagZen/FlagZen

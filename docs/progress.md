@@ -150,15 +150,15 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 
 ### M12: Documentation — `flagzen-docs`
 
-**Status: NOT STARTED** | **Release: continuous** | Depends on: M0
+**Status: IN PROGRESS** | **Release: continuous** | Depends on: M0
 
 Documentation is updated with every release. Each release adds docs for its new features.
 
 #### One-Time Setup
 
-- [ ] `flagzen-examples` Gradle submodule (not published to Maven Central)
-- [ ] GitHub Pages site hosted at flagzen.com (custom domain)
-- [ ] Documentation repository/submodule with static site generator
+- [x] `flagzen-examples` Gradle submodule (not published to Maven Central)
+- [x] MkDocs Material site with GitHub Pages deployment (flagzen.com)
+- [x] GitHub Actions workflow for automatic docs deployment
 
 #### Per-Milestone Documentation
 
@@ -166,7 +166,7 @@ Documentation is updated with every release. Each release adds docs for its new 
 | -------------- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --- | --- | --- |
 | Javadoc        | ok | ok | ok | ok | ok | ok | -  | -  | -  | -  | -   | -   | ok  |
 | README         | ok | ok | ok | ok | ok | ok | -  | -  | -  | -  | -   | -   | ok  |
-| Docs site page | -  | -  | -  | -  | -  | -  | -  | -  | -  | -  | -   | -   | -   |
+| Docs site page | ok | ok | ok | ok | ok | ok | -  | -  | -  | -  | -   | -   | ok  |
 | Example        | ok | ok | ok | ok | -  | -  | -  | -  | -  | -  | -   | -   | ok  |
 | Example tests  | ok | ok | ok | ok | -  | -  | -  | -  | -  | -  | -   | -   | ok  |
 
