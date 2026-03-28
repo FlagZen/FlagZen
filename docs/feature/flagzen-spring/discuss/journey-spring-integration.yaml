@@ -1,0 +1,143 @@
+journey:
+  name: "Spring Boot Integration"
+  goal: "Inject @Feature proxies via @Autowired with zero manual wiring"
+  persona: "Rafael Oliveira -- senior backend developer, fintech startup, Spring Boot microservices"
+
+  emotional_arc:
+    start: "Cautious optimism -- will this work like other starters?"
+    middle: "Growing confidence -- auto-config detected, proxies injected"
+    end: "Satisfaction -- standard Spring experience, no surprises"
+
+steps:
+  - id: 1
+    name: "Add Dependency"
+    action: "Add flagzen-spring to build.gradle.kts"
+
+    shared_artifacts:
+      - name: "flagzen-spring-version"
+        source: "gradle.properties or version catalog"
+        displayed_as: "${flagzen.version}"
+        consumers: ["build.gradle.kts", "auto-configuration metadata"]
+
+    emotional_state:
+      entry: "Hopeful"
+      exit: "Confident (dependency resolves, transitive deps correct)"
+
+    integration_checkpoint: |
+      flagzen-spring pulls in flagzen-core transitively.
+      annotationProcessor must be declared separately (not transitive).
+
+    gherkin: |
+      Scenario: FlagZen Spring starter resolves from Maven Central
+        Given Rafael's Spring Boot 3.x project uses Gradle
+        When he adds "com.flagzen:flagzen-spring:1.1.0" as implementation dependency
+        Then the dependency resolves successfully
+        And flagzen-core is included transitively
+
+  - id: 2
+    name: "Configure FlagProvider"
+    action: "Define FlagProvider @Bean or rely on auto-configured default"
+
+    shared_artifacts:
+      - name: "flag-provider-bean"
+        source: "Spring ApplicationContext"
+        displayed_as: "${flagProvider}"
+        consumers: ["FlagZenAutoConfiguration", "FeatureDispatcher bean"]
+
+    emotional_state:
+      entry: "Familiar (standard Spring @Bean pattern)"
+      exit: "Confident (provider configured)"
+
+    integration_checkpoint: |
+      Exactly one FlagProvider bean must be resolvable.
+      If zero: InMemoryFlagProvider auto-configured with warning.
+      If multiple: standard Spring @Primary resolution applies.
+
+    gherkin: |
+      Scenario: Explicit FlagProvider bean detected
+        Given Rafael defines a FlagProvider @Bean in his Spring configuration
+        When the application context starts
+        Then FlagZenAutoConfiguration uses that FlagProvider bean
+        And no InMemoryFlagProvider is created
+
+      Scenario: No FlagProvider bean -- fallback to InMemoryFlagProvider
+        Given Rafael has not defined any FlagProvider @Bean
+        When the application context starts
+        Then FlagZenAutoConfiguration creates an InMemoryFlagProvider
+        And a warning is logged: "No FlagProvider bean found. Using InMemoryFlagProvider (dev/test only)."
+
+  - id: 3
+    name: "Inject Feature Proxies"
+    action: "@Autowired CheckoutFlow into a Spring service"
+
+    shared_artifacts:
+      - name: "feature-proxy-bean"
+        source: "FeatureMetadata ServiceLoader + FeatureDispatcher"
+        displayed_as: "${featureProxy}"
+        consumers: ["@Autowired injection points", "ApplicationContext.getBean()"]
+
+    emotional_state:
+      entry: "Expectant (will @Autowired resolve?)"
+      exit: "Delighted (proxy injected, no manual wiring)"
+
+    integration_checkpoint: |
+      For each FeatureMetadata discovered via ServiceLoader,
+      a bean definition is registered in Spring context.
+      Bean type = the @Feature interface class.
+      Bean instance = proxy from FeatureDispatcher.resolve().
+
+    gherkin: |
+      Scenario: Feature proxy available for injection
+        Given FlagZenAutoConfiguration has started
+        And CheckoutFlow_FlagZenMetadata is on the classpath
+        When Rafael's CheckoutService requests @Autowired CheckoutFlow
+        Then Spring injects the FlagZen dispatch proxy
+        And the proxy delegates to the active variant on each method call
+
+  - id: 4
+    name: "Verify Runtime Dispatch"
+    action: "Change flag value, observe proxy dispatches to new variant"
+
+    emotional_state:
+      entry: "Curious (does dynamic dispatch work through Spring?)"
+      exit: "Satisfied (same behavior as standalone FlagZen)"
+
+    integration_checkpoint: |
+      Proxy is a singleton bean but re-evaluates flag on every method call.
+      Flag value change in provider is reflected immediately.
+
+    gherkin: |
+      Scenario: Dynamic dispatch through Spring-managed proxy
+        Given the CheckoutFlow proxy is injected via @Autowired
+        And the flag "checkout-flow" is set to "CLASSIC"
+        When Rafael changes the flag to "EXPRESS"
+        And calls a method on the CheckoutFlow proxy
+        Then the proxy dispatches to the EXPRESS variant implementation
+
+error_paths:
+  - id: E1
+    name: "Missing annotationProcessor declaration"
+    trigger: "Developer adds flagzen-spring but forgets annotationProcessor for flagzen-core"
+    symptom: "No FeatureMetadata on classpath, @Autowired fails with NoSuchBeanDefinitionException"
+    recovery: "Add annotationProcessor('com.flagzen:flagzen-core') to build config"
+
+  - id: E2
+    name: "Multiple FlagProvider beans without @Primary"
+    trigger: "Multiple FlagProvider @Bean definitions"
+    symptom: "Standard Spring NoUniqueBeanDefinitionException"
+    recovery: "Mark one FlagProvider @Bean as @Primary"
+
+  - id: E3
+    name: "No @Feature interfaces processed"
+    trigger: "flagzen-spring on classpath but no @Feature interfaces in project"
+    symptom: "No feature beans registered. FeatureDispatcher bean exists but empty."
+    recovery: "Define @Feature interfaces and ensure annotation processor runs"
+
+integration_validation:
+  shared_artifact_consistency:
+    - artifact: "flag-provider-bean"
+      must_match_across: [2, 3]
+      failure_message: "FlagProvider used by auto-config must be the same bean used by FeatureDispatcher"
+    - artifact: "feature-proxy-bean"
+      must_match_across: [3, 4]
+      failure_message: "Proxy registered as bean must be the same singleton returned by FeatureDispatcher.resolve()"
