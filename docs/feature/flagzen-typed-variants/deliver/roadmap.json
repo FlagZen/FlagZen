@@ -1,0 +1,793 @@
+{
+  "roadmap": {
+    "project_id": "flagzen-typed-variants",
+    "created_at": "2026-03-28T09:05:44Z",
+    "total_steps": 71,
+    "phases": 5
+  },
+  "phases": [
+    {
+      "id": "01",
+      "name": "Walking Skeleton",
+      "steps": [
+        {
+          "id": "01-01",
+          "name": "Declare integer-typed feature with typed variants",
+          "criteria": "A feature interface with INT type and two integer-valued variants compiles successfully and a dispatch proxy is generated",
+          "test_file": "tests/acceptance/flagzen-typed-variants/walking-skeleton.feature",
+          "scenario_name": "Developer declares an integer-typed feature with typed variants",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/Feature.java",
+            "flagzen-core/src/main/java/com/flagzen/Variant.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FeatureModel.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/VariantModel.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        },
+        {
+          "id": "01-02",
+          "name": "Resolve integer-typed feature to matching variant at runtime",
+          "criteria": "An integer-typed feature resolves to the correct variant based on the flag provider's integer value",
+          "test_file": "tests/acceptance/flagzen-typed-variants/walking-skeleton.feature",
+          "scenario_name": "Developer resolves an integer-typed feature to the matching variant at runtime",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/main/java/com/flagzen/internal/DefaultFeatureDispatcher.java"
+          ]
+        },
+        {
+          "id": "01-03",
+          "name": "Boolean dispatch with convenience annotations",
+          "criteria": "A boolean-typed feature with @WhenTrue/@WhenFalse convenience annotations dispatches to the correct variant",
+          "test_file": "tests/acceptance/flagzen-typed-variants/walking-skeleton.feature",
+          "scenario_name": "Developer dispatches a boolean feature using convenience annotations",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/Feature.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "Type Annotations",
+      "steps": [
+        {
+          "id": "02-01",
+          "name": "Feature with explicit BOOLEAN type compiles",
+          "criteria": "A feature interface declared with type BOOLEAN compiles and the feature model records the type",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Feature with explicit BOOLEAN type compiles",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/Feature.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FeatureModel.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "02-02",
+          "name": "Feature with explicit LONG type compiles",
+          "criteria": "A feature interface declared with type LONG compiles and the feature model records the type",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Feature with explicit LONG type compiles",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FeatureModel.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "02-03",
+          "name": "Feature with explicit DOUBLE type compiles",
+          "criteria": "A feature interface declared with type DOUBLE compiles and the feature model records the type",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Feature with explicit DOUBLE type compiles",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FeatureModel.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "02-04",
+          "name": "Feature without type attribute defaults to STRING",
+          "criteria": "A feature interface with no type attribute defaults to STRING and existing proxy generation is unchanged",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Feature without type attribute defaults to STRING",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/Feature.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FeatureModel.java"
+          ]
+        },
+        {
+          "id": "02-05",
+          "name": "Variant with integer value for INT feature",
+          "criteria": "Variants with integer values compile and the variant model records the integer values",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Variant with integer value for INT feature",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/Variant.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/VariantModel.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "02-06",
+          "name": "Variant with boolean value for BOOLEAN feature",
+          "criteria": "Variants with boolean values compile and the variant model records the boolean values",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Variant with boolean value for BOOLEAN feature",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/Variant.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/VariantModel.java"
+          ]
+        },
+        {
+          "id": "02-07",
+          "name": "Variant with long value for LONG feature",
+          "criteria": "Variants with long values compile and the variant model records the long values",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Variant with long value for LONG feature",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/Variant.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/VariantModel.java"
+          ]
+        },
+        {
+          "id": "02-08",
+          "name": "Variant with approximate double value and default tolerance",
+          "criteria": "A variant with a double value and default tolerance compiles and the variant model records double with tolerance 1e-10",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Variant with approximate double value and default tolerance",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/Variant.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/VariantModel.java"
+          ]
+        },
+        {
+          "id": "02-09",
+          "name": "Variant with approximate double value and explicit tolerance",
+          "criteria": "A variant with a double value and explicit tolerance compiles and the variant model records the specified tolerance",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Variant with approximate double value and explicit tolerance",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/Variant.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/VariantModel.java"
+          ]
+        },
+        {
+          "id": "02-10",
+          "name": "Existing string variant remains unchanged",
+          "criteria": "A string-typed feature variant compiles and the variant model records the string value unchanged",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Existing string variant remains unchanged",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/VariantModel.java"
+          ]
+        },
+        {
+          "id": "02-11",
+          "name": "Convenience annotation for true equals boolean variant true",
+          "criteria": "A variant annotated with @WhenTrue is treated identically to a boolean variant with value true",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Convenience annotation for true is equivalent to boolean variant true",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "02-12",
+          "name": "Convenience annotation for false equals boolean variant false",
+          "criteria": "A variant annotated with @WhenFalse is treated identically to a boolean variant with value false",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Convenience annotation for false is equivalent to boolean variant false",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "02-13",
+          "name": "Convenience annotations with explicit feature target for multi-feature class",
+          "criteria": "A variant implementing two features uses explicit target on @WhenTrue/@WhenFalse to register correct boolean per feature",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Convenience annotations with explicit feature target for multi-feature class",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "02-14",
+          "name": "Convenience annotation infers target on single-feature class",
+          "criteria": "A variant implementing a single feature infers the target feature from @WhenTrue without explicit target",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Convenience annotation infers target on single-feature class",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "02-15",
+          "name": "Convenience annotation mixed with explicit boolean variant on same feature",
+          "criteria": "A feature with one @WhenTrue variant and one explicit boolean false variant compiles with both registered",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-1-type-annotations.feature",
+          "scenario_name": "Convenience annotation mixed with explicit boolean variant on same feature",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "name": "Compile Validation",
+      "steps": [
+        {
+          "id": "03-01",
+          "name": "String variant on INT feature is rejected",
+          "criteria": "Compilation fails with error mentioning type INT and string value, suggesting integer value",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-2-compile-validation.feature",
+          "scenario_name": "String variant on INT feature is rejected",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "03-02",
+          "name": "Integer variant on BOOLEAN feature is rejected",
+          "criteria": "Compilation fails with error suggesting a boolean variant",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-2-compile-validation.feature",
+          "scenario_name": "Integer variant on BOOLEAN feature is rejected",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "03-03",
+          "name": "Boolean variant on LONG feature is rejected",
+          "criteria": "Compilation fails suggesting a long value variant",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-2-compile-validation.feature",
+          "scenario_name": "Boolean variant on LONG feature is rejected",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "03-04",
+          "name": "Integer variant on DOUBLE feature is rejected",
+          "criteria": "Compilation fails suggesting an approximate double value variant",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-2-compile-validation.feature",
+          "scenario_name": "Integer variant on DOUBLE feature is rejected",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "03-05",
+          "name": "Long variant on INT feature is rejected",
+          "criteria": "Compilation fails suggesting an integer value variant",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-2-compile-validation.feature",
+          "scenario_name": "Long variant on INT feature is rejected",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "03-06",
+          "name": "Mixed variant attributes within same feature are rejected",
+          "criteria": "Compilation fails identifying the variant using the wrong attribute type",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-2-compile-validation.feature",
+          "scenario_name": "Mixed variant attributes within same feature are rejected",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "03-07",
+          "name": "Duplicate integer values for the same feature are rejected",
+          "criteria": "Compilation fails with a duplicate variant value error for the repeated integer",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-2-compile-validation.feature",
+          "scenario_name": "Duplicate integer values for the same feature are rejected",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "03-08",
+          "name": "Duplicate long values for the same feature are rejected",
+          "criteria": "Compilation fails with a duplicate variant value error for the repeated long",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-2-compile-validation.feature",
+          "scenario_name": "Duplicate long values for the same feature are rejected",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "03-09",
+          "name": "Duplicate boolean true values from mixed annotations are rejected",
+          "criteria": "Compilation fails with a duplicate variant value error for boolean true from @WhenTrue and explicit boolean",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-2-compile-validation.feature",
+          "scenario_name": "Duplicate boolean true values from mixed annotations are rejected",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "03-10",
+          "name": "Boolean REQUIRED feature missing false variant is rejected",
+          "criteria": "Compilation fails requiring variants for both true and false when fallback is REQUIRED",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-2-compile-validation.feature",
+          "scenario_name": "Boolean REQUIRED feature missing false variant is rejected",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "03-11",
+          "name": "Boolean REQUIRED feature with both variants compiles",
+          "criteria": "Compilation succeeds when both true and false variants are present for a REQUIRED boolean feature",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-2-compile-validation.feature",
+          "scenario_name": "Boolean REQUIRED feature with both variants compiles",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "03-12",
+          "name": "Boolean REQUIRED feature satisfied by default variant",
+          "criteria": "Compilation succeeds when a REQUIRED boolean feature has one boolean variant and a default variant",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-2-compile-validation.feature",
+          "scenario_name": "Boolean REQUIRED feature satisfied by default variant",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "03-13",
+          "name": "Type mismatch error message includes feature and variant names",
+          "criteria": "Error message includes the flag key and variant name for actionable diagnosis",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-2-compile-validation.feature",
+          "scenario_name": "Type mismatch error message includes feature name and variant name",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        },
+        {
+          "id": "03-14",
+          "name": "Every type mismatch produces an actionable suggested fix",
+          "criteria": "Every type mismatch error includes a suggested fix with the correct attribute syntax",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-2-compile-validation.feature",
+          "scenario_name": "Every type mismatch produces an actionable suggested fix",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "name": "Typed Dispatch",
+      "steps": [
+        {
+          "id": "04-01",
+          "name": "Integer proxy dispatches to matching variant",
+          "criteria": "An INT feature proxy dispatches to the variant matching the flag provider's integer value",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Integer proxy dispatches to matching variant",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        },
+        {
+          "id": "04-02",
+          "name": "Integer proxy follows runtime flag changes",
+          "criteria": "When the flag value changes at runtime, the next method call dispatches to the new matching variant",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Integer proxy follows runtime flag changes",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        },
+        {
+          "id": "04-03",
+          "name": "Unmatched integer value with EXCEPTION fallback",
+          "criteria": "Resolution fails with an unmatched variant error listing known values when no variant matches",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Unmatched integer value with EXCEPTION fallback",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/main/java/com/flagzen/UnmatchedVariantException.java"
+          ]
+        },
+        {
+          "id": "04-04",
+          "name": "Unmatched integer value falls back to default variant",
+          "criteria": "When no variant matches, the default variant handles the method call",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Unmatched integer value falls back to default variant",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        },
+        {
+          "id": "04-05",
+          "name": "Empty integer value triggers NOOP fallback",
+          "criteria": "When the flag provider returns no value, the NOOP proxy returns safe defaults",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Empty integer value triggers NOOP fallback",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        },
+        {
+          "id": "04-06",
+          "name": "Boolean proxy dispatches true to matching variant",
+          "criteria": "A BOOLEAN feature proxy dispatches to the variant matching boolean true",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Boolean proxy dispatches true to matching variant",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        },
+        {
+          "id": "04-07",
+          "name": "Boolean proxy dispatches false to matching variant",
+          "criteria": "A BOOLEAN feature proxy dispatches to the variant matching boolean false",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Boolean proxy dispatches false to matching variant",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        },
+        {
+          "id": "04-08",
+          "name": "Integer dispatch with explicit evaluation context",
+          "criteria": "Integer dispatch uses explicit evaluation context to determine the flag value",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Integer dispatch with explicit evaluation context",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "04-09",
+          "name": "Boolean dispatch with explicit evaluation context",
+          "criteria": "Boolean dispatch uses explicit evaluation context to determine the flag value",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Boolean dispatch with explicit evaluation context",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        },
+        {
+          "id": "04-10",
+          "name": "Typed dispatch with block-scoped context",
+          "criteria": "Typed dispatch within a scoped context block uses that context, and the context is cleared after the block exits",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Typed dispatch with block-scoped context",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/main/java/com/flagzen/FlagContext.java"
+          ]
+        },
+        {
+          "id": "04-11",
+          "name": "Explicit context overrides scoped context for typed dispatch",
+          "criteria": "When both scoped and explicit context exist, the explicit context wins for typed dispatch",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Explicit context overrides scoped context for typed dispatch",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        },
+        {
+          "id": "04-12",
+          "name": "Typed dispatch with context accessor",
+          "criteria": "Typed dispatch uses the context accessor's context when no explicit context is provided",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Typed dispatch with context accessor",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        },
+        {
+          "id": "04-13",
+          "name": "Typed dispatch without context falls back to default resolution",
+          "criteria": "Typed dispatch without any evaluation context uses the contextless flag value",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Typed dispatch without context falls back to default resolution",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        },
+        {
+          "id": "04-14",
+          "name": "Long proxy dispatches to matching variant",
+          "criteria": "A LONG feature proxy dispatches to the variant matching the flag provider's long value",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Long proxy dispatches to matching variant",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "04-15",
+          "name": "Double proxy dispatches via approximate matching with default tolerance",
+          "criteria": "A DOUBLE feature proxy selects the variant when the flag value is within default tolerance",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Double proxy dispatches via approximate matching with default tolerance",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "04-16",
+          "name": "Double proxy matches variant with explicit tolerance",
+          "criteria": "A DOUBLE feature proxy selects the variant when the flag value is within the explicitly specified tolerance",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Double proxy matches variant with explicit tolerance",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        },
+        {
+          "id": "04-17",
+          "name": "Double proxy rejects value outside all tolerances",
+          "criteria": "Resolution fails with an unmatched variant error when the double value is outside all variant tolerances",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Double proxy rejects value outside all tolerances",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        },
+        {
+          "id": "04-18",
+          "name": "Double proxy selects first matching variant when ranges overlap",
+          "criteria": "When multiple variants have overlapping tolerance ranges, the first match is selected",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Double proxy selects first matching variant when ranges overlap",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java"
+          ]
+        },
+        {
+          "id": "04-19",
+          "name": "Flag provider integer accessor parses from string value",
+          "criteria": "The flag provider's integer accessor correctly parses a string value to an integer",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Flag provider integer accessor parses from string value",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "04-20",
+          "name": "Flag provider boolean accessor rejects non-boolean strings",
+          "criteria": "The flag provider's boolean accessor returns no value for non-boolean strings like 'maybe'",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Flag provider boolean accessor rejects non-boolean strings",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "04-21",
+          "name": "Flag provider boolean accessor parses true case-insensitively",
+          "criteria": "The flag provider's boolean accessor parses 'TRUE' (any case) as boolean true",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Flag provider boolean accessor parses \"true\" case-insensitively",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "04-22",
+          "name": "Flag provider long accessor returns no value for overflow",
+          "criteria": "The flag provider's long accessor returns no value when the string represents a number exceeding Long range",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Flag provider long accessor returns no value for overflow",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "04-23",
+          "name": "Flag provider double accessor parses valid double",
+          "criteria": "The flag provider's double accessor correctly parses a valid double string",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "Flag provider double accessor parses valid double",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "04-24",
+          "name": "All typed accessors return no value for absent flag",
+          "criteria": "All typed accessors (boolean, integer, long, double) return no value when the flag does not exist",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-3-typed-dispatch.feature",
+          "scenario_name": "All typed accessors return no value for absent flag",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "05",
+      "name": "Conditional API",
+      "steps": [
+        {
+          "id": "05-01",
+          "name": "Boolean conditional check returns true",
+          "criteria": "The flag provider's boolean accessor returns true for string value 'true'",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "Boolean conditional check returns true",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "05-02",
+          "name": "Boolean conditional check returns false",
+          "criteria": "The flag provider's boolean accessor returns false for string value 'false'",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "Boolean conditional check returns false",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "05-03",
+          "name": "Boolean conditional check returns no value for non-boolean string",
+          "criteria": "The flag provider's boolean accessor returns no value for non-boolean strings",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "Boolean conditional check returns no value for non-boolean string",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "05-04",
+          "name": "Integer conditional check returns parsed value",
+          "criteria": "The flag provider's integer accessor returns the parsed integer value",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "Integer conditional check returns parsed value",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "05-05",
+          "name": "Integer conditional check returns no value for non-numeric string",
+          "criteria": "The flag provider's integer accessor returns no value for non-numeric strings",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "Integer conditional check returns no value for non-numeric string",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "05-06",
+          "name": "Long conditional check returns parsed value",
+          "criteria": "The flag provider's long accessor returns the parsed long value",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "Long conditional check returns parsed value",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "05-07",
+          "name": "Long conditional check returns no value for non-numeric string",
+          "criteria": "The flag provider's long accessor returns no value for non-numeric strings",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "Long conditional check returns no value for non-numeric string",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "05-08",
+          "name": "Long conditional check returns no value for overflow",
+          "criteria": "The flag provider's long accessor returns no value when the value overflows Long range",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "Long conditional check returns no value for overflow",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "05-09",
+          "name": "Double conditional check returns parsed value",
+          "criteria": "The flag provider's double accessor returns the parsed double value",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "Double conditional check returns parsed value",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "05-10",
+          "name": "Double conditional check returns no value for non-numeric string",
+          "criteria": "The flag provider's double accessor returns no value for non-numeric strings",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "Double conditional check returns no value for non-numeric string",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "05-11",
+          "name": "All typed accessors return no value for absent flag",
+          "criteria": "All typed accessors return no value when the flag does not exist",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "All typed accessors return no value for absent flag",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "05-12",
+          "name": "Integer conditional check with evaluation context",
+          "criteria": "The flag provider's integer accessor uses evaluation context to return the context-specific value",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "Integer conditional check with evaluation context",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "05-13",
+          "name": "Boolean conditional check with evaluation context",
+          "criteria": "The flag provider's boolean accessor uses evaluation context to return the context-specific value",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "Boolean conditional check with evaluation context",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "05-14",
+          "name": "Long conditional check with evaluation context",
+          "criteria": "The flag provider's long accessor uses evaluation context to return the context-specific value",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "Long conditional check with evaluation context",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        },
+        {
+          "id": "05-15",
+          "name": "Double conditional check with evaluation context",
+          "criteria": "The flag provider's double accessor uses evaluation context to return the context-specific value",
+          "test_file": "tests/acceptance/flagzen-typed-variants/milestone-4-conditional-api.feature",
+          "scenario_name": "Double conditional check with evaluation context",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/spi/FlagProvider.java"
+          ]
+        }
+      ]
+    }
+  ],
+  "implementation_scope": {
+    "source_directories": [
+      "flagzen-core/src/main/java"
+    ],
+    "test_directories": [
+      "flagzen-core/src/test/java",
+      "tests/acceptance/flagzen-typed-variants"
+    ],
+    "excluded_patterns": [
+      "*.class",
+      "build/**"
+    ]
+  },
+  "validation": {
+    "status": "pending",
+    "reviewer": "",
+    "approved_at": ""
+  }
+}

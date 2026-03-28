@@ -13,9 +13,10 @@ public class UnmatchedVariantException extends FlagZenException {
         super("No variant matches flag value '" + flagValue + "' for key '" + flagKey + "'");
     }
 
-    public UnmatchedVariantException(String flagKey, String flagValue, Collection<String> knownVariants) {
+    public UnmatchedVariantException(String flagKey, String flagValue, Collection<?> knownVariants) {
         super("No variant matches flag value '" + flagValue + "' for key '" + flagKey
-                + "'. Known variants: " + knownVariants.stream().sorted().collect(Collectors.joining(", ")));
+                + "'. Known variants: " + knownVariants.stream()
+                .map(Object::toString).sorted().collect(Collectors.joining(", ")));
     }
 
     private UnmatchedVariantException(String message) {

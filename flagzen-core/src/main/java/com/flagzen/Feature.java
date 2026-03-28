@@ -16,4 +16,7 @@ public @interface Feature {
 
     /** Strategy when no variant matches the flag value. */
     FallbackStrategy fallback() default FallbackStrategy.EXCEPTION;
+
+    /** The type of flag value used to dispatch variants. */
+    FeatureType type() default FeatureType.STRING;
 }

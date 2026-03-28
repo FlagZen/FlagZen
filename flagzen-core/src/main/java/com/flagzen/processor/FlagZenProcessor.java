@@ -3,6 +3,7 @@ package com.flagzen.processor;
 import com.flagzen.DefaultVariant;
 import com.flagzen.FallbackStrategy;
 import com.flagzen.Feature;
+import com.flagzen.FeatureType;
 import com.flagzen.Variant;
 import com.flagzen.Variants;
 
@@ -83,10 +84,11 @@ public class FlagZenProcessor extends AbstractProcessor {
         String interfaceName = featureElement.getSimpleName().toString();
         String flagKey = featureAnnotation.value();
         FallbackStrategy fallbackStrategy = featureAnnotation.fallback();
+        FeatureType featureType = featureAnnotation.type();
 
         List<MethodModel> methods = extractMethods(featureElement);
 
-        List<VariantModel> variants = collectVariants(roundEnv, featureElement);
+        List<VariantModel> variants = collectVariants(roundEnv, featureElement, featureType);
         if (hasDuplicateVariantValues(variants, flagKey, featureElement)) {
             return;
         }
@@ -107,7 +109,7 @@ public class FlagZenProcessor extends AbstractProcessor {
 
         FeatureModel model = new FeatureModel(
                 packageName, interfaceName, flagKey,
-                fallbackStrategy, methods, variants, defaultVariantClassName
+                fallbackStrategy, featureType, methods, variants, defaultVariantClassName
         );
 
         generateCode(model, featureElement);
@@ -217,17 +219,20 @@ public class FlagZenProcessor extends AbstractProcessor {
         }
     }
 
-    private List<VariantModel> collectVariants(RoundEnvironment roundEnv, TypeElement featureElement) {
+    private List<VariantModel> collectVariants(RoundEnvironment roundEnv, TypeElement featureElement,
+                                                FeatureType featureType) {
         List<VariantModel> variants = new ArrayList<>();
 
         for (Element element : roundEnv.getElementsAnnotatedWith(Variant.class)) {
-            processVariantAnnotation(element, element.getAnnotation(Variant.class), featureElement, variants);
+            processVariantAnnotation(element, element.getAnnotation(Variant.class), featureElement,
+                    featureType, variants);
         }
 
         for (Element element : roundEnv.getElementsAnnotatedWith(Variants.class)) {
             Variants container = element.getAnnotation(Variants.class);
             for (Variant variantAnnotation : container.value()) {
-                processVariantAnnotation(element, variantAnnotation, featureElement, variants);
+                processVariantAnnotation(element, variantAnnotation, featureElement,
+                        featureType, variants);
             }
         }
 
@@ -235,7 +240,8 @@ public class FlagZenProcessor extends AbstractProcessor {
     }
 
     private void processVariantAnnotation(Element element, Variant variantAnnotation,
-                                          TypeElement featureElement, List<VariantModel> variants) {
+                                          TypeElement featureElement, FeatureType featureType,
+                                          List<VariantModel> variants) {
         TypeMirror targetFeature = extractVariantOf(variantAnnotation);
         if (targetFeature == null) {
             return;
@@ -257,7 +263,11 @@ public class FlagZenProcessor extends AbstractProcessor {
             return;
         }
         String qualifiedName = variantElement.getQualifiedName().toString();
-        variants.add(new VariantModel(qualifiedName, variantAnnotation.value()));
+        if (featureType == FeatureType.INT) {
+            variants.add(new VariantModel(qualifiedName, "", variantAnnotation.intValue(), featureType));
+        } else {
+            variants.add(new VariantModel(qualifiedName, variantAnnotation.value()));
+        }
     }
 
     private boolean implementsInterface(TypeElement variantElement, TypeElement featureElement) {
@@ -346,8 +356,9 @@ public class FlagZenProcessor extends AbstractProcessor {
         for (VariantModel variant : variants) {
             String simpleName = variant.qualifiedClassName()
                     .substring(variant.qualifiedClassName().lastIndexOf('.') + 1);
+            String key = variant.variantKeyLiteral();
             valueToClassNames
-                    .computeIfAbsent(variant.variantValue(), k -> new ArrayList<>())
+                    .computeIfAbsent(key, k -> new ArrayList<>())
                     .add(simpleName);
         }
         boolean foundDuplicate = false;

@@ -2,6 +2,7 @@ package com.flagzen.processor;
 
 import com.flagzen.EvaluationContext;
 import com.flagzen.FallbackStrategy;
+import com.flagzen.FeatureType;
 import com.flagzen.FlagContext;
 import com.flagzen.UnmatchedVariantException;
 import com.flagzen.spi.FeatureMetadata;
@@ -31,9 +32,10 @@ final class ProxyGenerator {
         ClassName flagProviderType = ClassName.get(FlagProvider.class);
         ClassName supplierOfFeature = ClassName.get(Supplier.class);
         ParameterizedTypeName supplierType = ParameterizedTypeName.get(supplierOfFeature, interfaceType);
+        TypeName variantKeyType = variantKeyType(model.featureType());
         ParameterizedTypeName variantsMapType = ParameterizedTypeName.get(
                 ClassName.get(Map.class),
-                ClassName.get(String.class),
+                variantKeyType,
                 supplierType
         );
 
@@ -85,6 +87,7 @@ final class ProxyGenerator {
         ClassName flagProviderType = ClassName.get(FlagProvider.class);
         ClassName supplierOfFeature = ClassName.get(Supplier.class);
         ParameterizedTypeName supplierType = ParameterizedTypeName.get(supplierOfFeature, interfaceType);
+        // Metadata always uses String keys (SPI contract)
         ParameterizedTypeName variantsMapType = ParameterizedTypeName.get(
                 ClassName.get(Map.class),
                 ClassName.get(String.class),
@@ -130,16 +133,8 @@ final class ProxyGenerator {
         metadataBuilder.addMethod(buildDefaultVariantSupplierMethod(model, interfaceType, supplierType));
 
         // createProxy()
-        metadataBuilder.addMethod(MethodSpec.methodBuilder("createProxy")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(interfaceType)
-                .addParameter(flagProviderType, "flagProvider")
-                .addParameter(variantsMapType, "variants")
-                .addParameter(supplierType, "defaultVariant")
-                .addStatement("return new $T(flagProvider, variants, defaultVariant, $T.$L)",
-                        proxyType, FallbackStrategy.class, model.fallbackStrategy().name())
-                .build());
+        metadataBuilder.addMethod(buildCreateProxyMethod(model, interfaceType, proxyType,
+                flagProviderType, variantsMapType, supplierType));
 
         TypeSpec metadataClass = metadataBuilder.build();
         return JavaFile.builder(model.packageName(), metadataClass).build();
@@ -152,14 +147,26 @@ final class ProxyGenerator {
                 .addStatement("$T context = $T.current()", EvaluationContext.class, FlagContext.class)
                 .addStatement("$T<$T> flagValue = (context != null) ? flagProvider.getString($S, context) : flagProvider.getString($S)",
                         Optional.class, String.class, model.flagKey(), model.flagKey())
-                .addStatement("$T value = flagValue.orElse(null)", String.class)
-                .beginControlFlow("if (value != null)")
-                .addStatement("$T supplier = variants.get(value)", supplierType)
-                .beginControlFlow("if (supplier != null)")
-                .addStatement("return supplier.get()")
-                .endControlFlow()
-                .endControlFlow()
-                .beginControlFlow("if (defaultVariant != null)")
+                .addStatement("$T rawValue = flagValue.orElse(null)", String.class);
+
+        if (model.featureType() == FeatureType.INT) {
+            builder.beginControlFlow("if (rawValue != null)")
+                    .addStatement("$T key = $T.parseInt(rawValue)", int.class, Integer.class)
+                    .addStatement("$T supplier = variants.get(key)", supplierType)
+                    .beginControlFlow("if (supplier != null)")
+                    .addStatement("return supplier.get()")
+                    .endControlFlow()
+                    .endControlFlow();
+        } else {
+            builder.beginControlFlow("if (rawValue != null)")
+                    .addStatement("$T supplier = variants.get(rawValue)", supplierType)
+                    .beginControlFlow("if (supplier != null)")
+                    .addStatement("return supplier.get()")
+                    .endControlFlow()
+                    .endControlFlow();
+        }
+
+        builder.beginControlFlow("if (defaultVariant != null)")
                 .addStatement("return defaultVariant.get()")
                 .endControlFlow();
 
@@ -167,11 +174,11 @@ final class ProxyGenerator {
             builder.addStatement("return null");
         } else {
             builder
-                .beginControlFlow("if (value == null)")
+                .beginControlFlow("if (rawValue == null)")
                 .addStatement("throw $T.noFlagValue($S)",
                         UnmatchedVariantException.class, model.flagKey())
                 .endControlFlow()
-                .addStatement("throw new $T($S, value, variants.keySet())",
+                .addStatement("throw new $T($S, rawValue, variants.keySet())",
                         UnmatchedVariantException.class, model.flagKey());
         }
 
@@ -264,8 +271,9 @@ final class ProxyGenerator {
             for (int i = 0; i < model.variants().size(); i++) {
                 VariantModel variant = model.variants().get(i);
                 if (i > 0) mapBuilder.add(",");
+                // Metadata always uses string keys (SPI contract)
                 mapBuilder.add("\n    $S, ($T) $T::new",
-                        variant.variantValue(),
+                        variant.variantKeyLiteral(),
                         supplierType,
                         ClassName.bestGuess(variant.qualifiedClassName()));
             }
@@ -274,6 +282,44 @@ final class ProxyGenerator {
         }
 
         return builder.build();
+    }
+
+    private MethodSpec buildCreateProxyMethod(FeatureModel model, ClassName interfaceType,
+                                                ClassName proxyType, ClassName flagProviderType,
+                                                ParameterizedTypeName variantsMapType,
+                                                ParameterizedTypeName supplierType) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("createProxy")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(interfaceType)
+                .addParameter(flagProviderType, "flagProvider")
+                .addParameter(variantsMapType, "variants")
+                .addParameter(supplierType, "defaultVariant");
+
+        if (model.featureType() == FeatureType.INT) {
+            // Convert Map<String, Supplier<T>> to Map<Integer, Supplier<T>>
+            ParameterizedTypeName intMapType = ParameterizedTypeName.get(
+                    ClassName.get(Map.class),
+                    ClassName.get(Integer.class),
+                    supplierType
+            );
+            builder.addStatement("$T intVariants = new $T<>()", intMapType, ClassName.get("java.util", "HashMap"));
+            builder.addStatement("variants.forEach((k, v) -> intVariants.put($T.parseInt(k), v))", Integer.class);
+            builder.addStatement("return new $T(flagProvider, intVariants, defaultVariant, $T.$L)",
+                    proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
+        } else {
+            builder.addStatement("return new $T(flagProvider, variants, defaultVariant, $T.$L)",
+                    proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
+        }
+
+        return builder.build();
+    }
+
+    private static TypeName variantKeyType(FeatureType featureType) {
+        return switch (featureType) {
+            case INT -> ClassName.get(Integer.class);
+            default -> ClassName.get(String.class);
+        };
     }
 
     private MethodSpec buildDefaultVariantSupplierMethod(FeatureModel model, ClassName interfaceType,

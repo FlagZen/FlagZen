@@ -1,6 +1,7 @@
 package com.flagzen.processor;
 
 import com.flagzen.FallbackStrategy;
+import com.flagzen.FeatureType;
 
 import java.util.List;
 
@@ -12,10 +13,21 @@ record FeatureModel(
         String interfaceName,
         String flagKey,
         FallbackStrategy fallbackStrategy,
+        FeatureType featureType,
         List<MethodModel> methods,
         List<VariantModel> variants,
         String defaultVariantClassName
 ) {
+
+    /**
+     * Backward-compatible constructor for STRING-typed features.
+     */
+    FeatureModel(String packageName, String interfaceName, String flagKey,
+                 FallbackStrategy fallbackStrategy, List<MethodModel> methods,
+                 List<VariantModel> variants, String defaultVariantClassName) {
+        this(packageName, interfaceName, flagKey, fallbackStrategy, FeatureType.STRING,
+                methods, variants, defaultVariantClassName);
+    }
 
     String proxyClassName() {
         return interfaceName + "_FlagZenProxy";
