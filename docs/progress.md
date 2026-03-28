@@ -103,11 +103,18 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 
 ### M3: Environment Variable Provider — `flagzen-env`
 
-**Status: NOT STARTED** | **Release: v1.1.0** | Depends on: M0
+**Status: DONE** | **Release: v1.1.0** | Depends on: M0 | [Artifacts](feature/flagzen-env/)
 
-- [ ] `EnvironmentVariableFlagProvider` implementing `FlagProvider`
-- [ ] Key-to-env-var mapping convention (e.g., `checkout-flow` -> `FLAGZEN_CHECKOUT_FLOW`)
-- [ ] ServiceLoader registration
+- [x] `EnvironmentVariableFlagProvider` implementing `FlagProvider`
+- [x] Key-to-env-var mapping convention (e.g., `checkout-flow` -> `FLAGZEN_CHECKOUT_FLOW`)
+- [x] ServiceLoader registration
+- [x] `flagzen-key-mapping` module: `FlagKeyParser`, `FlagKeyParsers`, `FlagKeyFormat`, `FlagKeyFormats`
+- [x] Built-in parsers: `screamingSnakeCase` (with/without prefix), `camelCase` (with/without prefix)
+- [x] Built-in formatters: kebab, snake, camel, pascal, dot, colon case
+- [x] Configurable prefix per parser
+- [x] Custom lambda parsers and formatters
+- [x] `ConflictStrategy` enum (WARN/ERROR) with cardinality-based defaults
+- [x] First-access conflict warning
 
 ### M13: Multi-Value Variant Mapping — `flagzen-multi-value-variant`
 
