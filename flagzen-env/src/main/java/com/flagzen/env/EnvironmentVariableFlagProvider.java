@@ -159,13 +159,7 @@ public final class EnvironmentVariableFlagProvider implements FlagProvider {
             return this;
         }
 
-        /**
-         * Returns the effective conflict strategy based on explicit setting
-         * or cardinality defaults.
-         *
-         * @return the conflict strategy
-         */
-        public ConflictStrategy effectiveConflictStrategy() {
+        ConflictStrategy effectiveConflictStrategy() {
             if (conflictStrategy != null) {
                 return conflictStrategy;
             }

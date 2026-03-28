@@ -63,10 +63,15 @@ public final class FlagKeyFormats {
      */
     public static FlagKeyFormat pascalCase() {
         return segments -> {
+            if (segments.isEmpty()) {
+                return "";
+            }
             StringBuilder result = new StringBuilder();
             for (String segment : segments) {
-                result.append(Character.toUpperCase(segment.charAt(0)))
-                      .append(segment.substring(1));
+                if (!segment.isEmpty()) {
+                    result.append(Character.toUpperCase(segment.charAt(0)))
+                          .append(segment.substring(1));
+                }
             }
             return result.toString();
         };
