@@ -25,6 +25,16 @@ public final class EnvironmentVariableFlagProvider implements FlagProvider {
 
     private final Map<String, String> flagMap;
 
+    /**
+     * Creates a provider with default configuration.
+     * Required by {@link java.util.ServiceLoader} for automatic discovery.
+     *
+     * <p>Equivalent to calling {@link #create()}.
+     */
+    public EnvironmentVariableFlagProvider() {
+        this(builder().buildFlagMap());
+    }
+
     private EnvironmentVariableFlagProvider(Map<String, String> flagMap) {
         this.flagMap = flagMap;
     }
@@ -100,11 +110,11 @@ public final class EnvironmentVariableFlagProvider implements FlagProvider {
         }
 
         /**
-         * Builds the provider, eagerly loading and mapping all environment variables.
+         * Builds the immutable flag map from the configured environment source.
          *
-         * @return a new provider with the configured settings
+         * @return an immutable map of flag keys to values
          */
-        public EnvironmentVariableFlagProvider build() {
+        Map<String, String> buildFlagMap() {
             Map<String, String> envVars = environmentSource.get();
             Map<String, String> result = new HashMap<>();
             for (var entry : envVars.entrySet()) {
@@ -113,7 +123,16 @@ public final class EnvironmentVariableFlagProvider implements FlagProvider {
                     result.put(flagKey, entry.getValue());
                 });
             }
-            return new EnvironmentVariableFlagProvider(Map.copyOf(result));
+            return Map.copyOf(result);
+        }
+
+        /**
+         * Builds the provider, eagerly loading and mapping all environment variables.
+         *
+         * @return a new provider with the configured settings
+         */
+        public EnvironmentVariableFlagProvider build() {
+            return new EnvironmentVariableFlagProvider(buildFlagMap());
         }
     }
 }
