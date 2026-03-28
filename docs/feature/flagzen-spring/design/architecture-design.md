@@ -6,13 +6,13 @@ flagzen-spring is an **adapter module** in the FlagZen library. It bridges FlagZ
 
 ### Capabilities
 
-| Capability | Description |
-|---|---|
-| Auto-configure `FeatureDispatcher` | Detect `FlagProvider` bean from Spring `ApplicationContext`, create `FeatureDispatcher` singleton |
-| Register feature proxy beans | Discover `FeatureMetadata` via `ServiceLoader`, register a bean definition per `@Feature` interface |
-| Fallback provider | Create `InMemoryFlagProvider` with WARN log when no `FlagProvider` bean exists |
-| Safe composition | `@ConditionalOnMissingBean` on all auto-configured beans, standard Spring back-off pattern |
-| Startup diagnostics | INFO summary and DEBUG per-feature logging |
+|             Capability             |                                             Description                                             |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Auto-configure `FeatureDispatcher` | Detect `FlagProvider` bean from Spring `ApplicationContext`, create `FeatureDispatcher` singleton   |
+| Register feature proxy beans       | Discover `FeatureMetadata` via `ServiceLoader`, register a bean definition per `@Feature` interface |
+| Fallback provider                  | Create `InMemoryFlagProvider` with WARN log when no `FlagProvider` bean exists                      |
+| Safe composition                   | `@ConditionalOnMissingBean` on all auto-configured beans, standard Spring back-off pattern          |
+| Startup diagnostics                | INFO summary and DEBUG per-feature logging                                                          |
 
 ### Module Position in FlagZen Architecture
 
@@ -142,13 +142,13 @@ For each `FeatureMetadata<T>` discovered:
 
 ## 7. Technology Stack
 
-| Component | Technology | Version | License | Rationale |
-|---|---|---|---|---|
+|     Component      |        Technology         |  Version   |  License   |                              Rationale                               |
+| ------------------ | ------------------------- | ---------- | ---------- | -------------------------------------------------------------------- |
 | Auto-configuration | Spring Boot Autoconfigure | 3.x (3.2+) | Apache 2.0 | Standard Spring Boot starter mechanism, required for target audience |
-| DI framework | Spring Framework | 6.x | Apache 2.0 | Transitive via Spring Boot, provides `ImportBeanDefinitionRegistrar` |
-| SPI discovery | `java.util.ServiceLoader` | JDK 17+ | N/A | Already used by flagzen-core, zero additional dependency |
-| Logging | SLF4J (via Spring Boot) | 2.x | MIT | Standard Spring Boot logging, no additional dependency |
-| Build | Gradle | 8.x | Apache 2.0 | Existing project build tool |
+| DI framework       | Spring Framework          | 6.x        | Apache 2.0 | Transitive via Spring Boot, provides `ImportBeanDefinitionRegistrar` |
+| SPI discovery      | `java.util.ServiceLoader` | JDK 17+    | N/A        | Already used by flagzen-core, zero additional dependency             |
+| Logging            | SLF4J (via Spring Boot)   | 2.x        | MIT        | Standard Spring Boot logging, no additional dependency               |
+| Build              | Gradle                    | 8.x        | Apache 2.0 | Existing project build tool                                          |
 
 **Dependencies for flagzen-spring `build.gradle.kts`**:
 
@@ -225,15 +225,15 @@ Note: This is a compile-time/framework API dependency, not a runtime service. Tr
 
 ## 10. Architectural Enforcement
 
-| Rule | Tool | Enforcement |
-|---|---|---|
-| flagzen-spring depends only on flagzen-core + Spring Boot | Gradle dependency constraints | `build.gradle.kts` -- no cross-extension module dependencies |
-| No `java.lang.reflect` usage | ArchUnit | Same rule as core, applied to `com.flagzen.spring..` |
-| Package structure: only `com.flagzen.spring` | ArchUnit | `classes().that().resideInAPackage("com.flagzen.spring..").should().resideInAPackage("com.flagzen.spring")` |
-| Auto-configuration conditional guards | Code review + integration test | Every `@Bean` method has `@ConditionalOnMissingBean` |
+|                           Rule                            |              Tool              |                                                 Enforcement                                                 |
+| --------------------------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| flagzen-spring depends only on flagzen-core + Spring Boot | Gradle dependency constraints  | `build.gradle.kts` -- no cross-extension module dependencies                                                |
+| No `java.lang.reflect` usage                              | ArchUnit                       | Same rule as core, applied to `com.flagzen.spring..`                                                        |
+| Package structure: only `com.flagzen.spring`              | ArchUnit                       | `classes().that().resideInAPackage("com.flagzen.spring..").should().resideInAPackage("com.flagzen.spring")` |
+| Auto-configuration conditional guards                     | Code review + integration test | Every `@Bean` method has `@ConditionalOnMissingBean`                                                        |
 
 ## 11. ADR Index
 
-| ADR | Title | Status |
-|---|---|---|
+|                                 ADR                                  |              Title               |  Status  |
+| -------------------------------------------------------------------- | -------------------------------- | -------- |
 | [ADR-019](../../../adrs/ADR-019-proxy-bean-registration-strategy.md) | Proxy Bean Registration Strategy | Proposed |

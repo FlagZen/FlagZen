@@ -80,10 +80,10 @@ public @interface PinFlag {
 
 ### Attributes
 
-| Attribute | Type | Description |
-|-----------|------|-------------|
+| Attribute |  Type  |                      Description                      |
+| --------- | ------ | ----------------------------------------------------- |
 | `feature` | String | The feature flag key to pin (e.g., `"checkout-flow"`) |
-| `variant` | String | The variant value to pin (e.g., `"CLASSIC"`) |
+| `variant` | String | The variant value to pin (e.g., `"CLASSIC"`)          |
 
 ### Usage
 
@@ -144,9 +144,9 @@ public @interface FlagSource {
 
 ### Attributes
 
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `value` | String | Classpath resource path to the properties file (e.g., `"flags.properties"`) |
+| Attribute |  Type  |                                 Description                                 |
+| --------- | ------ | --------------------------------------------------------------------------- |
+| `value`   | String | Classpath resource path to the properties file (e.g., `"flags.properties"`) |
 
 ### File Format
 
@@ -230,11 +230,13 @@ CheckoutFlow flow = context.resolve(CheckoutFlow.class);
 Pins a flag to a value.
 
 **Signature**
+
 ```java
 public void pin(String key, String value)
 ```
 
 **Parameters**
+
 - `key` (String): The flag key
 - `value` (String): The variant value
 
@@ -252,17 +254,21 @@ context.pin("max-retries", "5");
 Resolves a feature interface to its proxy using the pinned flag values.
 
 **Signature**
+
 ```java
 public <T> T resolve(Class<T> featureType)
 ```
 
 **Type Parameter**
+
 - `T`: The feature interface type
 
 **Parameters**
-- `featureType` (Class<T>): The feature interface class
+
+- `featureType` (`Class<T>`): The feature interface class
 
 **Returns**
+
 - A proxy delegating to the active variant based on pinned flag values
 
 **Example**

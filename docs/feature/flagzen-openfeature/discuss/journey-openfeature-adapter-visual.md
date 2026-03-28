@@ -82,8 +82,8 @@ The adapter maps this to OpenFeature's `EvaluationContext` and passes it to `cli
 
 ## Error Paths
 
-| Error | What Ricardo Sees | Recovery |
-|-------|-------------------|----------|
-| No OpenFeature provider registered | `getString` returns `Optional.empty()` for all keys; FlagZen fallback strategy activates (EXCEPTION/NOOP/DEFAULT) | Register an OpenFeature provider (`OpenFeatureAPI.getInstance().setProviderAndWait(...)`) |
-| OpenFeature returns ERROR reason | `getString` returns `Optional.empty()` | Check OpenFeature provider logs; flag key may not exist upstream |
-| Attribute type not convertible to OpenFeature `Value` | Adapter logs warning, skips unconvertible attribute | Use supported types: String, Boolean, Integer, Long, Double, List, Map |
+|                         Error                         |                                                 What Ricardo Sees                                                 |                                         Recovery                                          |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| No OpenFeature provider registered                    | `getString` returns `Optional.empty()` for all keys; FlagZen fallback strategy activates (EXCEPTION/NOOP/DEFAULT) | Register an OpenFeature provider (`OpenFeatureAPI.getInstance().setProviderAndWait(...)`) |
+| OpenFeature returns ERROR reason                      | `getString` returns `Optional.empty()`                                                                            | Check OpenFeature provider logs; flag key may not exist upstream                          |
+| Attribute type not convertible to OpenFeature `Value` | Adapter logs warning, skips unconvertible attribute                                                               | Use supported types: String, Boolean, Integer, Long, Double, List, Map                    |

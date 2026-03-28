@@ -8,15 +8,16 @@ Complete index of all FlagZen modules with Maven coordinates and descriptions.
 
 The foundation module. Contains annotations, annotation processor, proxy generation, `FeatureDispatcher`, and `FlagProvider` SPI.
 
-| Attribute | Value |
-|-----------|-------|
-| Group ID | `com.flagzen` |
-| Artifact ID | `flagzen-core` |
-| Version | `1.1.0` |
+|  Attribute   |               Value               |
+| ------------ | --------------------------------- |
+| Group ID     | `com.flagzen`                     |
+| Artifact ID  | `flagzen-core`                    |
+| Version      | `1.1.0`                           |
 | Dependencies | None (zero external dependencies) |
-| Java Version | 17+ |
+| Java Version | 17+                               |
 
 **What it provides**:
+
 - `@Feature` annotation
 - `@Variant` annotation with `@Repeatable` support
 - `@DefaultVariant` annotation
@@ -35,6 +36,7 @@ The foundation module. Contains annotations, annotation processor, proxy generat
 **When to use**: Always. This is the base dependency.
 
 **Gradle**:
+
 ```gradle
 dependencies {
     implementation("com.flagzen:flagzen-core:1.1.0")
@@ -48,15 +50,16 @@ dependencies {
 
 JUnit 5 extension with `@PinFlag`, `@FlagSource`, and `TestFlagContext` for testing.
 
-| Attribute | Value |
-|-----------|-------|
-| Group ID | `com.flagzen` |
-| Artifact ID | `flagzen-test` |
-| Version | `1.1.0` |
-| Depends On | `flagzen-core`, `junit-jupiter-api` |
-| Java Version | 17+ |
+|  Attribute   |                Value                |
+| ------------ | ----------------------------------- |
+| Group ID     | `com.flagzen`                       |
+| Artifact ID  | `flagzen-test`                      |
+| Version      | `1.1.0`                             |
+| Depends On   | `flagzen-core`, `junit-jupiter-api` |
+| Java Version | 17+                                 |
 
 **What it provides**:
+
 - `FlagZenExtension` (JUnit 5 extension)
 - `@PinFlag` annotation for declarative flag pinning
 - `@FlagSource` annotation for loading flags from properties files
@@ -65,6 +68,7 @@ JUnit 5 extension with `@PinFlag`, `@FlagSource`, and `TestFlagContext` for test
 **When to use**: In test suites (`testImplementation`). Not needed in production.
 
 **Gradle**:
+
 ```gradle
 dependencies {
     testImplementation("com.flagzen:flagzen-test:1.1.0")
@@ -77,15 +81,16 @@ dependencies {
 
 Reusable parser/formatter infrastructure for converting source names (env vars, config properties) to flag keys.
 
-| Attribute | Value |
-|-----------|-------|
-| Group ID | `com.flagzen` |
-| Artifact ID | `flagzen-key-mapping` |
-| Version | `1.1.0` |
+|  Attribute   |               Value               |
+| ------------ | --------------------------------- |
+| Group ID     | `com.flagzen`                     |
+| Artifact ID  | `flagzen-key-mapping`             |
+| Version      | `1.1.0`                           |
 | Dependencies | None (zero external dependencies) |
-| Java Version | 17+ |
+| Java Version | 17+                               |
 
 **What it provides**:
+
 - `FlagKeyParser` interface
 - `FlagKeyParsers` factory (screamingSnakeCase, camelCase)
 - `FlagKeyFormat` interface
@@ -95,6 +100,7 @@ Reusable parser/formatter infrastructure for converting source names (env vars, 
 **When to use**: When implementing custom `FlagProvider`s that parse source names (env vars, config files, etc.). Used transitively by `flagzen-env`.
 
 **Gradle**:
+
 ```gradle
 dependencies {
     implementation("com.flagzen:flagzen-key-mapping:1.1.0")
@@ -107,15 +113,16 @@ dependencies {
 
 Environment variable `FlagProvider` with configurable key mapping.
 
-| Attribute | Value |
-|-----------|-------|
-| Group ID | `com.flagzen` |
-| Artifact ID | `flagzen-env` |
-| Version | `1.1.0` |
-| Depends On | `flagzen-core`, `flagzen-key-mapping` |
-| Java Version | 17+ |
+|  Attribute   |                 Value                 |
+| ------------ | ------------------------------------- |
+| Group ID     | `com.flagzen`                         |
+| Artifact ID  | `flagzen-env`                         |
+| Version      | `1.1.0`                               |
+| Depends On   | `flagzen-core`, `flagzen-key-mapping` |
+| Java Version | 17+                                   |
 
 **What it provides**:
+
 - `EnvironmentVariableFlagProvider` — reads flags from `System.getenv()`
 - Configurable parsers/formatters for mapping env var names to flag keys
 - Eager loading of all env vars at construction time
@@ -124,6 +131,7 @@ Environment variable `FlagProvider` with configurable key mapping.
 **When to use**: When you want FlagZen flags to be driven by environment variables (common in cloud deployments).
 
 **Gradle**:
+
 ```gradle
 dependencies {
     implementation("com.flagzen:flagzen-env:1.1.0")
@@ -131,6 +139,7 @@ dependencies {
 ```
 
 **Example**:
+
 ```java
 FlagProvider provider = new EnvironmentVariableFlagProvider.builder()
     .parser(FlagKeyParsers.screamingSnakeCase("FLAGZEN_"))
@@ -145,21 +154,23 @@ FlagProvider provider = new EnvironmentVariableFlagProvider.builder()
 
 LaunchDarkly SDK adapter.
 
-| Attribute | Value |
-|-----------|-------|
-| Group ID | `com.flagzen` |
-| Artifact ID | `flagzen-launchdarkly` |
-| Version | `1.1.0` |
-| Depends On | `flagzen-core`, `launchdarkly-java-server-sdk` |
-| Java Version | 17+ |
+|  Attribute   |                     Value                      |
+| ------------ | ---------------------------------------------- |
+| Group ID     | `com.flagzen`                                  |
+| Artifact ID  | `flagzen-launchdarkly`                         |
+| Version      | `1.1.0`                                        |
+| Depends On   | `flagzen-core`, `launchdarkly-java-server-sdk` |
+| Java Version | 17+                                            |
 
 **What it provides**:
+
 - `LaunchDarklyFlagProvider` — adapter to LaunchDarkly SDK
 - Context mapping from `EvaluationContext` to LaunchDarkly users/attributes
 
 **When to use**: When you manage flags via LaunchDarkly's control plane.
 
 **Gradle**:
+
 ```gradle
 dependencies {
     implementation("com.flagzen:flagzen-launchdarkly:1.1.0")
@@ -170,20 +181,22 @@ dependencies {
 
 Togglz SDK adapter.
 
-| Attribute | Value |
-|-----------|-------|
-| Group ID | `com.flagzen` |
-| Artifact ID | `flagzen-togglz` |
-| Version | `1.1.0` |
-| Depends On | `flagzen-core`, `togglz-core` |
-| Java Version | 17+ |
+|  Attribute   |             Value             |
+| ------------ | ----------------------------- |
+| Group ID     | `com.flagzen`                 |
+| Artifact ID  | `flagzen-togglz`              |
+| Version      | `1.1.0`                       |
+| Depends On   | `flagzen-core`, `togglz-core` |
+| Java Version | 17+                           |
 
 **What it provides**:
+
 - `TogglzFlagProvider` — adapter to Togglz feature toggle framework
 
 **When to use**: When you manage flags via Togglz.
 
 **Gradle**:
+
 ```gradle
 dependencies {
     implementation("com.flagzen:flagzen-togglz:1.1.0")
@@ -194,21 +207,23 @@ dependencies {
 
 OpenFeature SDK adapter.
 
-| Attribute | Value |
-|-----------|-------|
-| Group ID | `com.flagzen` |
-| Artifact ID | `flagzen-openfeature` |
-| Version | `1.1.0` |
-| Depends On | `flagzen-core`, `openfeature-sdk` |
-| Java Version | 17+ |
+|  Attribute   |               Value               |
+| ------------ | --------------------------------- |
+| Group ID     | `com.flagzen`                     |
+| Artifact ID  | `flagzen-openfeature`             |
+| Version      | `1.1.0`                           |
+| Depends On   | `flagzen-core`, `openfeature-sdk` |
+| Java Version | 17+                               |
 
 **What it provides**:
+
 - `OpenFeatureFlagProvider` — adapter to OpenFeature SDK
 - Reason-based detection for absent flags
 
 **When to use**: When you use OpenFeature-compliant flag providers (vendor-neutral approach).
 
 **Gradle**:
+
 ```gradle
 dependencies {
     implementation("com.flagzen:flagzen-openfeature:1.1.0")
@@ -221,16 +236,17 @@ dependencies {
 
 Spring Boot auto-configuration for feature proxy injection.
 
-| Attribute | Value |
-|-----------|-------|
-| Group ID | `com.flagzen` |
-| Artifact ID | `flagzen-spring` |
-| Version | `1.1.0` |
-| Depends On | `flagzen-core`, `spring-boot-autoconfigure` |
-| Java Version | 17+ |
-| Spring Boot Version | 2.7+ |
+|      Attribute      |                    Value                    |
+| ------------------- | ------------------------------------------- |
+| Group ID            | `com.flagzen`                               |
+| Artifact ID         | `flagzen-spring`                            |
+| Version             | `1.1.0`                                     |
+| Depends On          | `flagzen-core`, `spring-boot-autoconfigure` |
+| Java Version        | 17+                                         |
+| Spring Boot Version | 2.7+                                        |
 
 **What it provides**:
+
 - `FlagZenAutoConfiguration` — Spring Boot auto-configuration
 - `FeatureDispatcher` bean registration
 - Feature proxy beans for `@Autowired` injection
@@ -239,6 +255,7 @@ Spring Boot auto-configuration for feature proxy injection.
 **When to use**: When building Spring Boot applications (recommended for all Spring Boot projects using FlagZen).
 
 **Gradle**:
+
 ```gradle
 dependencies {
     implementation("com.flagzen:flagzen-spring:1.1.0")
@@ -249,21 +266,23 @@ dependencies {
 
 Reactor `ContextAccessor` for reactive context propagation.
 
-| Attribute | Value |
-|-----------|-------|
-| Group ID | `com.flagzen` |
-| Artifact ID | `flagzen-reactor` |
-| Version | `1.1.0` |
-| Depends On | `flagzen-core`, `reactor-core` |
-| Java Version | 17+ |
+|  Attribute   |             Value              |
+| ------------ | ------------------------------ |
+| Group ID     | `com.flagzen`                  |
+| Artifact ID  | `flagzen-reactor`              |
+| Version      | `1.1.0`                        |
+| Depends On   | `flagzen-core`, `reactor-core` |
+| Java Version | 17+                            |
 
 **What it provides**:
+
 - `ReactorContextAccessor` — provides `EvaluationContext` from Reactor's `Context`
 - Integration with reactive streams
 
 **When to use**: When using Project Reactor for reactive processing and want flags to be context-aware in reactive pipelines.
 
 **Gradle**:
+
 ```gradle
 dependencies {
     implementation("com.flagzen:flagzen-reactor:1.1.0")
@@ -274,21 +293,23 @@ dependencies {
 
 Mutiny `ContextAccessor` for reactive context propagation.
 
-| Attribute | Value |
-|-----------|-------|
-| Group ID | `com.flagzen` |
-| Artifact ID | `flagzen-mutiny` |
-| Version | `1.1.0` |
-| Depends On | `flagzen-core`, `smallrye-mutiny` |
-| Java Version | 17+ |
+|  Attribute   |               Value               |
+| ------------ | --------------------------------- |
+| Group ID     | `com.flagzen`                     |
+| Artifact ID  | `flagzen-mutiny`                  |
+| Version      | `1.1.0`                           |
+| Depends On   | `flagzen-core`, `smallrye-mutiny` |
+| Java Version | 17+                               |
 
 **What it provides**:
+
 - `MutinyContextAccessor` — provides `EvaluationContext` from Mutiny's context
 - Integration with Mutiny reactive streams
 
 **When to use**: When using Mutiny for reactive processing and want flags to be context-aware.
 
 **Gradle**:
+
 ```gradle
 dependencies {
     implementation("com.flagzen:flagzen-mutiny:1.1.0")
@@ -301,15 +322,16 @@ dependencies {
 
 Runnable example applications demonstrating FlagZen usage patterns.
 
-| Attribute | Value |
-|-----------|-------|
-| Group ID | `com.flagzen` |
-| Artifact ID | `flagzen-examples` |
-| Version | `1.1.0` |
-| Status | Not published to Maven Central |
-| Build | Available in source repository only |
+|  Attribute  |                Value                |
+| ----------- | ----------------------------------- |
+| Group ID    | `com.flagzen`                       |
+| Artifact ID | `flagzen-examples`                  |
+| Version     | `1.1.0`                             |
+| Status      | Not published to Maven Central      |
+| Build       | Available in source repository only |
 
 **What it contains**:
+
 - Spring Boot example with environment variable provider
 - Standalone example with custom provider
 - Testing examples with `@PinFlag` and `@FlagSource`
@@ -355,18 +377,18 @@ dependencies {
 
 ## Support Matrix
 
-| Module | Java | Spring Boot | Notes |
-|--------|------|-------------|-------|
-| flagzen-core | 17+ | N/A | Zero external dependencies |
-| flagzen-test | 17+ | N/A | JUnit 5 only |
-| flagzen-key-mapping | 17+ | N/A | Zero external dependencies |
-| flagzen-env | 17+ | N/A | Pure Java, no Spring required |
-| flagzen-spring | 17+ | 2.7+ | Tested with 2.7 LTS and 3.x |
-| flagzen-reactor | 17+ | N/A | Works standalone or in Spring |
-| flagzen-mutiny | 17+ | N/A | Works standalone or in Quarkus |
-| flagzen-launchdarkly | 17+ | N/A | LaunchDarkly SDK 7.0+ |
-| flagzen-togglz | 17+ | N/A | Togglz 2.x |
-| flagzen-openfeature | 17+ | N/A | OpenFeature SDK 1.0+ |
+|        Module        | Java | Spring Boot |             Notes              |
+| -------------------- | ---- | ----------- | ------------------------------ |
+| flagzen-core         | 17+  | N/A         | Zero external dependencies     |
+| flagzen-test         | 17+  | N/A         | JUnit 5 only                   |
+| flagzen-key-mapping  | 17+  | N/A         | Zero external dependencies     |
+| flagzen-env          | 17+  | N/A         | Pure Java, no Spring required  |
+| flagzen-spring       | 17+  | 2.7+        | Tested with 2.7 LTS and 3.x    |
+| flagzen-reactor      | 17+  | N/A         | Works standalone or in Spring  |
+| flagzen-mutiny       | 17+  | N/A         | Works standalone or in Quarkus |
+| flagzen-launchdarkly | 17+  | N/A         | LaunchDarkly SDK 7.0+          |
+| flagzen-togglz       | 17+  | N/A         | Togglz 2.x                     |
+| flagzen-openfeature  | 17+  | N/A         | OpenFeature SDK 1.0+           |
 
 ## Minimal Setup
 

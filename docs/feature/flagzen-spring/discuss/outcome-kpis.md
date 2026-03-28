@@ -8,11 +8,11 @@ Spring Boot developers integrate FlagZen feature flags with the same ease as any
 
 ### Outcome KPIs
 
-| # | Who | Does What | By How Much | Baseline | Measured By | Type |
-|---|-----|-----------|-------------|----------|-------------|------|
-| 1 | Spring Boot developer | Injects feature proxy via @Autowired without manual FeatureDispatcher setup | 100% of @Feature interfaces available as beans | 0% (manual wiring required) | Integration test: all FeatureMetadata on classpath produce injectable beans | Leading |
-| 2 | Spring Boot developer | Gets clear error/warning when misconfigured | 100% of misconfig paths produce actionable message | N/A (module does not exist) | Error path test coverage for missing provider, missing metadata, duplicate beans | Leading |
-| 3 | Spring Boot developer | Keeps existing FlagZen tests working after adding spring module | Zero test regressions | Existing flagzen-test suite passes | CI: flagzen-test suite green after flagzen-spring added to integration project | Guardrail |
+|  #  |          Who          |                                  Does What                                  |                    By How Much                     |              Baseline              |                                   Measured By                                    |   Type    |
+| --- | --------------------- | --------------------------------------------------------------------------- | -------------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------- | --------- |
+| 1   | Spring Boot developer | Injects feature proxy via @Autowired without manual FeatureDispatcher setup | 100% of @Feature interfaces available as beans     | 0% (manual wiring required)        | Integration test: all FeatureMetadata on classpath produce injectable beans      | Leading   |
+| 2   | Spring Boot developer | Gets clear error/warning when misconfigured                                 | 100% of misconfig paths produce actionable message | N/A (module does not exist)        | Error path test coverage for missing provider, missing metadata, duplicate beans | Leading   |
+| 3   | Spring Boot developer | Keeps existing FlagZen tests working after adding spring module             | Zero test regressions                              | Existing flagzen-test suite passes | CI: flagzen-test suite green after flagzen-spring added to integration project   | Guardrail |
 
 ### Metric Hierarchy
 
@@ -22,11 +22,11 @@ Spring Boot developers integrate FlagZen feature flags with the same ease as any
 
 ### Measurement Plan
 
-| KPI | Data Source | Collection Method | Frequency | Owner |
-|-----|------------|-------------------|-----------|-------|
-| Proxy injection coverage | Integration tests | Automated test suite | Every CI build | flagzen maintainers |
-| Error path coverage | Integration tests | Misconfig scenario tests | Every CI build | flagzen maintainers |
-| Startup time impact | Benchmark test | Spring Boot startup timing | Per release | flagzen maintainers |
+|           KPI            |    Data Source    |     Collection Method      |   Frequency    |        Owner        |
+| ------------------------ | ----------------- | -------------------------- | -------------- | ------------------- |
+| Proxy injection coverage | Integration tests | Automated test suite       | Every CI build | flagzen maintainers |
+| Error path coverage      | Integration tests | Misconfig scenario tests   | Every CI build | flagzen maintainers |
+| Startup time impact      | Benchmark test    | Spring Boot startup timing | Per release    | flagzen maintainers |
 
 ### Hypothesis
 

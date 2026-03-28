@@ -14,25 +14,25 @@ Two classes total. This is a thin adapter module -- complexity lives in the Open
 
 ### `OpenFeatureFlagProvider`
 
-| Member | Visibility | Description |
-|--------|-----------|-------------|
-| No-arg constructor | `public` | Uses `OpenFeatureAPI.getInstance().getClient()`. Required for ServiceLoader. |
-| `create(Client)` | `public static` | Factory method accepting an explicit OpenFeature `Client` instance. |
-| `getString(String)` | `public` | Override from `FlagProvider`. Delegates to `Client.getStringDetails`. |
-| `getString(String, EvaluationContext)` | `public` | Override from `FlagProvider`. Context-aware string resolution. |
-| `getBoolean(String)` | `public` | Override from `FlagProvider`. Delegates to `Client.getBooleanDetails`. |
-| `getBoolean(String, EvaluationContext)` | `public` | Override from `FlagProvider`. Context-aware boolean resolution. |
-| `getInt(String)` | `public` | Override from `FlagProvider`. Delegates to `Client.getIntegerDetails`. |
-| `getInt(String, EvaluationContext)` | `public` | Override from `FlagProvider`. Context-aware integer resolution. |
-| `getLong(String)` | `public` | Override from `FlagProvider`. Delegates to `Client.getIntegerDetails` + widening. |
-| `getLong(String, EvaluationContext)` | `public` | Override from `FlagProvider`. Context-aware long resolution. |
-| `getDouble(String)` | `public` | Override from `FlagProvider`. Delegates to `Client.getDoubleDetails`. |
-| `getDouble(String, EvaluationContext)` | `public` | Override from `FlagProvider`. Context-aware double resolution. |
+|                 Member                  |   Visibility    |                                    Description                                    |
+| --------------------------------------- | --------------- | --------------------------------------------------------------------------------- |
+| No-arg constructor                      | `public`        | Uses `OpenFeatureAPI.getInstance().getClient()`. Required for ServiceLoader.      |
+| `create(Client)`                        | `public static` | Factory method accepting an explicit OpenFeature `Client` instance.               |
+| `getString(String)`                     | `public`        | Override from `FlagProvider`. Delegates to `Client.getStringDetails`.             |
+| `getString(String, EvaluationContext)`  | `public`        | Override from `FlagProvider`. Context-aware string resolution.                    |
+| `getBoolean(String)`                    | `public`        | Override from `FlagProvider`. Delegates to `Client.getBooleanDetails`.            |
+| `getBoolean(String, EvaluationContext)` | `public`        | Override from `FlagProvider`. Context-aware boolean resolution.                   |
+| `getInt(String)`                        | `public`        | Override from `FlagProvider`. Delegates to `Client.getIntegerDetails`.            |
+| `getInt(String, EvaluationContext)`     | `public`        | Override from `FlagProvider`. Context-aware integer resolution.                   |
+| `getLong(String)`                       | `public`        | Override from `FlagProvider`. Delegates to `Client.getIntegerDetails` + widening. |
+| `getLong(String, EvaluationContext)`    | `public`        | Override from `FlagProvider`. Context-aware long resolution.                      |
+| `getDouble(String)`                     | `public`        | Override from `FlagProvider`. Delegates to `Client.getDoubleDetails`.             |
+| `getDouble(String, EvaluationContext)`  | `public`        | Override from `FlagProvider`. Context-aware double resolution.                    |
 
 ### `EvaluationContextMapper`
 
-| Member | Visibility | Description |
-|--------|-----------|-------------|
+|     Member     |        Visibility        |                                     Description                                      |
+| -------------- | ------------------------ | ------------------------------------------------------------------------------------ |
 | Mapping method | `package-private static` | Converts `com.flagzen.EvaluationContext` to `dev.openfeature.sdk.EvaluationContext`. |
 
 Package-private because it is an internal implementation detail. Only `OpenFeatureFlagProvider` uses it. No reason to expose it in the public API.

@@ -253,16 +253,19 @@ checkout-flow=PREMIUM
 Create separate property files for clarity:
 
 `src/test/resources/classic-checkout.properties`:
+
 ```properties
 checkout-flow=CLASSIC
 ```
 
 `src/test/resources/streamlined-checkout.properties`:
+
 ```properties
 checkout-flow=STREAMLINED
 ```
 
 `src/test/resources/premium-checkout.properties`:
+
 ```properties
 checkout-flow=PREMIUM
 ```

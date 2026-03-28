@@ -183,11 +183,13 @@ The generated proxy's method:
 FlagZen follows a strict ports-and-adapters pattern:
 
 **Core module** (`flagzen-core`):
+
 - Defines the contracts (ports): `FlagProvider` SPI, `ContextAccessor` SPI
 - Provides the machinery: `FeatureDispatcher`, annotation processor, proxy generation
 - Zero external dependencies — minimal, stable core
 
 **Adapter modules** (`flagzen-env`, `flagzen-spring`, `flagzen-launchdarkly`, etc.):
+
 - Implement ports: each provider adapts to a different flag source
 - Depend inward on `flagzen-core`
 - No adapter depends on another adapter
@@ -224,6 +226,7 @@ flagzen-core (zero external deps)
 ```
 
 Each extension module:
+
 - Depends only on `flagzen-core` (and its SPI contracts)
 - Does not depend on other extension modules
 - Can be used independently
@@ -289,12 +292,12 @@ Implementations (like `ReactorContextAccessor`) supply context from framework-sp
 
 FlagZen is designed for thread-safe, concurrent access:
 
-| Component | Strategy |
-|-----------|----------|
-| Generated proxies | Stateless; all dispatch is method calls and lookups. Thread-safe by design. |
-| `FeatureDispatcher` | Caches proxies in `ConcurrentHashMap`. Thread-safe. |
-| `InMemoryFlagProvider` | Uses `ConcurrentHashMap`. Thread-safe. |
-| `EnvironmentVariableFlagProvider` | Eagerly loads env vars at construction into an immutable map. Thread-safe. |
+|             Component             |                                  Strategy                                   |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| Generated proxies                 | Stateless; all dispatch is method calls and lookups. Thread-safe by design. |
+| `FeatureDispatcher`               | Caches proxies in `ConcurrentHashMap`. Thread-safe.                         |
+| `InMemoryFlagProvider`            | Uses `ConcurrentHashMap`. Thread-safe.                                      |
+| `EnvironmentVariableFlagProvider` | Eagerly loads env vars at construction into an immutable map. Thread-safe.  |
 
 The proxy re-evaluates the flag on every call, so flag changes are reflected immediately across all threads.
 
@@ -303,6 +306,7 @@ The proxy re-evaluates the flag on every call, so flag changes are reflected imm
 **Proxy construction**: Happens once per feature per dispatcher. Cost: service loading + proxy instantiation. Cached afterward.
 
 **Method call dispatch**: O(1) operation:
+
 - Query flag provider: typically `Map.get()` or similar constant-time operation
 - Look up variant: `Map.get()` in the variant map
 - Delegate method: direct method invocation
@@ -356,6 +360,7 @@ Trade-off: More boilerplate at compile time vs. runtime simplicity.
 **Chosen**: Compile-time generation.
 
 **Rationale**:
+
 - Zero runtime reflection ⇒ faster, GraalVM compatible, debuggable
 - Compile-time validation ⇒ fail fast, before production
 - Generated code is clear, inspectable bytecode
@@ -367,6 +372,7 @@ Trade-off: Single proxy per feature vs. multiple instances.
 **Chosen**: Singleton caching.
 
 **Rationale**:
+
 - Proxies are stateless; caching is safe
 - Reduces GC pressure and object churn
 - Simpler API (dispatcher doesn't need object management)
@@ -378,6 +384,7 @@ Trade-off: Proxy re-evaluates on every call vs. caching within proxy.
 **Chosen**: Eager evaluation on every call.
 
 **Rationale**:
+
 - Reflect flag changes immediately without restart
 - No cache invalidation complexity
 - Correct for dynamic flag systems (LaunchDarkly, etc.)
@@ -388,6 +395,7 @@ Trade-off: Proxy re-evaluates on every call vs. caching within proxy.
 ### Spring Boot
 
 `FlagZenAutoConfiguration` registers:
+
 - `FeatureDispatcher` bean from the available `FlagProvider`
 - Feature proxy beans for `@Autowired` injection
 - Uses `ImportBeanDefinitionRegistrar` for dynamic bean discovery

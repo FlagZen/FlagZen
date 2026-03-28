@@ -26,20 +26,25 @@ public interface FlagProvider {
 Returns the current value for the given flag key as a string.
 
 **Signature**
+
 ```java
 Optional<String> getString(String key)
 ```
 
 **Parameters**
+
 - `key` (String): The flag key to look up. Non-null.
 
 **Returns**
+
 - `Optional<String>`: The flag value if found, or `Optional.empty()` if the key is not set or unavailable.
 
 **Thread Safety**
+
 - Implementations must be thread-safe. Multiple threads may call this method concurrently.
 
 **Stability**
+
 - Flag values can change between calls (e.g., from a remote service). Callers should not assume cached values.
 
 **Example**
@@ -64,6 +69,7 @@ public class MyFlagProvider implements FlagProvider {
 Returns the current value for the given flag key using the provided evaluation context.
 
 **Signature**
+
 ```java
 default Optional<String> getString(String key, EvaluationContext context) {
     return getString(key);
@@ -71,16 +77,20 @@ default Optional<String> getString(String key, EvaluationContext context) {
 ```
 
 **Parameters**
+
 - `key` (String): The flag key to look up. Non-null.
 - `context` (EvaluationContext): The evaluation context containing targeting key and attributes. Non-null. See `EvaluationContext` reference.
 
 **Returns**
+
 - `Optional<String>`: The flag value if found, or `Optional.empty()`.
 
 **Default Behavior**
+
 - The default implementation ignores the context and delegates to `getString(String)`. This ensures backward compatibility for providers that do not need contextual resolution.
 
 **Override When**
+
 - Your provider supports targeting flags to specific users, segments, or request scopes
 - You need custom logic based on the targeting key or attributes
 
@@ -106,6 +116,7 @@ All typed methods have default implementations that parse the string value from 
 ### `getBoolean(String key)`
 
 **Default Implementation**
+
 ```java
 default Optional<Boolean> getBoolean(String key) {
     return getString(key)
@@ -115,12 +126,14 @@ default Optional<Boolean> getBoolean(String key) {
 ```
 
 **Parsing**
+
 - Only exact `"true"` or `"false"` (case-insensitive) are recognized
 - Any other value returns `Optional.empty()`
 
 ### `getBoolean(String key, EvaluationContext context)`
 
 **Default Implementation**
+
 ```java
 default Optional<Boolean> getBoolean(String key, EvaluationContext context) {
     return getString(key, context)
@@ -132,6 +145,7 @@ default Optional<Boolean> getBoolean(String key, EvaluationContext context) {
 ### `getInt(String key)`
 
 **Default Implementation**
+
 ```java
 default OptionalInt getInt(String key) {
     try {
@@ -146,6 +160,7 @@ default OptionalInt getInt(String key) {
 ```
 
 **Parsing**
+
 - Calls `Integer.parseInt(value)` on the string value
 - Returns empty on `NumberFormatException`
 - Valid range: -2,147,483,648 to 2,147,483,647
@@ -153,6 +168,7 @@ default OptionalInt getInt(String key) {
 ### `getInt(String key, EvaluationContext context)`
 
 **Default Implementation**
+
 ```java
 default OptionalInt getInt(String key, EvaluationContext context) {
     try {
@@ -169,6 +185,7 @@ default OptionalInt getInt(String key, EvaluationContext context) {
 ### `getLong(String key)`
 
 **Default Implementation**
+
 ```java
 default OptionalLong getLong(String key) {
     try {
@@ -183,6 +200,7 @@ default OptionalLong getLong(String key) {
 ```
 
 **Parsing**
+
 - Calls `Long.parseLong(value)` on the string value
 - Returns empty on `NumberFormatException`
 - Valid range: -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807
@@ -190,6 +208,7 @@ default OptionalLong getLong(String key) {
 ### `getLong(String key, EvaluationContext context)`
 
 **Default Implementation**
+
 ```java
 default OptionalLong getLong(String key, EvaluationContext context) {
     try {
@@ -206,6 +225,7 @@ default OptionalLong getLong(String key, EvaluationContext context) {
 ### `getDouble(String key)`
 
 **Default Implementation**
+
 ```java
 default OptionalDouble getDouble(String key) {
     try {
@@ -220,6 +240,7 @@ default OptionalDouble getDouble(String key) {
 ```
 
 **Parsing**
+
 - Calls `Double.parseDouble(value)` on the string value
 - Returns empty on `NumberFormatException`
 - Valid range: IEEE 754 double range
@@ -227,6 +248,7 @@ default OptionalDouble getDouble(String key) {
 ### `getDouble(String key, EvaluationContext context)`
 
 **Default Implementation**
+
 ```java
 default OptionalDouble getDouble(String key, EvaluationContext context) {
     try {
@@ -295,7 +317,8 @@ Implementations are discovered via `java.util.ServiceLoader`:
 3. The file is discovered automatically when the provider module is on the classpath
 
 Example `META-INF/services/com.flagzen.spi.FlagProvider`:
-```
+
+```text
 com.flagzen.env.EnvironmentVariableFlagProvider
 ```
 

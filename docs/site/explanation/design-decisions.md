@@ -8,14 +8,14 @@ FlagZen's design reflects a series of intentional choices, each made to solve a 
 
 ## Decision Index
 
-| ADR | Decision | Status |
-|-----|----------|--------|
+|   ADR   |                   Decision                   |  Status  |
+| ------- | -------------------------------------------- | -------- |
 | ADR-015 | Module split: separate `flagzen-key-mapping` | Accepted |
-| ADR-016 | Eager loading of environment variables | Accepted |
-| ADR-017 | Conflict strategy for key mapping | Accepted |
-| ADR-018 | Variant annotation array migration | Proposed |
-| ADR-019 | Spring Boot proxy bean registration | Proposed |
-| ADR-020 | OpenFeature absence detection strategy | Proposed |
+| ADR-016 | Eager loading of environment variables       | Accepted |
+| ADR-017 | Conflict strategy for key mapping            | Accepted |
+| ADR-018 | Variant annotation array migration           | Proposed |
+| ADR-019 | Spring Boot proxy bean registration          | Proposed |
+| ADR-020 | OpenFeature absence detection strategy       | Proposed |
 
 ## ADR-015: Why a Separate Key Mapping Module?
 
@@ -111,12 +111,12 @@ Both map to `checkout-flow`. What should happen?
 
 Conflict risk varies by cardinality:
 
-| Parsers | Formatters | Risk | Example |
-|---------|------------|------|---------|
-| 1 | 1 | Low | Single convention, unlikely collision |
-| N | 1 | Medium | Multiple parsers may match overlapping env vars |
-| 1 | N | Medium | Different formatters reduce surface |
-| N | N | High | Cartesian product maximizes collisions |
+| Parsers | Formatters |  Risk  |                     Example                     |
+| ------- | ---------- | ------ | ----------------------------------------------- |
+| 1       | 1          | Low    | Single convention, unlikely collision           |
+| N       | 1          | Medium | Multiple parsers may match overlapping env vars |
+| 1       | N          | Medium | Different formatters reduce surface             |
+| N       | N          | High   | Cartesian product maximizes collisions          |
 
 ### Alternatives Considered
 
@@ -138,11 +138,11 @@ Conflict risk varies by cardinality:
 Introduce `ConflictStrategy` enum with `WARN` and `ERROR` values. Cardinality-based defaults:
 
 | Parsers | Formatters | Default |
-|---------|------------|---------|
-| 1 | 1 | WARN |
-| N | 1 | WARN |
-| 1 | N | WARN |
-| N | N | ERROR |
+| ------- | ---------- | ------- |
+| 1       | 1          | WARN    |
+| N       | 1          | WARN    |
+| 1       | N          | WARN    |
+| N       | N          | ERROR   |
 
 High-cardinality configs (N×N) default to `ERROR` to fail fast. Lower cardinalities default to `WARN` for flexibility.
 
@@ -206,6 +206,7 @@ Integer/long values like `Integer.MIN_VALUE` become valid flag values. Processor
 `flagzen-spring` needs to register one bean per discovered `@Feature` interface. The number and types are not known at compile time (depends on which `@Feature` interfaces the consumer's processor generated).
 
 Requirements:
+
 1. Register beans with correct feature interface type (for `@Autowired CheckoutFlow`)
 2. Resolve lazily via `FeatureDispatcher.resolve()` after dispatcher bean exists
 3. Integrate cleanly with Spring Boot `@AutoConfiguration` patterns

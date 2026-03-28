@@ -2,16 +2,16 @@
 
 ## Decision Summary
 
-| # | Decision | Choice | Rationale |
-|---|----------|--------|-----------|
-| D1 | Architectural style | Driven adapter in existing ports-and-adapters | Follows project architecture; this is a textbook adapter |
-| D2 | Absent flag detection | Reason-based via `get*Details` | Correct for all types, no sentinel fragility (ADR-020) |
-| D3 | Typed method delegation | Override all 10 FlagProvider methods | Native typed calls avoid string round-tripping |
-| D4 | Context mapper visibility | Package-private | Internal detail; one consumer (`OpenFeatureFlagProvider`) |
-| D5 | Constructor strategy | No-arg + static factory `create(Client)` | No builder -- insufficient configuration dimensions |
-| D6 | Logging framework | java.util.logging (JUL) | Consistent with flagzen-env; zero added dependencies |
-| D7 | Long type handling | `getIntegerDetails` + widen to long | OpenFeature SDK has no `getLongDetails`; documented limitation |
-| D8 | `DISABLED` reason handling | Treat as resolved (return value) | A disabled flag returning a value is still a real resolution |
+|  #  |          Decision          |                    Choice                     |                           Rationale                            |
+| --- | -------------------------- | --------------------------------------------- | -------------------------------------------------------------- |
+| D1  | Architectural style        | Driven adapter in existing ports-and-adapters | Follows project architecture; this is a textbook adapter       |
+| D2  | Absent flag detection      | Reason-based via `get*Details`                | Correct for all types, no sentinel fragility (ADR-020)         |
+| D3  | Typed method delegation    | Override all 10 FlagProvider methods          | Native typed calls avoid string round-tripping                 |
+| D4  | Context mapper visibility  | Package-private                               | Internal detail; one consumer (`OpenFeatureFlagProvider`)      |
+| D5  | Constructor strategy       | No-arg + static factory `create(Client)`      | No builder -- insufficient configuration dimensions            |
+| D6  | Logging framework          | java.util.logging (JUL)                       | Consistent with flagzen-env; zero added dependencies           |
+| D7  | Long type handling         | `getIntegerDetails` + widen to long           | OpenFeature SDK has no `getLongDetails`; documented limitation |
+| D8  | `DISABLED` reason handling | Treat as resolved (return value)              | A disabled flag returning a value is still a real resolution   |
 
 ## Decisions Carried Forward from DISCUSS
 

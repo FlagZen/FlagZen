@@ -41,6 +41,7 @@ public interface FlagKeyParser {
 Matches `SCREAMING_SNAKE_CASE` names with a given prefix.
 
 **Signature**
+
 ```java
 public static FlagKeyParser screamingSnakeCase(String prefix)
 ```
@@ -65,6 +66,7 @@ parser.parse("OTHER_PREFIX_VALUE");
 Matches any `SCREAMING_SNAKE_CASE` name without a prefix.
 
 **Signature**
+
 ```java
 public static FlagKeyParser screamingSnakeCase()
 ```
@@ -89,6 +91,7 @@ parser.parse("lowercase_value");
 Matches camelCase names with a given prefix, splitting on uppercase boundaries.
 
 **Signature**
+
 ```java
 public static FlagKeyParser camelCase(String prefix)
 ```
@@ -113,6 +116,7 @@ parser.parse("otherAppValue");
 Matches any camelCase name without a prefix.
 
 **Signature**
+
 ```java
 public static FlagKeyParser camelCase()
 ```
@@ -264,21 +268,21 @@ public enum ConflictStrategy {
 
 ### Values
 
-| Value | Behavior |
-|-------|----------|
-| `WARN` | Log a warning at construction and on first access, keep the last mapping |
-| `ERROR` | Throw `IllegalStateException` at construction, provider is not created |
+|  Value  |                                 Behavior                                 |
+| ------- | ------------------------------------------------------------------------ |
+| `WARN`  | Log a warning at construction and on first access, keep the last mapping |
+| `ERROR` | Throw `IllegalStateException` at construction, provider is not created   |
 
 ### Cardinality-Based Defaults
 
 The default conflict strategy depends on the number of parsers and formatters:
 
-| Parsers | Formatters | Default | Reasoning |
-|---------|------------|---------|-----------|
-| 1 | 1 | WARN | Low collision risk (only env var name collision) |
-| N | 1 | WARN | Medium risk (different parsers may overlap) |
-| 1 | N | WARN | Medium risk (multiple formatters reduce collisions) |
-| N | N | ERROR | High risk (cartesian product maximizes collisions) |
+| Parsers | Formatters | Default |                      Reasoning                      |
+| ------- | ---------- | ------- | --------------------------------------------------- |
+| 1       | 1          | WARN    | Low collision risk (only env var name collision)    |
+| N       | 1          | WARN    | Medium risk (different parsers may overlap)         |
+| 1       | N          | WARN    | Medium risk (multiple formatters reduce collisions) |
+| N       | N          | ERROR   | High risk (cartesian product maximizes collisions)  |
 
 ### Example
 

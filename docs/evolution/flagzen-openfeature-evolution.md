@@ -25,8 +25,8 @@ New Gradle submodule bridging the OpenFeature SDK to FlagZen's FlagProvider SPI.
 
 ## Quality Gates
 
-|                  Gate                   |           Result           |
-| --------------------------------------- | -------------------------- |
-| Acceptance tests (16 scenarios)         | PASS                       |
-| PITest mutation testing (flagzen-core)  | 84% kill rate (gate: ≥80%) |
+|                  Gate                  |           Result           |
+| -------------------------------------- | -------------------------- |
+| Acceptance tests (16 scenarios)        | PASS                       |
+| PITest mutation testing (flagzen-core) | 84% kill rate (gate: ≥80%) |
 | DES integrity verification (16 steps)  | PASS                       |

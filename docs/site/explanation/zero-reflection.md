@@ -35,6 +35,7 @@ return variant.execute();
 ```
 
 Operations:
+
 1. `Class.forName()` — classpath lookup, classloader interaction
 2. `getConstructor()` — reflective method lookup
 3. `newInstance()` — reflective constructor invocation
@@ -53,6 +54,7 @@ throw new UnmatchedVariantException(...);
 ```
 
 Operations:
+
 1. `HashMap.get()` — constant-time lookup
 2. Method call — direct invocation on JIT-compiled code
 3. Optional constructor invocation in the supplier
@@ -261,14 +263,14 @@ Generated proxy code is also verified to contain no reflection imports.
 
 ## The Cost-Benefit Summary
 
-| Aspect | Reflection | Generated (FlagZen) |
-|--------|-----------|-------------------|
-| Performance | 1000-10,000 ns overhead per dispatch | 10-50 ns overhead |
-| GraalVM native image | Requires configuration; brittle | Works out of the box |
-| Debuggability | Opaque reflection frames | Clear, inspectable code |
-| Code size | Minimal | Modest (one proxy per feature) |
-| Dynamic discovery | Yes; variants auto-discovered | Compile-time only |
-| Cross-module variants | Possible | Deferred to Release 2 |
+|        Aspect         |              Reflection              |      Generated (FlagZen)       |
+| --------------------- | ------------------------------------ | ------------------------------ |
+| Performance           | 1000-10,000 ns overhead per dispatch | 10-50 ns overhead              |
+| GraalVM native image  | Requires configuration; brittle      | Works out of the box           |
+| Debuggability         | Opaque reflection frames             | Clear, inspectable code        |
+| Code size             | Minimal                              | Modest (one proxy per feature) |
+| Dynamic discovery     | Yes; variants auto-discovered        | Compile-time only              |
+| Cross-module variants | Possible                             | Deferred to Release 2          |
 
 For production backend systems, the benefit is worth the cost.
 

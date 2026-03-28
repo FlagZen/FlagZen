@@ -30,6 +30,7 @@ CheckoutFlow flow = dispatcher.resolve(CheckoutFlow.class);
 ```
 
 The default provider:
+
 - Reads from `System.getenv()`
 - Expects environment variables with the `FLAGZEN_` prefix
 - Parses variable names as SCREAMING_SNAKE_CASE

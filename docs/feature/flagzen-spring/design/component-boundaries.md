@@ -17,43 +17,43 @@ All public API is in the single `com.flagzen.spring` package. No sub-packages, n
 
 ### `FlagZenAutoConfiguration`
 
-| Aspect | Detail |
-|---|---|
-| Type | `@AutoConfiguration` class |
-| Responsibility | Creates `InMemoryFlagProvider` fallback bean (conditional) and `FeatureDispatcher` bean (conditional), logs startup summary |
-| Inputs | `FlagProvider` bean from `ApplicationContext` (optional), `FeatureDispatcher` bean presence check |
-| Outputs | `FlagProvider` bean (fallback only), `FeatureDispatcher` bean, INFO/WARN log messages |
+|       Aspect       |                                                                  Detail                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Type               | `@AutoConfiguration` class                                                                                                               |
+| Responsibility     | Creates `InMemoryFlagProvider` fallback bean (conditional) and `FeatureDispatcher` bean (conditional), logs startup summary              |
+| Inputs             | `FlagProvider` bean from `ApplicationContext` (optional), `FeatureDispatcher` bean presence check                                        |
+| Outputs            | `FlagProvider` bean (fallback only), `FeatureDispatcher` bean, INFO/WARN log messages                                                    |
 | Conditional guards | `@ConditionalOnMissingBean(FlagProvider.class)` on fallback provider, `@ConditionalOnMissingBean(FeatureDispatcher.class)` on dispatcher |
-| Imports | `@Import(FeatureProxyRegistrar.class)` |
+| Imports            | `@Import(FeatureProxyRegistrar.class)`                                                                                                   |
 
 ### `FeatureProxyRegistrar`
 
-| Aspect | Detail |
-|---|---|
-| Type | Implements `ImportBeanDefinitionRegistrar` |
+|     Aspect     |                                                        Detail                                                        |
+| -------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Type           | Implements `ImportBeanDefinitionRegistrar`                                                                           |
 | Responsibility | Discovers `FeatureMetadata` via `ServiceLoader`, registers a lazy singleton bean definition per `@Feature` interface |
-| Inputs | `ServiceLoader<FeatureMetadata>` results |
-| Outputs | Bean definitions in `BeanDefinitionRegistry` |
-| Bean naming | Decapitalized simple name of feature interface (e.g., `CheckoutFlow` becomes `checkoutFlow`) |
-| Error handling | Zero metadata found: logs INFO "No @Feature metadata found on classpath", registers no beans, does not fail |
+| Inputs         | `ServiceLoader<FeatureMetadata>` results                                                                             |
+| Outputs        | Bean definitions in `BeanDefinitionRegistry`                                                                         |
+| Bean naming    | Decapitalized simple name of feature interface (e.g., `CheckoutFlow` becomes `checkoutFlow`)                         |
+| Error handling | Zero metadata found: logs INFO "No @Feature metadata found on classpath", registers no beans, does not fail          |
 
 ### `AutoConfiguration.imports`
 
-| Aspect | Detail |
-|---|---|
-| Type | Resource file |
+|  Aspect  |                                       Detail                                       |
+| -------- | ---------------------------------------------------------------------------------- |
+| Type     | Resource file                                                                      |
 | Location | `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` |
-| Content | Single line: `com.flagzen.spring.FlagZenAutoConfiguration` |
-| Purpose | Spring Boot 3.x auto-configuration discovery |
+| Content  | Single line: `com.flagzen.spring.FlagZenAutoConfiguration`                         |
+| Purpose  | Spring Boot 3.x auto-configuration discovery                                       |
 
 ## Public API Surface
 
 The public API of flagzen-spring is intentionally minimal:
 
-| Type | Visibility | Rationale |
-|---|---|---|
-| `FlagZenAutoConfiguration` | Public | Required by Spring's auto-configuration mechanism |
-| `FeatureProxyRegistrar` | Public | Required by Spring's `@Import` mechanism |
+|            Type            | Visibility |                     Rationale                     |
+| -------------------------- | ---------- | ------------------------------------------------- |
+| `FlagZenAutoConfiguration` | Public     | Required by Spring's auto-configuration mechanism |
+| `FeatureProxyRegistrar`    | Public     | Required by Spring's `@Import` mechanism          |
 
 No annotations, interfaces, or helper classes are exposed. The module's API is effectively "add to classpath and it works."
 

@@ -301,6 +301,7 @@ WARN ... No FlagProvider bean found; activating InMemoryFlagProvider fallback (d
 **Symptom**: `NoSuchBeanDefinitionException` or bean not found when autowiring a feature interface.
 
 **Causes**:
+
 1. Feature interface is not in the classpath (missing dependency)
 2. Annotation processor did not generate metadata (missing `annotationProcessor` dependency in build)
 3. Auto-configuration is disabled (check `spring.autoconfigure.exclude`)

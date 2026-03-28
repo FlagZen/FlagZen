@@ -17,17 +17,17 @@ New Gradle submodule providing Spring Boot 3.x auto-configuration for FlagZen. S
 
 ## Key Components
 
-| Type | Responsibility |
-|------|---------------|
+|            Type            |                                     Responsibility                                      |
+| -------------------------- | --------------------------------------------------------------------------------------- |
 | `FlagZenAutoConfiguration` | Detects `FlagProvider` bean, creates `FeatureDispatcher`, InMemoryFlagProvider fallback |
-| `FeatureProxyRegistrar` | Discovers `FeatureMetadata` via ServiceLoader, registers proxy bean definitions |
-| `FeatureProxyFactoryBean` | Creates feature proxy instances via `FeatureDispatcher.resolve()` |
-| `NoOpFlagProvider` | Fallback provider when no `FlagProvider` bean exists |
+| `FeatureProxyRegistrar`    | Discovers `FeatureMetadata` via ServiceLoader, registers proxy bean definitions         |
+| `FeatureProxyFactoryBean`  | Creates feature proxy instances via `FeatureDispatcher.resolve()`                       |
+| `NoOpFlagProvider`         | Fallback provider when no `FlagProvider` bean exists                                    |
 
 ## Quality Gates
 
-|                 Gate                  |           Result           |
-| ------------------------------------- | -------------------------- |
-| Spring integration tests (24 scenarios) | PASS                     |
+|                  Gate                   |           Result           |
+| --------------------------------------- | -------------------------- |
+| Spring integration tests (24 scenarios) | PASS                       |
 | PITest mutation testing (flagzen-core)  | 84% kill rate (gate: ≥80%) |
-| DES integrity verification (24 steps)  | PASS                      |
+| DES integrity verification (24 steps)   | PASS                       |

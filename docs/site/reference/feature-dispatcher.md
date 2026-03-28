@@ -18,26 +18,32 @@ public interface FeatureDispatcher {
 Resolves a feature interface to a dispatch proxy implementing that interface.
 
 **Signature**
+
 ```java
 <T> T resolve(Class<T> featureType)
 ```
 
 **Type Parameter**
+
 - `T`: The feature interface type to resolve. Must be annotated with `@Feature`.
 
 **Parameters**
-- `featureType` (Class<T>): The feature interface class. Non-null.
+
+- `featureType` (`Class<T>`): The feature interface class. Non-null.
 
 **Returns**
+
 - A proxy object that implements `T` and dispatches method calls to the active variant based on the current flag value.
 
 **Behavior**
+
 - The proxy is created once per feature per dispatcher and cached as a singleton
 - Each method call on the proxy re-evaluates the flag value (dynamic dispatch)
 - The flag value is retrieved from the configured `FlagProvider`
 - If no variant matches, behavior is determined by the feature's `FallbackStrategy`
 
 **Exceptions**
+
 - `IllegalArgumentException`: if `featureType` is null
 - `NoProviderException`: if no `FlagProvider` is available
 - `UnmatchedVariantException`: if no variant matches and `fallback = FallbackStrategy.EXCEPTION`
@@ -65,21 +71,26 @@ String result = flow1.execute(); // reads checkout-flow flag, calls active varia
 Resolves a feature interface to a dispatch proxy using a provided evaluation context.
 
 **Signature**
+
 ```java
 <T> T resolve(Class<T> featureType, EvaluationContext context)
 ```
 
 **Type Parameters**
+
 - `T`: The feature interface type to resolve. Must be annotated with `@Feature`.
 
 **Parameters**
-- `featureType` (Class<T>): The feature interface class. Non-null.
+
+- `featureType` (`Class<T>`): The feature interface class. Non-null.
 - `context` (EvaluationContext): The evaluation context for targeted resolution. Non-null.
 
 **Returns**
+
 - A proxy that dispatches with access to the provided context.
 
 **Behavior**
+
 - The proxy is created once and cached (same caching as `resolve(Class<T>)`)
 - The provided context is made available to the flag provider via `FlagProvider.getString(key, context)` and typed equivalents
 - Each method call re-evaluates the flag using the context
@@ -186,10 +197,10 @@ This allows libraries like Reactor and Mutiny to provide implicit context from r
 
 The `FallbackStrategy` enum on `@Feature` determines what happens when no variant matches:
 
-| Strategy | Behavior |
-|----------|----------|
-| `EXCEPTION` (default) | Throw `UnmatchedVariantException` |
-| `NOOP` | Return default value (null for objects, 0 for primitives, false for boolean) |
+|       Strategy        |                                   Behavior                                   |
+| --------------------- | ---------------------------------------------------------------------------- |
+| `EXCEPTION` (default) | Throw `UnmatchedVariantException`                                            |
+| `NOOP`                | Return default value (null for objects, 0 for primitives, false for boolean) |
 
 The proxy is not aware of the strategy -- the generated proxy code handles it.
 
@@ -205,6 +216,7 @@ The proxy is not aware of the strategy -- the generated proxy code handles it.
 ### `UnmatchedVariantException`
 
 Thrown when:
+
 - No variant matches the flag value
 - No `@DefaultVariant` is defined
 - Feature's `fallback = FallbackStrategy.EXCEPTION`

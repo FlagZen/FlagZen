@@ -8,11 +8,11 @@ Marks a Java interface as a feature flag dispatch point. The annotation processo
 
 ### Attributes
 
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `value` | `String` | required | The flag key used to resolve the active variant. Must be a non-empty string. |
-| `type` | `FeatureType` | `STRING` | The type of flag value used to dispatch variants. Must match the variant value types. |
-| `fallback` | `FallbackStrategy` | `EXCEPTION` | Strategy when no variant matches the flag value. |
+| Attribute  |        Type        |   Default   |                                      Description                                      |
+| ---------- | ------------------ | ----------- | ------------------------------------------------------------------------------------- |
+| `value`    | `String`           | required    | The flag key used to resolve the active variant. Must be a non-empty string.          |
+| `type`     | `FeatureType`      | `STRING`    | The type of flag value used to dispatch variants. Must match the variant value types. |
+| `fallback` | `FallbackStrategy` | `EXCEPTION` | Strategy when no variant matches the flag value.                                      |
 
 ### Constraints
 
@@ -47,14 +47,14 @@ Maps one or more flag values to a variant implementation class. A feature requir
 
 ### Attributes
 
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `value` | `String[]` | `{}` | String variant value(s) for `STRING`-type features. Auto-wraps scalars to single-element arrays. |
-| `intValue` | `int[]` | `{}` | Integer variant value(s) for `INT`-type features. Auto-wraps scalars. |
-| `longValue` | `long[]` | `{}` | Long variant value(s) for `LONG`-type features. Auto-wraps scalars. |
-| `doubleValue` | `CloseTo[]` | `{}` | Double variant value(s) with approximate matching for `DOUBLE`-type features. |
-| `booleanValue` | `String` | `""` (empty) | Boolean variant value: `"true"` or `"false"`. Empty string means not set. |
-| `of` | `Class<?>` | `void.class` | The feature interface this variant belongs to. Required. |
+|   Attribute    |    Type     |   Default    |                                           Description                                            |
+| -------------- | ----------- | ------------ | ------------------------------------------------------------------------------------------------ |
+| `value`        | `String[]`  | `{}`         | String variant value(s) for `STRING`-type features. Auto-wraps scalars to single-element arrays. |
+| `intValue`     | `int[]`     | `{}`         | Integer variant value(s) for `INT`-type features. Auto-wraps scalars.                            |
+| `longValue`    | `long[]`    | `{}`         | Long variant value(s) for `LONG`-type features. Auto-wraps scalars.                              |
+| `doubleValue`  | `CloseTo[]` | `{}`         | Double variant value(s) with approximate matching for `DOUBLE`-type features.                    |
+| `booleanValue` | `String`    | `""` (empty) | Boolean variant value: `"true"` or `"false"`. Empty string means not set.                        |
+| `of`           | `Class<?>`  | `void.class` | The feature interface this variant belongs to. Required.                                         |
 
 ### Constraints
 
@@ -113,9 +113,9 @@ Marks a variant as the fallback when no flag value matches any `@Variant` annota
 
 ### Attributes
 
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `of` | `Class<?>` | `void.class` | The feature interface this default variant belongs to. Required. |
+| Attribute |    Type    |   Default    |                           Description                            |
+| --------- | ---------- | ------------ | ---------------------------------------------------------------- |
+| `of`      | `Class<?>` | `void.class` | The feature interface this default variant belongs to. Required. |
 
 ### Constraints
 
@@ -147,9 +147,9 @@ Convenience annotations for `BOOLEAN`-type features. Equivalent to `@Variant(boo
 
 ### Attributes
 
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `of` | `Class<?>` | `void.class` | The boolean feature interface this variant belongs to. Required. |
+| Attribute |    Type    |   Default    |                           Description                            |
+| --------- | ---------- | ------------ | ---------------------------------------------------------------- |
+| `of`      | `Class<?>` | `void.class` | The boolean feature interface this variant belongs to. Required. |
 
 ### Constraints
 
@@ -184,10 +184,10 @@ Specifies a double variant value with approximate matching. Used within `@Varian
 
 ### Attributes
 
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `value` | `double` | required | The double value to match against. |
-| `delta` | `double` | `1e-10` | The maximum absolute difference for a match. Accepts values like `0.01` for 1% tolerance. |
+| Attribute |   Type   | Default  |                                        Description                                        |
+| --------- | -------- | -------- | ----------------------------------------------------------------------------------------- |
+| `value`   | `double` | required | The double value to match against.                                                        |
+| `delta`   | `double` | `1e-10`  | The maximum absolute difference for a match. Accepts values like `0.01` for 1% tolerance. |
 
 ### Constraints
 
@@ -224,13 +224,13 @@ Defines the type of flag value used to dispatch variants.
 
 ### Values
 
-| Value | Description | Range | Example Variant |
-|-------|-------------|-------|-----------------|
-| `STRING` | Text-based flag values (default). | any string | `@Variant(value = "PREMIUM")` |
-| `INT` | 32-bit signed integer flag values. | -2,147,483,648 to 2,147,483,647 | `@Variant(intValue = 42)` |
-| `LONG` | 64-bit signed integer flag values. | -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807 | `@Variant(longValue = 1000000000000L)` |
-| `BOOLEAN` | Boolean flag values (`true` or `false`). | `true`, `false` | `@WhenTrue(of = Feature.class)` |
-| `DOUBLE` | 64-bit floating-point flag values with approximate matching. | IEEE 754 double range | `@Variant(doubleValue = {@CloseTo(value = 0.5)})` |
+|   Value   |                         Description                          |                          Range                          |                  Example Variant                  |
+| --------- | ------------------------------------------------------------ | ------------------------------------------------------- | ------------------------------------------------- |
+| `STRING`  | Text-based flag values (default).                            | any string                                              | `@Variant(value = "PREMIUM")`                     |
+| `INT`     | 32-bit signed integer flag values.                           | -2,147,483,648 to 2,147,483,647                         | `@Variant(intValue = 42)`                         |
+| `LONG`    | 64-bit signed integer flag values.                           | -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807 | `@Variant(longValue = 1000000000000L)`            |
+| `BOOLEAN` | Boolean flag values (`true` or `false`).                     | `true`, `false`                                         | `@WhenTrue(of = Feature.class)`                   |
+| `DOUBLE`  | 64-bit floating-point flag values with approximate matching. | IEEE 754 double range                                   | `@Variant(doubleValue = {@CloseTo(value = 0.5)})` |
 
 ## `FallbackStrategy` Enum
 
@@ -238,10 +238,10 @@ Defines the runtime behavior when no variant matches the flag value.
 
 ### Values
 
-| Value | Description | Behavior |
-|-------|-------------|----------|
-| `EXCEPTION` (default) | Throw an exception if no variant matches. | Calls to the proxy throw `UnmatchedVariantException` if the flag value has no corresponding variant and no `@DefaultVariant` is defined. Fails loudly at runtime. |
-| `NOOP` | Silently do nothing if no variant matches. | Calls to the proxy return default values (null for objects, 0 for primitives, false for booleans). No exception. Used for optional features. |
+|         Value         |                Description                 |                                                                             Behavior                                                                              |
+| --------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EXCEPTION` (default) | Throw an exception if no variant matches.  | Calls to the proxy throw `UnmatchedVariantException` if the flag value has no corresponding variant and no `@DefaultVariant` is defined. Fails loudly at runtime. |
+| `NOOP`                | Silently do nothing if no variant matches. | Calls to the proxy return default values (null for objects, 0 for primitives, false for booleans). No exception. Used for optional features.                      |
 
 ### Usage
 
@@ -263,16 +263,16 @@ public interface ExperimentalUI {
 
 The annotation processor performs these validations at compile time:
 
-| Check | Scope | Failure |
-|-------|-------|---------|
-| `@Feature` applied only to interfaces | per feature | Error: cannot apply to class |
-| `@Variant` applied only to classes | per variant | Error: cannot apply to interface |
-| Variant implements feature interface | per variant | Error: class does not implement feature |
-| All variant values match feature type | per variant | Error: type mismatch |
-| No duplicate variant values | per feature | Error: duplicate value |
-| Feature has at least one variant or default | per feature | Error: no variants found (unless `@DefaultVariant`) |
-| Boolean feature has `@WhenTrue` or `@DefaultVariant` | per feature | Error: boolean feature with no true variant |
-| `CloseTo` only in DOUBLE features | per variant | Error: type mismatch |
+|                        Check                         |    Scope    |                       Failure                       |
+| ---------------------------------------------------- | ----------- | --------------------------------------------------- |
+| `@Feature` applied only to interfaces                | per feature | Error: cannot apply to class                        |
+| `@Variant` applied only to classes                   | per variant | Error: cannot apply to interface                    |
+| Variant implements feature interface                 | per variant | Error: class does not implement feature             |
+| All variant values match feature type                | per variant | Error: type mismatch                                |
+| No duplicate variant values                          | per feature | Error: duplicate value                              |
+| Feature has at least one variant or default          | per feature | Error: no variants found (unless `@DefaultVariant`) |
+| Boolean feature has `@WhenTrue` or `@DefaultVariant` | per feature | Error: boolean feature with no true variant         |
+| `CloseTo` only in DOUBLE features                    | per variant | Error: type mismatch                                |
 
 ## Generated Code
 

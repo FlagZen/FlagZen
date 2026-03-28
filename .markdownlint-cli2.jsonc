@@ -9,9 +9,7 @@
     // allow emphasis "as" headline
     "MD036": false,
     // allow code fences without specifying the language (used for plain text)
-    "MD040": false,
-    // disable table column alignment check (conflicts with inline code in cells)
-    "MD060": false
+    "MD040": false
   },
   "gitignore": true,
   "ignores": [

@@ -9,6 +9,7 @@ If you discover a security vulnerability in FlagZen, please report it responsibl
 Instead, use [GitHub's private vulnerability reporting](https://github.com/FlagZen/FlagZen/security/advisories/new) to submit your report.
 
 Include:
+
 - A description of the vulnerability
 - Steps to reproduce
 - The affected module(s) and version(s)

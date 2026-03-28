@@ -6,36 +6,36 @@ flagzen-spring registers the following beans in the Spring `ApplicationContext`.
 
 ### FlagProvider Fallback Bean
 
-| Property | Value |
-|---|---|
-| Bean name | `inMemoryFlagProvider` |
-| Bean type | `com.flagzen.internal.InMemoryFlagProvider` (implements `FlagProvider`) |
-| Scope | Singleton |
-| Conditional | `@ConditionalOnMissingBean(FlagProvider.class)` -- only created when no `FlagProvider` bean exists |
-| Construction | `new InMemoryFlagProvider()` (empty, no pre-set flags) |
-| Side effect | WARN log: "No FlagProvider bean found. Using InMemoryFlagProvider (dev/test only)." |
+|   Property   |                                               Value                                                |
+| ------------ | -------------------------------------------------------------------------------------------------- |
+| Bean name    | `inMemoryFlagProvider`                                                                             |
+| Bean type    | `com.flagzen.internal.InMemoryFlagProvider` (implements `FlagProvider`)                            |
+| Scope        | Singleton                                                                                          |
+| Conditional  | `@ConditionalOnMissingBean(FlagProvider.class)` -- only created when no `FlagProvider` bean exists |
+| Construction | `new InMemoryFlagProvider()` (empty, no pre-set flags)                                             |
+| Side effect  | WARN log: "No FlagProvider bean found. Using InMemoryFlagProvider (dev/test only)."                |
 
 ### FeatureDispatcher Bean
 
-| Property | Value |
-|---|---|
-| Bean name | `featureDispatcher` |
-| Bean type | `com.flagzen.FeatureDispatcher` (concrete: `DefaultFeatureDispatcher`) |
-| Scope | Singleton |
-| Conditional | `@ConditionalOnMissingBean(FeatureDispatcher.class)` |
+|   Property   |                                                 Value                                                 |
+| ------------ | ----------------------------------------------------------------------------------------------------- |
+| Bean name    | `featureDispatcher`                                                                                   |
+| Bean type    | `com.flagzen.FeatureDispatcher` (concrete: `DefaultFeatureDispatcher`)                                |
+| Scope        | Singleton                                                                                             |
+| Conditional  | `@ConditionalOnMissingBean(FeatureDispatcher.class)`                                                  |
 | Construction | `new DefaultFeatureDispatcher(flagProvider)` where `flagProvider` is the resolved `FlagProvider` bean |
-| Dependencies | `FlagProvider` bean (user-defined or fallback) |
+| Dependencies | `FlagProvider` bean (user-defined or fallback)                                                        |
 
 ### Feature Proxy Beans (one per `FeatureMetadata`)
 
-| Property | Value |
-|---|---|
-| Bean name | Decapitalized simple name of feature interface (e.g., `checkoutFlow`) |
-| Bean type | Feature interface `Class<T>` from `FeatureMetadata.featureType()` |
-| Scope | Singleton |
-| Lazy | Yes |
+|   Property   |                                     Value                                     |
+| ------------ | ----------------------------------------------------------------------------- |
+| Bean name    | Decapitalized simple name of feature interface (e.g., `checkoutFlow`)         |
+| Bean type    | Feature interface `Class<T>` from `FeatureMetadata.featureType()`             |
+| Scope        | Singleton                                                                     |
+| Lazy         | Yes                                                                           |
 | Construction | Supplier: `beanFactory.getBean(FeatureDispatcher.class).resolve(featureType)` |
-| Discovery | `ServiceLoader.load(FeatureMetadata.class)` |
+| Discovery    | `ServiceLoader.load(FeatureMetadata.class)`                                   |
 
 ## Configuration Properties
 
@@ -48,8 +48,8 @@ Future releases may introduce:
 
 ## Registration Resource
 
-| File | Content |
-|---|---|
+|                                        File                                        |                    Content                    |
+| ---------------------------------------------------------------------------------- | --------------------------------------------- |
 | `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` | `com.flagzen.spring.FlagZenAutoConfiguration` |
 
 ## Logging Output

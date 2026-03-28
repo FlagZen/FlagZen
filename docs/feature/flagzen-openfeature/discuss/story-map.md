@@ -6,12 +6,12 @@
 
 ## Backbone
 
-| Add Dependency | Configure Provider | Resolve String Flags | Resolve Typed Flags | Resolve with Context |
-|----------------|-------------------|---------------------|--------------------|--------------------|
+| Add Dependency |      Configure Provider      |              Resolve String Flags              |               Resolve Typed Flags                |                      Resolve with Context                      |
+| -------------- | ---------------------------- | ---------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------- |
 | Add Gradle dep | ServiceLoader auto-discovery | getString delegates to client.getStringDetails | getBoolean delegates to client.getBooleanDetails | Map FlagZen EvaluationContext to OpenFeature EvaluationContext |
-| | Explicit Client constructor | Handle DEFAULT/ERROR reason -> empty | getInt delegates to client.getIntegerDetails | Targeting key 1:1 mapping |
-| | Spring Bean registration | | getDouble delegates to client.getDoubleDetails | Attribute type conversion (String, Boolean, Number, List, Map) |
-| | | | getLong via getIntegerDetails (widening) | Unsupported attribute types logged and skipped |
+|                | Explicit Client constructor  | Handle DEFAULT/ERROR reason -> empty           | getInt delegates to client.getIntegerDetails     | Targeting key 1:1 mapping                                      |
+|                | Spring Bean registration     |                                                | getDouble delegates to client.getDoubleDetails   | Attribute type conversion (String, Boolean, Number, List, Map) |
+|                |                              |                                                | getLong via getIntegerDetails (widening)         | Unsupported attribute types logged and skipped                 |
 
 ---
 

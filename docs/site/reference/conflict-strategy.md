@@ -72,12 +72,12 @@ Use ConflictStrategy.WARN to override, or adjust parsers/formatters to eliminate
 
 The default `ConflictStrategy` is determined automatically based on parser/formatter cardinality:
 
-| Parsers | Formatters | Default | Reasoning |
-|---------|------------|---------|-----------|
-| 1 | 1 | WARN | Low collision risk; conflicts only from env var naming collisions |
-| 2+ | 1 | WARN | Medium risk; different parsers may match overlapping env vars |
-| 1 | 2+ | WARN | Medium risk; multiple formatters reduce collision surface |
-| 2+ | 2+ | ERROR | High risk; cartesian product of (parsers × formatters) maximizes collision surface |
+| Parsers | Formatters | Default |                                     Reasoning                                      |
+| ------- | ---------- | ------- | ---------------------------------------------------------------------------------- |
+| 1       | 1          | WARN    | Low collision risk; conflicts only from env var naming collisions                  |
+| 2+      | 1          | WARN    | Medium risk; different parsers may match overlapping env vars                      |
+| 1       | 2+         | WARN    | Medium risk; multiple formatters reduce collision surface                          |
+| 2+      | 2+         | ERROR   | High risk; cartesian product of (parsers × formatters) maximizes collision surface |
 
 ## Usage
 
