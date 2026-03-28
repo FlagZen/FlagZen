@@ -3,16 +3,16 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
     branches: [main]
-
-permissions:
-  contents: read
 
 jobs:
   lint-markdown:
     name: "Markdown Lint"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -26,6 +26,8 @@ jobs:
   build:
     name: "Build & Test (Java ${{ matrix.java }})"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -59,6 +61,8 @@ jobs:
   pitest:
     name: "Mutation Testing (PITest)"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: build
 
     steps:
@@ -104,3 +108,81 @@ jobs:
           name: pitest-report
           path: flagzen-core/build/reports/pitest/
           retention-days: 14
+
+  release:
+    name: "Publish & Release"
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build, pitest]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate tag matches gradle version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          GRADLE_VERSION=$(grep '^flagzenVersion=' gradle.properties | cut -d'=' -f2)
+          if [ "$TAG_VERSION" != "$GRADLE_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match gradle.properties ($GRADLE_VERSION)"
+            exit 1
+          fi
+
+      - name: Setup Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Publish to Maven Central (Central Portal)
+        run: ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_PRIVATE_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREVIOUS_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" HEAD)
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" "${PREVIOUS_TAG}..HEAD")
+          fi
+          {
+            echo "changelog<<EOF"
+            echo "$CHANGELOG"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: |
+            ## What's Changed
+
+            ${{ steps.changelog.outputs.changelog }}
+
+            ## Maven Coordinates
+
+            ```xml
+            <dependency>
+                <groupId>com.flagzen</groupId>
+                <artifactId>flagzen-core</artifactId>
+                <version>${{ github.ref_name }}</version>
+            </dependency>
+            ```
+
+            ```kotlin
+            implementation("com.flagzen:flagzen-core:${{ github.ref_name }}")
+            ```
+          generate_release_notes: true
