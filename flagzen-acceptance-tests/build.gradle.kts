@@ -29,7 +29,8 @@ tasks.withType<Test> {
         rootProject.projectDir.resolve("tests/acceptance/flagzen-typed-variants").absolutePath,
         rootProject.projectDir.resolve("tests/acceptance/flagzen-env").absolutePath,
         rootProject.projectDir.resolve("tests/acceptance/flagzen-multi-value-variant").absolutePath,
-        rootProject.projectDir.resolve("tests/acceptance/flagzen-spring").absolutePath
+        rootProject.projectDir.resolve("tests/acceptance/flagzen-spring").absolutePath,
+        rootProject.projectDir.resolve("tests/acceptance/flagzen-openfeature").absolutePath
     ).joinToString(","))
     systemProperty("cucumber.glue", "com.flagzen.acceptance.steps")
     systemProperty("cucumber.plugin", "pretty")
