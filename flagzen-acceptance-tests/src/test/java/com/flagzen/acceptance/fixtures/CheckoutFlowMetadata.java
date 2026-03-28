@@ -56,7 +56,8 @@ public class CheckoutFlowMetadata implements FeatureMetadata<CheckoutFlow> {
         return Map.of(
                 "CLASSIC", ClassicCheckout::new,
                 "STREAMLINED", StreamlinedCheckout::new,
-                "PREMIUM", PremiumCheckout::new
+                "PREMIUM", PremiumCheckout::new,
+                "EXPRESS", ExpressCheckout::new
         );
     }
 

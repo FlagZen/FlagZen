@@ -3,6 +3,8 @@ package com.flagzen.spring;
 import com.flagzen.FeatureDispatcher;
 import com.flagzen.internal.DefaultFeatureDispatcher;
 import com.flagzen.spi.FlagProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -19,10 +21,15 @@ import org.springframework.context.annotation.Import;
 @Import(FeatureProxyRegistrar.class)
 public class FlagZenAutoConfiguration {
 
+    private static final Logger log = LoggerFactory.getLogger(FlagZenAutoConfiguration.class);
+
+    /** Creates a new auto-configuration instance. */
+    public FlagZenAutoConfiguration() { }
+
     /**
      * Creates a {@link FeatureDispatcher} from the available {@link FlagProvider}.
-     * If no {@code FlagProvider} bean is defined, uses a no-op provider that
-     * always returns empty, allowing default variants to activate.
+     * If no {@code FlagProvider} bean is defined, uses an {@link InMemoryFlagProvider}
+     * that always returns empty, allowing default variants to activate.
      * Backs off if the user defines their own {@code FeatureDispatcher} bean.
      *
      * @param flagProvider the flag provider, or null if none defined
@@ -33,7 +40,10 @@ public class FlagZenAutoConfiguration {
     public FeatureDispatcher featureDispatcher(
             @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
             org.springframework.beans.factory.ObjectProvider<FlagProvider> flagProvider) {
-        FlagProvider provider = flagProvider.getIfAvailable(NoOpFlagProvider::new);
+        FlagProvider provider = flagProvider.getIfAvailable(() -> {
+            log.warn("No FlagProvider bean found; activating InMemoryFlagProvider fallback (dev/test only)");
+            return new InMemoryFlagProvider();
+        });
         return new DefaultFeatureDispatcher(provider);
     }
 }

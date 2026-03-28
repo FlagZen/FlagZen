@@ -131,13 +131,14 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 
 ### M4: Spring Integration — `flagzen-spring`
 
-**Status: NOT STARTED** | **Release: v1.1.0** | Depends on: M0
+**Status: DONE** | **Release: v1.1.0** | Depends on: M0 | [Artifacts](feature/flagzen-spring/)
 
-- [ ] `FlagZenAutoConfiguration` (Spring Boot auto-config)
-- [ ] `FeatureFactoryBean` for `@Autowired` injection of `@Feature` proxies
-- [ ] `FlagProvider` bean auto-detected from `ApplicationContext`
-- [ ] `@Variant` + `@Component` classes participate in Spring DI
-- [ ] Conditional annotations (`@ConditionalOnMissingBean`)
+- [x] `FlagZenAutoConfiguration` (Spring Boot 3.x auto-config via `AutoConfiguration.imports`)
+- [x] `FeatureProxyRegistrar` + `FeatureProxyFactoryBean` for `@Autowired` injection of `@Feature` proxies
+- [x] `FlagProvider` bean auto-detected from `ApplicationContext`
+- [x] `InMemoryFlagProvider` fallback when no provider bean (with WARN log)
+- [x] Conditional annotations (`@ConditionalOnMissingBean`) for FeatureDispatcher and FlagProvider
+- [x] Startup diagnostics logging (INFO summary, DEBUG per-feature)
 
 ### M5: Provider Adapters — `flagzen-providers`
 

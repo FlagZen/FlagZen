@@ -1,3 +1,4 @@
+@spring-test
 Feature: Feature proxy bean injection via Spring DI
   As a Spring Boot developer,
   I want feature proxies automatically registered as Spring beans,
@@ -5,7 +6,7 @@ Feature: Feature proxy bean injection via Spring DI
 
   # --- US-SPRING-02: Register Feature Proxy Beans ---
 
-  @pending @US-SPRING-02
+  @US-SPRING-02
   Scenario: Feature proxy bean registered from discovered feature metadata
     Given CheckoutFlow is a feature interface with generated metadata
     And the application has an auto-configured FeatureDispatcher
@@ -13,7 +14,7 @@ Feature: Feature proxy bean injection via Spring DI
     Then a CheckoutFlow bean is available in the application
     And the bean is the dispatch proxy created by the FeatureDispatcher
 
-  @pending @US-SPRING-02
+  @US-SPRING-02
   Scenario: Multiple feature proxy beans registered for multiple feature interfaces
     Given CheckoutFlow and ShippingMethod are feature interfaces with generated metadata
     And the application has an auto-configured FeatureDispatcher
@@ -21,7 +22,7 @@ Feature: Feature proxy bean injection via Spring DI
     Then both CheckoutFlow and ShippingMethod beans are available
     And each bean is a distinct dispatch proxy
 
-  @pending @US-SPRING-02
+  @US-SPRING-02
   Scenario: Feature proxy injected via constructor autowiring
     Given a CheckoutFlow proxy bean is registered in the application
     And PaymentService declares CheckoutFlow as a constructor dependency
@@ -29,7 +30,7 @@ Feature: Feature proxy bean injection via Spring DI
     Then PaymentService receives the FlagZen dispatch proxy
     And PaymentService can call methods on the injected CheckoutFlow
 
-  @pending @US-SPRING-02
+  @US-SPRING-02
   Scenario: Injected proxy dispatches dynamically as flag values change
     Given a CheckoutFlow proxy is injected into PaymentService
     And the flag provider returns "CLASSIC" for flag "checkout-flow"
@@ -39,7 +40,7 @@ Feature: Feature proxy bean injection via Spring DI
     And PaymentService calls the method on CheckoutFlow again
     Then the Express variant executes
 
-  @pending @US-SPRING-02
+  @US-SPRING-02
   Scenario: No feature metadata found logs informational message and starts normally
     Given a Spring Boot application with no feature interfaces on the classpath
     When the application starts

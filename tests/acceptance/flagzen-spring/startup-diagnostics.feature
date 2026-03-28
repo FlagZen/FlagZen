@@ -1,3 +1,4 @@
+@spring-test
 Feature: Startup diagnostics logging
   As a developer debugging FlagZen integration,
   I want to see a summary of what was auto-configured at startup,
@@ -5,7 +6,7 @@ Feature: Startup diagnostics logging
 
   # --- US-SPRING-06: Startup Diagnostics Logging ---
 
-  @pending @US-SPRING-06
+  @US-SPRING-06
   Scenario: Startup summary logged with provider and feature details
     Given a Spring Boot application with a FlagProvider and two feature interfaces
     When the application starts
@@ -14,13 +15,13 @@ Feature: Startup diagnostics logging
     And the summary lists the feature interface names
     And the summary includes the count of registered proxy beans
 
-  @pending @US-SPRING-06
+  @US-SPRING-06
   Scenario: Zero features logged clearly in startup summary
     Given a Spring Boot application with a FlagProvider but no feature interfaces
     When the application starts
     Then the startup summary indicates zero feature proxies registered
 
-  @pending @US-SPRING-06
+  @US-SPRING-06
   Scenario: Individual feature registration logged at debug level
     Given a Spring Boot application with CheckoutFlow as a feature interface
     And diagnostic logging is set to debug level

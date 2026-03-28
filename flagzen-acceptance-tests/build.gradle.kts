@@ -33,5 +33,5 @@ tasks.withType<Test> {
     ).joinToString(","))
     systemProperty("cucumber.glue", "com.flagzen.acceptance.steps")
     systemProperty("cucumber.plugin", "pretty")
-    systemProperty("cucumber.filter.tags", "not @pending")
+    systemProperty("cucumber.filter.tags", "not @pending and not @spring-test")
 }
