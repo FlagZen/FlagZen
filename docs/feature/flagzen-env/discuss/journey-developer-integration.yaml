@@ -1,0 +1,204 @@
+journey:
+  name: "Environment Variable Provider Integration"
+  goal: "Use environment variables as feature flag source for 12-factor apps"
+  persona: "Kenji Tanaka -- backend developer deploying 12-factor apps to Kubernetes"
+  secondary_persona: "Mei-Lin Chen -- platform engineer managing shared Kubernetes cluster"
+
+  emotional_arc:
+    start: "Curious -- can I use env vars with FlagZen?"
+    middle: "Confident -- defaults work, parsing/formatting is clean, customizable when needed"
+    end: "Satisfied -- it just works, zero config for defaults, full control for edge cases"
+
+steps:
+  - id: 1
+    name: "Add Dependency"
+    action: "Add flagzen-env (and transitively flagzen-key-mapping) to build.gradle"
+
+    shared_artifacts:
+      - name: "flagzen_env_artifact"
+        source: "flagzen-env/build.gradle (module coordinates)"
+        displayed_as: "com.flagzen:flagzen-env:${version}"
+        consumers:
+          - "Developer's build.gradle"
+          - "Maven Central listing"
+        note: "flagzen-env depends on flagzen-key-mapping transitively; users only declare flagzen-env"
+      - name: "flagzen_key_mapping_artifact"
+        source: "flagzen-key-mapping/build.gradle (module coordinates)"
+        displayed_as: "com.flagzen:flagzen-key-mapping:${version}"
+        consumers:
+          - "flagzen-env (transitive dependency)"
+          - "Other providers that need key parsing/formatting (e.g., file-based, vault)"
+
+    emotional_state:
+      entry: "Curious"
+      exit: "Clear"
+
+    integration_checkpoint: |
+      flagzen-env module published with correct coordinates and transitive dependencies on flagzen-core and flagzen-key-mapping
+
+    gherkin: |
+      Scenario: Add flagzen-env dependency
+        Given Kenji has a Gradle project using flagzen-core 1.1.0
+        When he adds "com.flagzen:flagzen-env:1.1.0" to dependencies
+        Then the project resolves successfully
+        And flagzen-core is included transitively
+
+  - id: 2
+    name: "Set Environment Variables"
+    action: "Export env vars following naming convention (default FLAGZEN_ SCREAMING_SNAKE or custom)"
+
+    shared_artifacts:
+      - name: "flag_key_parser"
+        source: "FlagKeyParser implementations (screamingSnakeCase, camelCase)"
+        displayed_as: "FlagKeyParsers.screamingSnakeCase(\"FLAGZEN_\")"
+        consumers:
+          - "Shell/CI/CD scripts"
+          - "Kubernetes ConfigMaps"
+          - "Docker Compose files"
+          - "EnvironmentVariableFlagProvider construction pipeline"
+      - name: "flag_key_format"
+        source: "FlagKeyFormat implementations (kebabCase, snakeCase, camelCase, pascalCase, dotCase, colonCase)"
+        displayed_as: "FlagKeyFormats.kebabCase()"
+        consumers:
+          - "Flag key lookups via getString()"
+          - "Documentation examples"
+          - "@Feature interface method naming"
+
+    emotional_state:
+      entry: "Clear"
+      exit: "Confident"
+
+    integration_checkpoint: |
+      Parse-format pipeline is deterministic: FLAGZEN_CHECKOUT_FLOW -> parser produces
+      segments ["checkout", "flow"] -> formatter produces flag key "checkout-flow".
+      Same env var + same config always produces same flag key.
+
+    gherkin: |
+      Scenario: Default parse-format pipeline
+        Given env var "FLAGZEN_CHECKOUT_FLOW" and default parser + formatter
+        When the construction pipeline processes it
+        Then parser produces segments ["checkout", "flow"]
+        And formatter produces flag key "checkout-flow"
+
+      Scenario: Custom prefix parse-format pipeline
+        Given env var "FF_CHECKOUT_FLOW" and parser screamingSnakeCase("FF_") + kebabCase formatter
+        When the construction pipeline processes it
+        Then parser produces segments ["checkout", "flow"]
+        And formatter produces flag key "checkout-flow"
+
+  - id: 3
+    name: "Configure Provider"
+    action: "Use zero-config create(), builder with custom parsers/formatters, or ServiceLoader"
+
+    shared_artifacts:
+      - name: "serviceloader_registration"
+        source: "META-INF/services/com.flagzen.spi.FlagProvider"
+        displayed_as: "com.flagzen.env.EnvironmentVariableFlagProvider"
+        consumers:
+          - "FlagZen.create() factory"
+          - "ServiceLoader.load(FlagProvider.class)"
+      - name: "builder_api"
+        source: "EnvironmentVariableFlagProvider.builder()"
+        displayed_as: ".parser().formatter().onConflict().build()"
+        consumers:
+          - "Explicit construction in application code"
+          - "Test fixtures"
+      - name: "conflict_strategy"
+        source: "ConflictStrategy enum (WARN, ERROR)"
+        displayed_as: "ConflictStrategy.WARN / ConflictStrategy.ERROR"
+        consumers:
+          - "Builder .onConflict() method"
+          - "Construction-time conflict detection"
+          - "First-access warning logging"
+
+    emotional_state:
+      entry: "Confident"
+      exit: "Confident"
+
+    integration_checkpoint: |
+      ServiceLoader discovers default-config provider automatically.
+      Builder supports custom parsers, formatters, and conflict strategy.
+      Default conflict strategy depends on parser/formatter cardinality.
+      No self-configuration via env vars.
+
+    gherkin: |
+      Scenario: Zero-config via create()
+        When Kenji calls EnvironmentVariableFlagProvider.create()
+        Then the provider uses default parser (screamingSnakeCase("FLAGZEN_"))
+        And default formatter (kebabCase())
+        And default conflict strategy (WARN)
+
+      Scenario: Builder with custom parser and formatter
+        When Mei-Lin uses the builder with parser screamingSnakeCase("FF_") and formatter snakeCase()
+        Then the provider parses FF_ prefixed env vars and formats as snake_case flag keys
+
+      Scenario: Multi-parser multi-formatter defaults to ERROR
+        When Mei-Lin configures 2 parsers and 2 formatters without explicit conflict strategy
+        Then the default conflict strategy is ERROR
+
+  - id: 4
+    name: "Verify Resolution"
+    action: "Resolve flags and confirm values come from env vars via immutable map"
+
+    shared_artifacts:
+      - name: "immutable_flag_map"
+        source: "EnvironmentVariableFlagProvider internal map (built at construction)"
+        displayed_as: "flagKey -> envVarValue"
+        consumers:
+          - "getString(key) lookups"
+          - "Typed resolution via FlagProvider defaults"
+
+    emotional_state:
+      entry: "Confident"
+      exit: "Satisfied"
+
+    integration_checkpoint: |
+      Flag values from env vars flow through FlagProvider SPI correctly.
+      getString() is a pure Map.get() -- no System.getenv() at runtime.
+      Typed parsing delegates to FlagProvider default methods.
+      Conflicted keys produce warning on first access (WARN strategy).
+
+    gherkin: |
+      Scenario: Resolve string flag from immutable map
+        Given FLAGZEN_CHECKOUT_FLOW is set to "PREMIUM"
+        And the provider was constructed with default config
+        When Kenji calls getString("checkout-flow")
+        Then the result is Optional.of("PREMIUM")
+
+      Scenario: Conflicted key warns on first access
+        Given the provider was constructed with WARN strategy
+        And flag key "checkout-flow" had a conflict
+        When Kenji calls getString("checkout-flow") for the first time
+        Then a warning is logged mentioning the conflict
+        And subsequent calls do not repeat the warning
+
+      Scenario: Missing flag key returns empty
+        Given no env var maps to flag key "nonexistent"
+        When Kenji calls getString("nonexistent")
+        Then the result is Optional.empty()
+
+integration_validation:
+  shared_artifact_consistency:
+    - artifact: "flag_key_parser"
+      must_match_across: [2, 3]
+      failure_message: "Parser behavior in pipeline (step 2) must match parser configuration in builder (step 3)"
+
+    - artifact: "flag_key_format"
+      must_match_across: [2, 4]
+      failure_message: "Formatter output (step 2) must match the flag keys used in getString() calls (step 4)"
+
+    - artifact: "serviceloader_registration"
+      must_match_across: [3]
+      failure_message: "ServiceLoader file must reference the correct fully-qualified class name"
+
+    - artifact: "flagzen_env_artifact"
+      must_match_across: [1]
+      failure_message: "Module coordinates must match published artifact"
+
+    - artifact: "conflict_strategy"
+      must_match_across: [3, 4]
+      failure_message: "Conflict strategy configured in builder (step 3) must govern behavior during resolution (step 4)"
+
+    - artifact: "immutable_flag_map"
+      must_match_across: [4]
+      failure_message: "Immutable map built at construction must serve all getString() lookups without runtime env access"
