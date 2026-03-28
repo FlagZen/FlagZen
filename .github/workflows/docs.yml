@@ -6,22 +6,28 @@ on:
     paths:
       - 'docs/site/**'
       - 'mkdocs.yml'
+    tags: ['v*']
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version alias to deploy (e.g., 1.1, dev)'
+        required: false
+        default: 'dev'
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: "pages"
+  group: "docs"
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -33,20 +39,29 @@ jobs:
 
       - run: npx markdownlint-cli2 "docs/site/**/*.md"
 
-      - run: pip install mkdocs mkdocs-material
+      - run: pip install mkdocs mkdocs-material mike
 
       - run: mkdocs build --strict
 
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
+      - name: Configure git for mike
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy versioned docs (release tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          MINOR="${VERSION%.*}"
+          mike deploy --push --update-aliases "$MINOR" latest
+          mike set-default --push latest
+
+      - name: Deploy dev docs (main branch)
+        if: github.ref == 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/')
+        run: |
+          mike deploy --push dev
+
+      - name: Deploy manual version
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          mike deploy --push "${{ github.event.inputs.version }}"
