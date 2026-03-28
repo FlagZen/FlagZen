@@ -22,7 +22,7 @@ Rafael Oliveira is a senior backend developer at a fintech startup who maintains
 
 #### 1: Happy Path -- Rafael's payment service
 
-Rafael defines a `LaunchDarklyFlagProvider` `@Bean` in his payment service. On startup, `FlagZenAutoConfiguration` detects it, creates a `DefaultFeatureDispatcher` with that provider, and registers it as a singleton bean. Rafael can now `@Autowired FeatureDispatcher` anywhere.
+Rafael defines an `EnvironmentVariableFlagProvider` `@Bean` in his payment service. On startup, `FlagZenAutoConfiguration` detects it, creates a `DefaultFeatureDispatcher` with that provider, and registers it as a singleton bean. Rafael can now `@Autowired FeatureDispatcher` anywhere.
 
 #### 2: Edge Case -- Rafael already has a custom FeatureDispatcher
 
@@ -37,10 +37,10 @@ Rafael's new service has `flagzen-spring` on the classpath but no `FlagProvider`
 #### Scenario: FeatureDispatcher auto-configured from FlagProvider bean
 
 ```gherkin
-Given Rafael's Spring Boot application defines a FlagProvider @Bean "launchDarklyProvider"
+Given Rafael's Spring Boot application defines a FlagProvider @Bean "envVarProvider"
 When the application context starts
 Then a FeatureDispatcher bean exists in the context
-And the FeatureDispatcher uses the "launchDarklyProvider" FlagProvider
+And the FeatureDispatcher uses the "envVarProvider" FlagProvider
 ```
 
 #### Scenario: Auto-configuration backs off when FeatureDispatcher already exists
@@ -206,7 +206,7 @@ Then ExpressCheckout.process() executes
 
 ### Problem
 
-Rafael Oliveira configures flag providers differently per environment -- LaunchDarkly in production, `InMemoryFlagProvider` in local dev, OpenFeature in staging. He expects Spring to pick up whichever `FlagProvider` `@Bean` he defines, without FlagZen-specific configuration properties or custom annotations.
+Rafael Oliveira configures flag providers differently per environment -- `EnvironmentVariableFlagProvider` in production (reading from deployment env vars), `InMemoryFlagProvider` in local dev. He expects Spring to pick up whichever `FlagProvider` `@Bean` he defines, without FlagZen-specific configuration properties or custom annotations.
 
 ### Who
 
@@ -218,9 +218,9 @@ Rafael Oliveira configures flag providers differently per environment -- LaunchD
 
 ### Domain Examples
 
-#### 1: Happy Path -- LaunchDarkly in production
+#### 1: Happy Path -- EnvironmentVariableFlagProvider in production
 
-Rafael defines `@Bean @Profile("prod") FlagProvider launchDarkly()` and `@Bean @Profile("dev") FlagProvider inMemory()`. In production, Spring activates the `prod` profile, LaunchDarkly provider is injected into auto-configuration.
+Rafael defines `@Bean @Profile("prod") FlagProvider envVarProvider()` and `@Bean @Profile("dev") FlagProvider inMemory()`. In production, Spring activates the `prod` profile, the environment variable provider is injected into auto-configuration.
 
 #### 2: Edge Case -- Two providers without @Primary
 
@@ -228,35 +228,35 @@ Rafael accidentally defines two `FlagProvider` beans without `@Primary` or profi
 
 #### 3: Provider from another starter
 
-Rafael uses `flagzen-openfeature` which registers its own `FlagProvider` `@Bean` via auto-configuration. `FlagZenAutoConfiguration` detects it and uses it. Rafael writes zero provider configuration.
+Rafael uses `flagzen-env` which registers its own `FlagProvider` `@Bean` via auto-configuration. `FlagZenAutoConfiguration` detects it and uses it. Rafael writes zero provider configuration.
 
 ### UAT Scenarios (BDD)
 
 #### Scenario: FlagProvider detected via standard Spring bean resolution
 
 ```gherkin
-Given Rafael defines a FlagProvider @Bean named "launchDarklyProvider"
+Given Rafael defines a FlagProvider @Bean named "envVarProvider"
 When FlagZenAutoConfiguration is processed
-Then it receives the "launchDarklyProvider" bean as its FlagProvider dependency
+Then it receives the "envVarProvider" bean as its FlagProvider dependency
 And uses it to create the FeatureDispatcher
 ```
 
 #### Scenario: Profile-specific FlagProvider selection
 
 ```gherkin
-Given Rafael defines @Bean @Profile("prod") FlagProvider returning LaunchDarklyFlagProvider
+Given Rafael defines @Bean @Profile("prod") FlagProvider returning EnvironmentVariableFlagProvider
 And @Bean @Profile("dev") FlagProvider returning InMemoryFlagProvider
 When the application starts with active profile "prod"
-Then FlagZenAutoConfiguration uses the LaunchDarklyFlagProvider
+Then FlagZenAutoConfiguration uses the EnvironmentVariableFlagProvider
 ```
 
 #### Scenario: FlagProvider from another FlagZen provider module
 
 ```gherkin
-Given "flagzen-openfeature" is on the classpath
-And flagzen-openfeature's auto-configuration registers an OpenFeatureFlagProvider @Bean
+Given "flagzen-env" is on the classpath
+And flagzen-env's auto-configuration registers an EnvironmentVariableFlagProvider @Bean
 When FlagZenAutoConfiguration is processed
-Then it uses the OpenFeatureFlagProvider for the FeatureDispatcher
+Then it uses the EnvironmentVariableFlagProvider for the FeatureDispatcher
 And Rafael has written zero FlagProvider configuration
 ```
 
@@ -319,7 +319,7 @@ Priya uses `application.yml` to set flag values for local dev: `flagzen.flags.ch
 
 #### 3: Boundary -- FlagProvider bean exists, no fallback needed
 
-Rafael's production service has a LaunchDarkly `FlagProvider` `@Bean`. The `@ConditionalOnMissingBean` check finds it, so no `InMemoryFlagProvider` is created and no warning is logged.
+Rafael's production service has an `EnvironmentVariableFlagProvider` `@Bean`. The `@ConditionalOnMissingBean` check finds it, so no `InMemoryFlagProvider` is created and no warning is logged.
 
 ### UAT Scenarios (BDD)
 
@@ -347,7 +347,7 @@ And the message contains "dev/test only"
 #### Scenario: No fallback when explicit provider exists
 
 ```gherkin
-Given Rafael defines a FlagProvider @Bean returning LaunchDarklyFlagProvider
+Given Rafael defines a FlagProvider @Bean returning EnvironmentVariableFlagProvider
 When the application context starts
 Then no InMemoryFlagProvider bean is created
 And no "No FlagProvider bean found" warning is logged
@@ -477,7 +477,7 @@ When something goes wrong with FlagZen auto-configuration, Rafael and Priya wast
 #### 1: Happy Path -- Everything configured
 
 Rafael starts his payment service. At INFO level he sees:
-`INFO  c.f.s.FlagZenAutoConfiguration : FlagZen auto-configured: provider=LaunchDarklyFlagProvider, features=[CheckoutFlow, ShippingMethod] (2 feature proxies registered)`
+`INFO  c.f.s.FlagZenAutoConfiguration : FlagZen auto-configured: provider=EnvironmentVariableFlagProvider, features=[CheckoutFlow, ShippingMethod] (2 feature proxies registered)`
 
 #### 2: No features found
 

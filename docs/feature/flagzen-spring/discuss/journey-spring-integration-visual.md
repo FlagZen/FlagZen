@@ -55,7 +55,7 @@ Two paths:
 public class FlagConfig {
     @Bean
     public FlagProvider flagProvider() {
-        return new LaunchDarklyFlagProvider(sdkKey);
+        return new EnvironmentVariableFlagProvider();
     }
 }
 ```
@@ -102,7 +102,7 @@ No FlagProvider bean found in ApplicationContext.
 
 Action:
 Define a FlagProvider @Bean or add a FlagZen provider module
-(flagzen-launchdarkly, flagzen-openfeature, etc.) to your classpath.
+(flagzen-env, etc.) to your classpath.
 ```
 
 ### E2: No @Feature interfaces on classpath

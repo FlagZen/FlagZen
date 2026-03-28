@@ -6,7 +6,7 @@
 |----------|--------|---------|
 | Problem statement clear | PASS | Rafael finds it tedious to manually create FeatureDispatcher per service |
 | User/persona identified | PASS | Rafael Oliveira, senior backend dev, fintech startup, Spring Boot microservices |
-| 3+ domain examples | PASS | 3 examples: happy path (LaunchDarkly), edge (custom dispatcher exists), error (no provider) |
+| 3+ domain examples | PASS | 3 examples: happy path (EnvironmentVariableFlagProvider), edge (custom dispatcher exists), error (no provider) |
 | UAT scenarios (3-7) | PASS | 4 scenarios covering auto-config, back-off, fallback, imports file |
 | AC derived from UAT | PASS | 4 AC items map to the 4 scenarios |
 | Right-sized | PASS | ~1-2 days, 4 scenarios, single auto-configuration class |
@@ -42,7 +42,7 @@
 |----------|--------|---------|
 | Problem statement clear | PASS | Rafael configures providers differently per environment, wants standard Spring pattern |
 | User/persona identified | PASS | Rafael Oliveira, multi-environment deployment |
-| 3+ domain examples | PASS | 3 examples: LaunchDarkly prod, duplicate providers, provider from another starter |
+| 3+ domain examples | PASS | 3 examples: EnvironmentVariableFlagProvider prod, duplicate providers, provider from another starter |
 | UAT scenarios (3-7) | PASS | 4 scenarios: standard resolution, profiles, provider module, ambiguous beans |
 | AC derived from UAT | PASS | 4 AC items: standard DI, @Primary/@Qualifier work, no custom resolution, standard error |
 | Right-sized | PASS | ~1 day, 4 scenarios, tightly coupled with US-SPRING-01 implementation |

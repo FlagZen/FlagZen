@@ -18,7 +18,7 @@ Feature: Spring Boot Auto-Configuration for FlagZen
   # --- Step 2: FlagProvider Detection ---
 
   Scenario: Explicit FlagProvider bean is used by auto-configuration
-    Given Rafael defines a FlagProvider @Bean returning a LaunchDarkly provider
+    Given Rafael defines a FlagProvider @Bean returning an EnvironmentVariableFlagProvider
     When the Spring application context starts
     Then FlagZenAutoConfiguration detects the FlagProvider bean
     And creates a FeatureDispatcher bean using that FlagProvider
