@@ -209,4 +209,4 @@ The OpenFeature SDK is a CNCF project with semver guarantees, but major version 
 
 | ADR | Title | Status |
 |-----|-------|--------|
-| [ADR-020](../../../../adrs/ADR-020-absent-flag-detection-strategy.md) | Absent Flag Detection Strategy (Reason-Based vs Sentinel) | Proposed |
+| [ADR-020](../../../adrs/ADR-020-absent-flag-detection-strategy.md) | Absent Flag Detection Strategy (Reason-Based vs Sentinel) | Proposed |

@@ -247,8 +247,8 @@ Existing ArchUnit rules apply unchanged. One additional rule recommended:
 
 ## 14. ADR Index
 
-|                                 ADR                                  |                            Title                             |  Status  |
-| -------------------------------------------------------------------- | ------------------------------------------------------------ | -------- |
-| [ADR-008](../../../adrs/ADR-008-unified-ordered-dispatch.md)         | Unified Ordered Dispatch (replaces Mutually Exclusive Modes) | Accepted |
-| [ADR-009](../../../adrs/ADR-009-predicate-instantiation-strategy.md) | Predicate Instantiation Strategy                             | Accepted |
-| [ADR-010](../../../adrs/ADR-010-condition-annotation-nesting.md)     | @Condition Annotation Nesting in @Variant                    | Accepted |
+|                                  ADR                                  |                            Title                             |  Status  |
+| --------------------------------------------------------------------- | ------------------------------------------------------------ | -------- |
+| [ADR-008](../../../adrs/ADR-008-mutually-exclusive-dispatch-modes.md) | Unified Ordered Dispatch (replaces Mutually Exclusive Modes) | Accepted |
+| [ADR-009](../../../adrs/ADR-009-predicate-instantiation-strategy.md)  | Predicate Instantiation Strategy                             | Accepted |
+| [ADR-010](../../../adrs/ADR-010-condition-annotation-nesting.md)      | @Condition Annotation Nesting in @Variant                    | Accepted |
