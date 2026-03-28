@@ -19,4 +19,4 @@ Thumbs.db
 # nWave transient state
 .nwave/des/des-task-active*
 .nwave/des/deliver-session.json
-site/
+/site/
