@@ -33,6 +33,14 @@ This project uses markdownlint (config in `.markdownlint-cli2.jsonc`). When writ
 - Check `.markdownlint-cli2.jsonc` for disabled rules before "fixing" something that's intentionally allowed
 - Tables must have consistent column alignment
 
+## Release Discipline
+
+When preparing a release:
+
+- Update `CHANGELOG.md` with a summary of changes since the last release
+- Bump `flagzenVersion` in `gradle.properties` (remove `-SNAPSHOT`)
+- After release, bump to next `-SNAPSHOT` version
+
 ## Commit Discipline
 
 When creating a commit, always check `git status` for the entire repo and include all related changes — not just the files you directly edited. In particular, watch for:
