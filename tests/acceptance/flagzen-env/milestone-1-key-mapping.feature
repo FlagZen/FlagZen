@@ -5,37 +5,37 @@ Feature: Key mapping from source names to flag keys
 
   # --- US-ENV-05: Built-in parsers ---
 
-  @pending @US-ENV-05
+  @US-ENV-05
   Scenario: Screaming snake case parser with prefix extracts segments
     Given a screaming snake case parser with prefix "FLAGZEN_"
     When it parses the name "FLAGZEN_CHECKOUT_FLOW"
     Then the segments are "checkout" and "flow"
 
-  @pending @US-ENV-05
+  @US-ENV-05
   Scenario: Screaming snake case parser rejects names without matching prefix
     Given a screaming snake case parser with prefix "FLAGZEN_"
     When it parses the name "HOME"
     Then no segments are returned
 
-  @pending @US-ENV-05
+  @US-ENV-05
   Scenario: Screaming snake case parser without prefix parses any screaming snake name
     Given a screaming snake case parser without prefix
     When it parses the name "CHECKOUT_FLOW"
     Then the segments are "checkout" and "flow"
 
-  @pending @US-ENV-05
+  @US-ENV-05
   Scenario: Screaming snake case parser handles single-segment name
     Given a screaming snake case parser with prefix "FLAGZEN_"
     When it parses the name "FLAGZEN_DARKMODE"
     Then the only segment is "darkmode"
 
-  @pending @US-ENV-05
+  @US-ENV-05
   Scenario: Camel case parser with prefix extracts segments
     Given a camel case parser with prefix "myApp"
     When it parses the name "myAppCheckoutFlow"
     Then the segments are "checkout" and "flow"
 
-  @pending @US-ENV-05
+  @US-ENV-05
   Scenario: Camel case parser rejects names without matching prefix
     Given a camel case parser with prefix "myApp"
     When it parses the name "FLAGZEN_CHECKOUT_FLOW"
