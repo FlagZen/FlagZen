@@ -27,8 +27,8 @@ Extended `@Variant` annotation to support multi-value mapping: multiple flag val
 
 ## Quality Gates
 
-| Gate | Result |
-|------|--------|
-| Acceptance tests (31 scenarios) | PASS |
-| PITest mutation testing | 84% kill rate (gate: ≥80%) |
-| DES integrity verification (33 steps) | PASS |
+|                 Gate                  |           Result           |
+| ------------------------------------- | -------------------------- |
+| Acceptance tests (31 scenarios)       | PASS                       |
+| PITest mutation testing               | 84% kill rate (gate: ≥80%) |
+| DES integrity verification (33 steps) | PASS                       |

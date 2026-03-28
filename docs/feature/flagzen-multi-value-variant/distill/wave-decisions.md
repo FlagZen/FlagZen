@@ -21,10 +21,12 @@
 **New step class `MultiValueVariantSteps`** for M13-specific steps. This avoids pattern collisions with existing `CompileTimeSteps` and `TypeAnnotationSteps` (per feedback in memory about DuplicateStepDefinitionException risk). Multi-value-specific step patterns like "for string values X and Y" and "for int values X and Y" are distinct from existing patterns.
 
 Reuse from existing steps:
+
 - `CompileTimeSteps`: "the project compiles", "compilation succeeds", "compilation fails"
 - `TypeAnnotationSteps`: feature setup with type (INT, LONG, DOUBLE)
 
 New steps needed:
+
 - Compile-time: multi-value variant definitions (string array, int array, long array, @CloseTo array/overlap)
 - Runtime: multi-value dispatcher setup, multi-value fixture resolution
 

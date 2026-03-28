@@ -13,7 +13,7 @@
 | Change `long longValue()` to `long[] longValue()` | Validate array elements against inner enum    | Intra-array duplicate detection           | Metadata lists all values                   |
 | Document `doubleValue` already supports arrays    | REQUIRED fallback counts multi-value coverage | Clear error messages with all class names |                                             |
 | Skip `booleanValue` multi-value                   | Validate @CloseTo ranges for overlap          | @CloseTo inter-variant overlap detection  |                                             |
-|                                                    |                                               | @CloseTo intra-variant overlap detection  |                                             |
+|                                                   |                                               | @CloseTo intra-variant overlap detection  |                                             |
 
 ---
 

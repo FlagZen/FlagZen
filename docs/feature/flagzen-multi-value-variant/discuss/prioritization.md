@@ -9,14 +9,14 @@
 
 ## Backlog Suggestions
 
-|                   Story                    | Release | Priority | Value | Urgency | Effort | Score |             Dependencies              |
-| ------------------------------------------ | ------- | -------- | ----- | ------- | ------ | ----- | ------------------------------------- |
-| US-01: String array multi-value            | R1      | P1       | 5     | 5       | 2      | 12.5  | None                                  |
-| US-02: Int array multi-value               | R1      | P2       | 4     | 4       | 2      | 8.0   | US-01 (annotation schema established) |
-| US-03: Cross-array duplicate detection     | R1      | P3       | 5     | 5       | 2      | 12.5  | US-01                                 |
-| US-04: Long array multi-value              | R2      | P4       | 3     | 3       | 1      | 9.0   | US-01 pattern established             |
-| US-05: Array + repeated composability      | R2      | P5       | 4     | 3       | 2      | 6.0   | US-01, US-03                          |
-| US-06: Enum validation + REQUIRED fallback | R2      | P6       | 4     | 3       | 2      | 6.0   | US-01, US-03                          |
+|                    Story                    | Release | Priority | Value | Urgency | Effort | Score |              Dependencies               |
+| ------------------------------------------- | ------- | -------- | ----- | ------- | ------ | ----- | --------------------------------------- |
+| US-01: String array multi-value             | R1      | P1       | 5     | 5       | 2      | 12.5  | None                                    |
+| US-02: Int array multi-value                | R1      | P2       | 4     | 4       | 2      | 8.0   | US-01 (annotation schema established)   |
+| US-03: Cross-array duplicate detection      | R1      | P3       | 5     | 5       | 2      | 12.5  | US-01                                   |
+| US-04: Long array multi-value               | R2      | P4       | 3     | 3       | 1      | 9.0   | US-01 pattern established               |
+| US-05: Array + repeated composability       | R2      | P5       | 4     | 3       | 2      | 6.0   | US-01, US-03                            |
+| US-06: Enum validation + REQUIRED fallback  | R2      | P6       | 4     | 3       | 2      | 6.0   | US-01, US-03                            |
 | US-07: @CloseTo overlapping range detection | R2      | P7       | 5     | 4       | 2      | 10.0  | None (can be implemented independently) |
 
 > **Note**: US-03 (duplicate detection) scores high on value/urgency because without it, the feature is unsafe. It ships with R1, not as a separate release.
