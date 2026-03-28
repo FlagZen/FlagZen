@@ -118,14 +118,16 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 
 ### M13: Multi-Value Variant Mapping — `flagzen-multi-value-variant`
 
-**Status: NOT STARTED** | **Release: v1.1.0** | Depends on: M0
+**Status: DONE** | **Release: v1.1.0** | Depends on: M0 | [Artifacts](feature/flagzen-multi-value-variant/)
 
-- [ ] `@Variant(value = {"CLASSIC", "LEGACY"})` — `String[] value()` on @Variant (non-breaking: single string still works)
-- [ ] `@Variant(intValue = {3, 5})` — `int[] intValue()` for multi-value int dispatch
-- [ ] Repeated `@Variant` annotations on same class also supported (existing `@Repeatable`)
-- [ ] Processor registers implementation class under all specified values
-- [ ] Compile-time duplicate detection across multi-value arrays
-- [ ] Both syntaxes composable: array values + repeated annotations
+- [x] `@Variant(value = {"CLASSIC", "LEGACY"})` — `String[] value()` on @Variant (non-breaking: single string still works)
+- [x] `@Variant(intValue = {3, 5})` — `int[] intValue()` for multi-value int dispatch
+- [x] `@Variant(longValue = {1000L, 5000L})` — `long[] longValue()` for multi-value long dispatch
+- [x] Repeated `@Variant` annotations on same class also supported (existing `@Repeatable`)
+- [x] Processor registers implementation class under all specified values
+- [x] Compile-time duplicate detection across multi-value arrays
+- [x] Both syntaxes composable: array values + repeated annotations
+- [x] `@CloseTo` overlap detection (inter-variant and intra-variant)
 
 ### M4: Spring Integration — `flagzen-spring`
 
