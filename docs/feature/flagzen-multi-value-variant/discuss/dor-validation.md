@@ -108,6 +108,26 @@
 
 ---
 
+---
+
+## US-07: Compile-Time Detection of Overlapping @CloseTo Ranges
+
+|        DoR Item         | Status |                                                                          Evidence                                                                           |
+| ----------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Problem statement clear | PASS   | Kenji defines DOUBLE-typed feature with @CloseTo variants whose ranges overlap, causing ambiguous runtime dispatch discovered only in QA                    |
+| User/persona identified | PASS   | Java developer defining DOUBLE-typed features with @CloseTo variant dispatch                                                                                |
+| 3+ domain examples      | PASS   | Inter-variant overlap (Kenji), non-overlapping ranges (Kenji), intra-variant overlap (Priya), intra-variant non-overlap (Kenji), default delta overlap (5) |
+| UAT scenarios (3-7)     | PASS   | 5 scenarios: inter-variant overlap, non-overlap, intra-variant overlap, intra-variant non-overlap, default delta overlap                                    |
+| AC derived from UAT     | PASS   | 7 criteria from scenarios covering both overlap types, error message content, and success cases                                                             |
+| Right-sized             | PASS   | 1-2 days, 5 scenarios                                                                                                                                       |
+| Technical notes         | PASS   | Overlap formula, floating-point safety, M2 vs M13 scope split, O(N^2) pairwise comparison noted                                                            |
+| Dependencies tracked    | PASS   | No hard dependencies (can be implemented independently); inter-variant part overlaps with M2                                                                |
+| Outcome KPIs defined    | PASS   | 100% compile-time overlap detection, measured by negative compilation tests                                                                                 |
+
+### DoR Status: PASSED
+
+---
+
 ## Summary
 
 |                   Story                    |   DoR Status   | Estimated Effort |
@@ -118,6 +138,7 @@
 | US-04: Long array multi-value              | PASSED         | 0.5-1 day        |
 | US-05: Array + repeated composability      | PASSED         | 0.5-1 day        |
 | US-06: Enum validation + REQUIRED fallback | PASSED         | 0.5-1 day        |
-| **Total**                                  | **ALL PASSED** | **4-7 days**     |
+| US-07: @CloseTo overlapping range detection | PASSED         | 1-2 days         |
+| **Total**                                  | **ALL PASSED** | **5-8 days**     |
 
-All 6 stories pass DoR. Ready for DESIGN wave handoff.
+All 7 stories pass DoR. Ready for DESIGN wave handoff.

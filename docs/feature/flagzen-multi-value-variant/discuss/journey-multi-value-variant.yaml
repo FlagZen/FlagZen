@@ -86,3 +86,28 @@ integration_validation:
     - artifact: "duplicate_detection_scope"
       must_match_across: [2]
       failure_message: "Duplicate detection must cover intra-array, inter-annotation (repeated), and inter-class scopes"
+
+    - artifact: "closeto_overlap_detection"
+      must_match_across: [2]
+      failure_message: "Overlap detection must cover inter-variant and intra-variant @CloseTo ranges"
+
+  - id: 4
+    name: "Validate @CloseTo Range Overlap"
+    action: "Annotation processor computes effective ranges for @CloseTo annotations and detects overlaps"
+
+    shared_artifacts:
+      - name: "closeto_ranges"
+        source: "@CloseTo annotation value and delta parameters"
+        displayed_as: "[value - delta, value + delta] per @CloseTo entry"
+        consumers:
+          - "FlagZenProcessor overlap detection logic"
+          - "Compile error reporting"
+
+    emotional_state:
+      entry: "Unaware of potential ambiguity in overlapping ranges"
+      exit: "Relieved -- compiler catches ambiguous dispatch before runtime"
+
+    integration_checkpoint: |
+      Overlap condition: |value1 - value2| < delta1 + delta2.
+      Two scopes: inter-variant (across classes) and intra-variant (within @CloseTo[] array).
+      Uses floating-point safe comparison (Double.compare or BigDecimal).

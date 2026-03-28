@@ -46,6 +46,16 @@
 - **Integration risk**: LOW -- existing groupBy logic works on flat VariantModel list. No change needed if array expansion is correct upstream.
 - **Validation**: Negative compilation tests for all duplicate scopes (intra-array, inter-annotation, inter-class).
 
+### closeto_range_overlap_detection
+
+- **Source of truth**: `FlagZenProcessor` overlap validation logic (new)
+- **Consumers**:
+  - Compile error reporting -- inter-variant and intra-variant overlap messages
+- **Owner**: flagzen-core (processor)
+- **Integration risk**: LOW -- new validation pass over existing `@CloseTo` data. No modification of existing data structures needed.
+- **Validation**: Negative compilation tests for overlapping and non-overlapping `@CloseTo` ranges, both inter-variant and intra-variant.
+- **Note**: Floating-point comparison risk -- must use safe arithmetic (`Double.compare` or `BigDecimal`) for range boundary calculations.
+
 ## Integration Checkpoints
 
 1. **Annotation schema change**: After changing element types, verify all existing tests compile without source modification.
@@ -53,3 +63,4 @@
 3. **Sentinel migration**: After changing defaults from scalar sentinels to empty arrays, verify `hasTypeMismatch()` detects correct/incorrect element usage.
 4. **Duplicate detection**: After array expansion, verify duplicates detected across all scopes.
 5. **Proxy generation**: After generating proxies with multi-value variants, verify map contains all entries.
+6. **@CloseTo overlap detection**: After implementing range overlap validation, verify inter-variant overlaps produce compile error, intra-variant overlaps produce compile error, and non-overlapping ranges compile successfully.

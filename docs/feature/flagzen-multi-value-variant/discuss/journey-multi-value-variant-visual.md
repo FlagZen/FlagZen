@@ -106,3 +106,71 @@ public class ClassicCheckout implements CheckoutFlow { ... }
 ```
 
 Registers under "CLASSIC", "LEGACY", and "RETRO". Duplicate detection spans all values from all annotations on the class.
+
+## @CloseTo Overlapping Range Detection
+
+### Step 4: Compile-Time @CloseTo Range Validation
+
+When Kenji defines DOUBLE-typed features with `@CloseTo` variants, the processor computes the effective range `[value - delta, value + delta]` for each entry and checks for overlaps.
+
+**Overlap detected (inter-variant):**
+
+```java
+@Variant(doubleValue = @CloseTo(value = 0.1, delta = 0.05), of = DiscountRate.class)
+public class SmallDiscount implements DiscountRate { ... }
+// range: [0.05, 0.15]
+
+@Variant(doubleValue = @CloseTo(value = 0.12, delta = 0.05), of = DiscountRate.class)
+public class MediumDiscount implements DiscountRate { ... }
+// range: [0.07, 0.17]
+```
+
+**Compiler output:**
+
+```
+error: Overlapping @CloseTo ranges for feature "discount-rate".
+  SmallDiscount: @CloseTo(value=0.1, delta=0.05) -> range [0.05, 0.15]
+  MediumDiscount: @CloseTo(value=0.12, delta=0.05) -> range [0.07, 0.17]
+  Suggestion: reduce delta to increase precision, or merge into a single variant.
+```
+
+**Overlap detected (intra-variant, M13 multi-value array):**
+
+```java
+@Variant(doubleValue = {
+    @CloseTo(value = 0.1, delta = 0.05),
+    @CloseTo(value = 0.12, delta = 0.05)  // overlaps with first entry!
+}, of = DiscountRate.class)
+public class SmallDiscount implements DiscountRate { ... }
+```
+
+**Compiler output:**
+
+```
+error: Overlapping @CloseTo ranges within variant SmallDiscount for feature "discount-rate".
+  @CloseTo(value=0.1, delta=0.05) -> range [0.05, 0.15]
+  @CloseTo(value=0.12, delta=0.05) -> range [0.07, 0.17]
+  Suggestion: reduce delta to increase precision, or remove the redundant entry.
+```
+
+**No overlap (well-separated ranges):**
+
+```java
+@Variant(doubleValue = {@CloseTo(0.1), @CloseTo(0.5)}, of = DiscountRate.class)
+public class SmallDiscount implements DiscountRate { ... }
+// ranges are far apart -- compilation succeeds
+```
+
+### Emotional Arc (Step 4)
+
+```
+[Trigger]              [Step 4]
+ Kenji defines          Processor computes
+ @CloseTo variants      ranges, detects overlap
+ with close values
+   |                      |
+   v                      v
+ Feels: unaware        Feels: relieved
+ "These look fine"     "Compiler caught
+                        ambiguous dispatch"
+```

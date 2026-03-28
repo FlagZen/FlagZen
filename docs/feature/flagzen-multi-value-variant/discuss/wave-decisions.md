@@ -28,3 +28,14 @@
 - `booleanValue` multi-value skipped (only two possible values: true/false)
 - `doubleValue` already uses `CloseTo[]` array -- multi-value already works for double
 - `@Repeatable` composability with array values must be tested
+
+## Decision 7: @CloseTo Overlapping Range Detection (US-07 addition)
+
+**Added post-initial discovery.** Two scopes of overlap detection:
+
+1. **Inter-variant overlap** (M2 concern): two different variant classes have `@CloseTo` ranges that overlap for the same DOUBLE-typed feature. This applies even without multi-value arrays and arguably belongs in `flagzen-typed-variants` (M2). However, it was not caught there, so it is tracked here.
+2. **Intra-variant overlap** (M13 concern): a single variant class has overlapping `@CloseTo` entries within its `doubleValue` array. This is M13-specific since M13 introduces multi-value `@CloseTo[]` arrays.
+
+Both checks use the formula `|value1 - value2| < delta1 + delta2` to determine overlap. Error messages name the overlapping variants, show computed ranges, and suggest remediation (reduce delta or merge variants).
+
+**Scope note**: Inter-variant overlap detection could be backported to M2 as a separate story if the team prefers. For now, both checks are tracked under M13 to avoid blocking delivery.

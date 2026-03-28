@@ -12,7 +12,8 @@
 | Change `int intValue()` to `int[] intValue()`     | Handle mixed array + repeated annotations     | Cross-class duplicate detection           | No runtime change to dispatch               |
 | Change `long longValue()` to `long[] longValue()` | Validate array elements against inner enum    | Intra-array duplicate detection           | Metadata lists all values                   |
 | Document `doubleValue` already supports arrays    | REQUIRED fallback counts multi-value coverage | Clear error messages with all class names |                                             |
-| Skip `booleanValue` multi-value                   |                                               |                                           |                                             |
+| Skip `booleanValue` multi-value                   | Validate @CloseTo ranges for overlap          | @CloseTo inter-variant overlap detection  |                                             |
+|                                                    |                                               | @CloseTo intra-variant overlap detection  |                                             |
 
 ---
 
@@ -42,7 +43,8 @@ Thinnest end-to-end slice: `String[] value()` on `@Variant` + processor expands 
 - US-04: Long array multi-value (`long[] longValue()`)
 - US-05: Array values compose with repeated `@Variant` annotations
 - US-06: Enum validation and REQUIRED fallback with multi-value coverage
+- US-07: Compile-time detection of overlapping `@CloseTo` ranges
 
-**Outcome:** Full type coverage (string, int, long -- double already works, boolean skipped) and composability with existing `@Repeatable` mechanism.
+**Outcome:** Full type coverage (string, int, long -- double already works, boolean skipped), composability with existing `@Repeatable` mechanism, and compile-time safety for ambiguous `@CloseTo` range dispatch.
 
-## Scope Assessment: PASS -- 6 stories, 1 bounded context (flagzen-core), estimated 4-5 days
+## Scope Assessment: PASS -- 7 stories, 1 bounded context (flagzen-core), estimated 5-6 days

@@ -561,3 +561,139 @@ Then compilation fails with error containing "variant MODERN has no implementati
 - `validateVariantValuesAgainstEnum()` iterates `VariantModel` list. Since multi-value arrays produce multiple `VariantModel` entries, each element is validated individually -- existing logic works.
 - `hasIncompleteVariantCoverage()` collects covered values from `VariantModel.variantValue()`. Multi-value array expansion means all elements are in the coverage set -- existing logic works.
 - Key insight: most of the existing validation logic works unchanged because the multi-value expansion happens upstream (in `collectVariants()`), and downstream validation operates on the flat `List<VariantModel>`.
+
+---
+
+## US-07: Compile-Time Detection of Overlapping @CloseTo Ranges
+
+### Problem
+
+Kenji Nakamura defines a DOUBLE-typed feature `DiscountRate` where variants are dispatched by proximity (`@CloseTo`). He accidentally creates two variants with ranges that overlap -- `@CloseTo(value = 0.1, delta = 0.05)` on `SmallDiscount` and `@CloseTo(value = 0.12, delta = 0.05)` on `MediumDiscount`. At runtime, a flag value of 0.11 falls within both ranges, causing ambiguous dispatch. Kenji only discovers this when QA reports inconsistent behavior in production. He needs the compiler to catch overlapping `@CloseTo` ranges before the code ever runs.
+
+### Who
+
+- Java developer | Defining DOUBLE-typed features with `@CloseTo` variants | Needs compile-time safety against ambiguous range overlap
+
+### Solution
+
+The annotation processor computes the effective range `[value - delta, value + delta]` for each `@CloseTo` annotation on variants of the same DOUBLE-typed feature. Two ranges overlap when `|value1 - value2| < delta1 + delta2`. The processor emits a compile error identifying the overlapping variants and their ranges, with a suggestion to reduce delta or merge variants. Two distinct checks apply:
+
+1. **Inter-variant overlap**: two different implementation classes have `@CloseTo` ranges that overlap for the same feature.
+2. **Intra-variant overlap (M13)**: a single variant class has multiple `@CloseTo` entries in its `doubleValue` array whose ranges overlap, which is nonsensical.
+
+### Domain Examples
+
+#### 1: Inter-variant overlap -- Kenji's discount rate ranges collide
+
+Kenji defines `SmallDiscount` with `@Variant(doubleValue = @CloseTo(value = 0.1, delta = 0.05), of = DiscountRate.class)` (range [0.05, 0.15]) and `MediumDiscount` with `@Variant(doubleValue = @CloseTo(value = 0.12, delta = 0.05), of = DiscountRate.class)` (range [0.07, 0.17]). The ranges overlap at [0.07, 0.15]. The compiler reports:
+
+```
+error: Overlapping @CloseTo ranges for feature "discount-rate".
+  SmallDiscount: @CloseTo(value=0.1, delta=0.05) -> range [0.05, 0.15]
+  MediumDiscount: @CloseTo(value=0.12, delta=0.05) -> range [0.07, 0.17]
+  Suggestion: reduce delta to increase precision, or merge into a single variant.
+```
+
+#### 2: Non-overlapping ranges -- Kenji's well-separated discount tiers
+
+Kenji defines `SmallDiscount` with `@CloseTo(value = 0.1, delta = 0.01)` (range [0.09, 0.11]) and `LargeDiscount` with `@CloseTo(value = 0.5, delta = 0.01)` (range [0.49, 0.51]). The ranges are well separated. Compilation succeeds.
+
+#### 3: Intra-variant overlap -- Priya's nonsensical array entries
+
+Priya Sharma writes `@Variant(doubleValue = {@CloseTo(value = 0.1, delta = 0.05), @CloseTo(value = 0.12, delta = 0.05)}, of = DiscountRate.class)` on `SmallDiscount`. Both `@CloseTo` entries are on the same variant class in the same array. Their ranges [0.05, 0.15] and [0.07, 0.17] overlap. The compiler reports:
+
+```
+error: Overlapping @CloseTo ranges within variant SmallDiscount for feature "discount-rate".
+  @CloseTo(value=0.1, delta=0.05) -> range [0.05, 0.15]
+  @CloseTo(value=0.12, delta=0.05) -> range [0.07, 0.17]
+  Suggestion: reduce delta to increase precision, or remove the redundant entry.
+```
+
+#### 4: Intra-variant non-overlap -- valid multi-value double
+
+Kenji writes `@Variant(doubleValue = {@CloseTo(0.1), @CloseTo(0.5)}, of = DiscountRate.class)` on `SmallDiscount`. With the default delta, the ranges do not overlap. Compilation succeeds.
+
+#### 5: Inter-variant overlap with default delta
+
+Kenji writes `@CloseTo(0.1)` on `SmallDiscount` and `@CloseTo(0.100001)` on `MediumDiscount`, both using the default delta. If the default delta is large enough that the ranges overlap, the compiler reports the overlap. This validates that the check uses actual delta values, not just exact value equality.
+
+### UAT Scenarios (BDD)
+
+#### Scenario: Overlapping @CloseTo ranges across variants rejected
+
+```gherkin
+Given Kenji defines a @Feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
+And SmallDiscount is annotated with @Variant(doubleValue = @CloseTo(value = 0.1, delta = 0.05), of = DiscountRate.class)
+And MediumDiscount is annotated with @Variant(doubleValue = @CloseTo(value = 0.12, delta = 0.05), of = DiscountRate.class)
+When the project compiles
+Then compilation fails with error containing "Overlapping @CloseTo ranges for feature \"discount-rate\""
+And the error message names SmallDiscount and MediumDiscount
+And the error message shows range [0.05, 0.15] and range [0.07, 0.17]
+And the error message suggests reducing delta or merging variants
+```
+
+#### Scenario: Non-overlapping @CloseTo ranges across variants accepted
+
+```gherkin
+Given Kenji defines a @Feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
+And SmallDiscount is annotated with @Variant(doubleValue = @CloseTo(value = 0.1, delta = 0.01), of = DiscountRate.class)
+And LargeDiscount is annotated with @Variant(doubleValue = @CloseTo(value = 0.5, delta = 0.01), of = DiscountRate.class)
+When the project compiles
+Then compilation succeeds
+```
+
+#### Scenario: Overlapping @CloseTo ranges within same variant array rejected
+
+```gherkin
+Given Priya defines a @Feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
+And SmallDiscount is annotated with @Variant(doubleValue = {@CloseTo(value = 0.1, delta = 0.05), @CloseTo(value = 0.12, delta = 0.05)}, of = DiscountRate.class)
+When the project compiles
+Then compilation fails with error containing "Overlapping @CloseTo ranges within variant SmallDiscount"
+And the error message shows both ranges
+And the error message suggests reducing delta or removing the redundant entry
+```
+
+#### Scenario: Non-overlapping @CloseTo ranges within same variant array accepted
+
+```gherkin
+Given Kenji defines a @Feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
+And SmallDiscount is annotated with @Variant(doubleValue = {@CloseTo(0.1), @CloseTo(0.5)}, of = DiscountRate.class)
+When the project compiles
+Then compilation succeeds
+```
+
+#### Scenario: Overlapping ranges with default delta detected
+
+```gherkin
+Given Kenji defines a @Feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
+And SmallDiscount is annotated with @Variant(doubleValue = @CloseTo(0.1), of = DiscountRate.class)
+And MediumDiscount is annotated with @Variant(doubleValue = @CloseTo(0.100001), of = DiscountRate.class)
+When the project compiles
+Then compilation fails with error containing "Overlapping @CloseTo ranges"
+```
+
+### Acceptance Criteria
+
+- [ ] Overlapping `@CloseTo` ranges across different variant classes produce a compile error
+- [ ] Overlapping `@CloseTo` ranges within a single variant's `doubleValue` array produce a compile error
+- [ ] Non-overlapping `@CloseTo` ranges across variant classes compile successfully
+- [ ] Non-overlapping `@CloseTo` ranges within a single variant's array compile successfully
+- [ ] Error message identifies both overlapping variants by class name
+- [ ] Error message displays the computed ranges `[value - delta, value + delta]`
+- [ ] Error message suggests reducing delta or merging variants
+
+### Outcome KPIs
+
+- **Who**: Java developers using DOUBLE-typed features with `@CloseTo` variant dispatch
+- **Does what**: Receive compile-time error when `@CloseTo` ranges overlap (ambiguous dispatch)
+- **By how much**: 100% of overlapping ranges caught at compile time (zero ambiguous runtime dispatch)
+- **Measured by**: Negative compilation tests covering inter-variant and intra-variant overlap scenarios
+- **Baseline**: No overlap detection exists; ambiguous dispatch discovered at runtime
+
+### Technical Notes
+
+- Overlap condition: two `@CloseTo` annotations overlap when `|value1 - value2| < delta1 + delta2`. This is mathematically equivalent to checking if the intervals `[v1 - d1, v1 + d1]` and `[v2 - d2, v2 + d2]` intersect.
+- Use `Double.compare()` or `BigDecimal` for range arithmetic to avoid floating-point comparison pitfalls.
+- Inter-variant overlap detection belongs in M2 (`flagzen-typed-variants`) since it applies even without multi-value arrays. However, intra-variant overlap (within a `@CloseTo[]` array) is M13-specific.
+- The processor should perform pairwise comparison of all `@CloseTo` annotations for the same feature. For N annotations, this is O(N^2) but N is typically small (< 10 variants per feature).
+- Dependency: requires `@CloseTo` range parameters (`value`, `delta`) to be accessible at annotation processing time (they already are).

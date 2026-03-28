@@ -17,7 +17,10 @@
 | US-04: Long array multi-value              | R2      | P4       | 3     | 3       | 1      | 9.0   | US-01 pattern established             |
 | US-05: Array + repeated composability      | R2      | P5       | 4     | 3       | 2      | 6.0   | US-01, US-03                          |
 | US-06: Enum validation + REQUIRED fallback | R2      | P6       | 4     | 3       | 2      | 6.0   | US-01, US-03                          |
+| US-07: @CloseTo overlapping range detection | R2      | P7       | 5     | 4       | 2      | 10.0  | None (can be implemented independently) |
 
 > **Note**: US-03 (duplicate detection) scores high on value/urgency because without it, the feature is unsafe. It ships with R1, not as a separate release.
 >
 > **Riskiest Assumption**: Changing `String value()` to `String[] value()` is source-compatible for all existing user code. Validated by: existing single-value tests still compile after annotation change.
+>
+> **Note on US-07**: Scores high on value (5) because without overlap detection, DOUBLE-typed features with close `@CloseTo` values produce ambiguous runtime dispatch with no compile-time warning. Inter-variant overlap detection could ship as part of M2 (`flagzen-typed-variants`) since it applies even without multi-value arrays, but intra-variant overlap is M13-specific.

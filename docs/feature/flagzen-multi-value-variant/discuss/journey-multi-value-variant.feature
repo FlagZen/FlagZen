@@ -135,3 +135,40 @@ Feature: Multi-Value Variant Mapping
     And StandardPricing mapped to int value 1
     When the flag provider returns 5 for key "pricing-tier"
     Then the FeatureDispatcher returns the BulkPricing implementation
+
+  # --- @CloseTo Overlapping Range Detection ---
+
+  Scenario: Overlapping @CloseTo ranges across variants produces compile error
+    Given a @Feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
+    And a class "SmallDiscount" annotated with @Variant(doubleValue = @CloseTo(value = 0.1, delta = 0.05), of = DiscountRate.class)
+    And a class "MediumDiscount" annotated with @Variant(doubleValue = @CloseTo(value = 0.12, delta = 0.05), of = DiscountRate.class)
+    When the project compiles
+    Then compilation fails with error containing "Overlapping @CloseTo ranges for feature \"discount-rate\""
+    And the error message names "SmallDiscount" and "MediumDiscount"
+    And the error message shows the overlapping ranges
+
+  Scenario: Non-overlapping @CloseTo ranges across variants accepted
+    Given a @Feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
+    And a class "SmallDiscount" annotated with @Variant(doubleValue = @CloseTo(value = 0.1, delta = 0.01), of = DiscountRate.class)
+    And a class "LargeDiscount" annotated with @Variant(doubleValue = @CloseTo(value = 0.5, delta = 0.01), of = DiscountRate.class)
+    When the project compiles
+    Then compilation succeeds
+
+  Scenario: Overlapping @CloseTo ranges within same variant array produces compile error
+    Given a @Feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
+    And a class "SmallDiscount" annotated with @Variant(doubleValue = {@CloseTo(value = 0.1, delta = 0.05), @CloseTo(value = 0.12, delta = 0.05)}, of = DiscountRate.class)
+    When the project compiles
+    Then compilation fails with error containing "Overlapping @CloseTo ranges within variant SmallDiscount"
+
+  Scenario: Non-overlapping @CloseTo ranges within same variant array accepted
+    Given a @Feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
+    And a class "SmallDiscount" annotated with @Variant(doubleValue = {@CloseTo(0.1), @CloseTo(0.5)}, of = DiscountRate.class)
+    When the project compiles
+    Then compilation succeeds
+
+  Scenario: Overlapping @CloseTo ranges with default delta detected
+    Given a @Feature interface "DiscountRate" with flag key "discount-rate" and type DOUBLE
+    And a class "SmallDiscount" annotated with @Variant(doubleValue = @CloseTo(0.1), of = DiscountRate.class)
+    And a class "MediumDiscount" annotated with @Variant(doubleValue = @CloseTo(0.100001), of = DiscountRate.class)
+    When the project compiles
+    Then compilation fails with error containing "Overlapping @CloseTo ranges"
