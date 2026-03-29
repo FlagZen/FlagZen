@@ -10,7 +10,7 @@ docs_dir: docs/site
 
 theme:
   name: material
-  logo: assets/logo.png
+  logo: assets/logo-white-circle-bg.png
   favicon: assets/logo.png
   palette:
     - media: "(prefers-color-scheme: light)"
