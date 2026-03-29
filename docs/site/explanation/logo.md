@@ -1,8 +1,10 @@
 # The FlagZen Logo
 
+<!-- markdownlint-disable MD033 -->
 <p align="center">
   <img src="../assets/logo.png" alt="FlagZen logo" width="200">
 </p>
+<!-- markdownlint-enable MD033 -->
 
 The FlagZen logo combines two symbols: a **flag pennant** inside a **Zen enso circle**.
 

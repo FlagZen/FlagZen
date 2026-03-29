@@ -1,8 +1,10 @@
+# FlagZen
+
+<!-- markdownlint-disable MD033 -->
 <p align="center">
   <img src="branding/logo.png" alt="FlagZen" width="120">
 </p>
-
-<h1 align="center">FlagZen</h1>
+<!-- markdownlint-enable MD033 -->
 
 [![CI](https://github.com/FlagZen/FlagZen/actions/workflows/ci.yml/badge.svg)](https://github.com/FlagZen/FlagZen/actions/workflows/ci.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/com.flagzen/flagzen-core)](https://central.sonatype.com/namespace/com.flagzen)

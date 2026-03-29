@@ -1,8 +1,10 @@
+# FlagZen
+
+<!-- markdownlint-disable MD033 -->
 <p align="center">
   <img src="assets/logo.png" alt="FlagZen" width="120">
 </p>
-
-# FlagZen
+<!-- markdownlint-enable MD033 -->
 
 **Compile-time, zero-reflection feature flag framework for Java 17+.**
 
