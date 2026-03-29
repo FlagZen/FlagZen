@@ -1,4 +1,8 @@
-# FlagZen
+<p align="center">
+  <img src="logo.png" alt="FlagZen" width="120">
+</p>
+
+<h1 align="center">FlagZen</h1>
 
 [![CI](https://github.com/FlagZen/FlagZen/actions/workflows/ci.yml/badge.svg)](https://github.com/FlagZen/FlagZen/actions/workflows/ci.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/com.flagzen/flagzen-core)](https://central.sonatype.com/namespace/com.flagzen)
