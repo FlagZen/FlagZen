@@ -1,0 +1,129 @@
+{
+  "roadmap": {
+    "project_id": "flagzen-providers",
+    "created_at": "2026-03-30T17:09:40Z",
+    "total_steps": 6,
+    "phases": 2
+  },
+  "phases": [
+    {
+      "id": "01",
+      "name": "LaunchDarkly Adapter",
+      "steps": [
+        {
+          "id": "01-01",
+          "name": "LaunchDarkly module setup and string flag resolution",
+          "criteria": "Given an LDClient with a string flag configured, when getString(key) is called on LaunchDarklyFlagProvider, then the resolved value is returned. When the flag does not exist (ERROR reason), empty is returned. When prerequisite fails (PREREQUISITE_FAILED reason), empty is returned. When the flag is OFF, the off-variation value is returned (not empty).",
+          "test_file": "",
+          "scenario_name": "",
+          "description": "Create flagzen-launchdarkly Gradle module. Implement LaunchDarklyFlagProvider with getString(key) using stringVariationDetail and reason-kind-based absence detection (ERROR and PREREQUISITE_FAILED = absent). Include static factory create(LDClient). No ServiceLoader.",
+          "files_to_modify": [
+            "settings.gradle.kts",
+            "flagzen-launchdarkly/build.gradle.kts",
+            "flagzen-launchdarkly/src/main/java/com/flagzen/launchdarkly/LaunchDarklyFlagProvider.java",
+            "flagzen-launchdarkly/src/test/java/com/flagzen/launchdarkly/LaunchDarklyFlagProviderTest.java"
+          ],
+          "dependencies": [],
+          "estimated_hours": 2
+        },
+        {
+          "id": "01-02",
+          "name": "LaunchDarkly native typed resolution and long via JSON value",
+          "criteria": "Given an LDClient with boolean/int/double/long flags configured, when getBoolean/getInt/getDouble/getLong is called, then the natively resolved typed value is returned without string round-tripping. For getLong, jsonValueVariationDetail is used and LDValue.longValue() extracts the value. Non-numeric JSON values for getLong return empty.",
+          "test_file": "",
+          "scenario_name": "",
+          "description": "Override getBoolean (boolVariationDetail), getInt (intVariationDetail), getDouble (doubleVariationDetail), getLong (jsonValueVariationDetail + LDValue.longValue). All use same reason-kind absence detection. getLong returns empty if LDValue is not numeric.",
+          "files_to_modify": [
+            "flagzen-launchdarkly/src/main/java/com/flagzen/launchdarkly/LaunchDarklyFlagProvider.java",
+            "flagzen-launchdarkly/src/test/java/com/flagzen/launchdarkly/LaunchDarklyFlagProviderTest.java"
+          ],
+          "dependencies": ["01-01"],
+          "estimated_hours": 2
+        },
+        {
+          "id": "01-03",
+          "name": "LaunchDarkly EvaluationContext mapping to LDContext",
+          "criteria": "Given a FlagZen EvaluationContext with targeting key and attributes, when a context-aware method (e.g. getString(key, ctx)) is called, then the context is mapped to an LDContext with the targeting key as context key and attributes as LDValue custom attributes. When no context is provided (non-context overloads), a shared anonymous LDContext singleton is used. String, Boolean, Integer, Long, Double attributes are mapped; unsupported types are skipped with a JUL warning.",
+          "test_file": "",
+          "scenario_name": "",
+          "description": "Implement EvaluationContextMapper (package-private) that maps FlagZen EvaluationContext to LDContext. Add context-aware overloads for all 5 typed methods (10 total methods now). Create anonymous LDContext singleton for non-context calls.",
+          "files_to_modify": [
+            "flagzen-launchdarkly/src/main/java/com/flagzen/launchdarkly/LaunchDarklyFlagProvider.java",
+            "flagzen-launchdarkly/src/main/java/com/flagzen/launchdarkly/EvaluationContextMapper.java",
+            "flagzen-launchdarkly/src/test/java/com/flagzen/launchdarkly/LaunchDarklyFlagProviderTest.java",
+            "flagzen-launchdarkly/src/test/java/com/flagzen/launchdarkly/EvaluationContextMapperTest.java"
+          ],
+          "dependencies": ["01-02"],
+          "estimated_hours": 2
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "Togglz Adapter",
+      "steps": [
+        {
+          "id": "02-01",
+          "name": "Togglz module setup and boolean flag resolution",
+          "criteria": "Given a FeatureManager with a registered feature, when getBoolean(key) is called on TogglzFlagProvider, then the feature's enabled state is returned. When the feature does not exist, empty is returned. When the feature state is null, empty is returned. Feature key lookup is case-insensitive.",
+          "test_file": "",
+          "scenario_name": "",
+          "description": "Create flagzen-togglz Gradle module. Implement TogglzFlagProvider with getBoolean(key) using FeatureState.isEnabled(). Implement FeatureLookup (package-private) with case-insensitive ConcurrentHashMap cache. Static factory create(FeatureManager). No ServiceLoader.",
+          "files_to_modify": [
+            "settings.gradle.kts",
+            "flagzen-togglz/build.gradle.kts",
+            "flagzen-togglz/src/main/java/com/flagzen/togglz/TogglzFlagProvider.java",
+            "flagzen-togglz/src/main/java/com/flagzen/togglz/FeatureLookup.java",
+            "flagzen-togglz/src/test/java/com/flagzen/togglz/TogglzFlagProviderTest.java"
+          ],
+          "dependencies": [],
+          "estimated_hours": 2
+        },
+        {
+          "id": "02-02",
+          "name": "Togglz string value via activation strategy parameter",
+          "criteria": "Given a Togglz feature with activation strategy parameter 'value' set to a string, when getString(key) is called, then the parameter value is returned. When no 'value' parameter exists, the enabled state as string ('true'/'false') is returned. Numeric types (getInt, getLong, getDouble) work via FlagProvider default string parsing from getString.",
+          "test_file": "",
+          "scenario_name": "",
+          "description": "Override getString(key) to read FeatureState.getParameter('value'), falling back to String.valueOf(state.isEnabled()). Verify that default FlagProvider numeric methods parse correctly from getString output.",
+          "files_to_modify": [
+            "flagzen-togglz/src/main/java/com/flagzen/togglz/TogglzFlagProvider.java",
+            "flagzen-togglz/src/test/java/com/flagzen/togglz/TogglzFlagProviderTest.java"
+          ],
+          "dependencies": ["02-01"],
+          "estimated_hours": 1.5
+        },
+        {
+          "id": "02-03",
+          "name": "Togglz context-aware overloads with limitation logging",
+          "criteria": "Given a TogglzFlagProvider, when a context-aware method (getString(key, ctx) or getBoolean(key, ctx)) is called, then the context is ignored and the non-context overload is used. A one-time INFO log is emitted on the first context-aware call warning that EvaluationContext is not supported.",
+          "test_file": "",
+          "scenario_name": "",
+          "description": "Override getString(key, ctx) and getBoolean(key, ctx) to delegate to non-context versions. Use AtomicBoolean to track first context-aware call and emit one-time INFO log via JUL.",
+          "files_to_modify": [
+            "flagzen-togglz/src/main/java/com/flagzen/togglz/TogglzFlagProvider.java",
+            "flagzen-togglz/src/test/java/com/flagzen/togglz/TogglzFlagProviderTest.java"
+          ],
+          "dependencies": ["02-02"],
+          "estimated_hours": 1
+        }
+      ]
+    }
+  ],
+  "implementation_scope": {
+    "source_directories": [
+      "flagzen-launchdarkly/src/main/java/com/flagzen/launchdarkly/",
+      "flagzen-togglz/src/main/java/com/flagzen/togglz/"
+    ],
+    "test_directories": [
+      "flagzen-launchdarkly/src/test/java/com/flagzen/launchdarkly/",
+      "flagzen-togglz/src/test/java/com/flagzen/togglz/"
+    ],
+    "excluded_patterns": []
+  },
+  "validation": {
+    "status": "approved",
+    "reviewer": "orchestrator",
+    "approved_at": "2026-03-30T17:10:00Z"
+  }
+}
