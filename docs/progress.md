@@ -176,22 +176,22 @@ Documentation is updated with every release. Each release adds docs for its new 
 
 ### M6: Condition Predicates — `flagzen-conditions`
 
-**Status: DESIGN DONE** | **Release: v1.2.0** | Depends on: M1 | [Artifacts](feature/flagzen-conditions/)
+**Status: DONE** | **Release: v1.2.0** | Depends on: M1 | [Artifacts](feature/flagzen-conditions/)
 
 > **Note**: Condition predicates test the **flag value** (ranges, thresholds, patterns), not the evaluation context. Context-based targeting belongs in the flag provider (LaunchDarkly, OpenFeature, Togglz).
 
-- [ ] `@Condition(matches = X.class)` — predicate class reference
-- [ ] `@Condition(notMatches = X.class)` — negated predicate (mutually exclusive with `matches`)
-- [ ] `@Variant(when = @Condition(matches = HighRange.class), order = 2)` syntax
-- [ ] `order` on `@Variant` (not `@Condition`) — enables mixed exact-match + condition dispatch
-- [ ] `order` optional when unambiguous, mandatory when mixed or multiple conditions
-- [ ] Predicates use JDK interfaces: `Predicate<String>`, `IntPredicate`, `LongPredicate`, `DoublePredicate`
-- [ ] Compile-time validation: predicate type matches `@Feature(type = ...)` (e.g., INT → `IntPredicate`)
-- [ ] Exact matches and conditions can coexist on same `@Feature` (unified ordered dispatch, ADR-008)
-- [ ] Fallback to `@DefaultVariant` when no match
-- [ ] Interaction with `FallbackStrategy` when no match and no default
-- [ ] Proxy generation: ordered list evaluation when `order` present, map lookup when absent
-- [ ] Predicates instantiated via no-arg constructor (or DI when Spring module present)
+- [x] `@Condition(matches = X.class)` — predicate class reference
+- [x] `@Condition(notMatches = X.class)` — negated predicate (mutually exclusive with `matches`)
+- [x] `@Variant(when = @Condition(matches = HighRange.class), order = 2)` syntax
+- [x] `order` on `@Variant` (not `@Condition`) — enables mixed exact-match + condition dispatch
+- [x] `order` optional when unambiguous, mandatory when mixed or multiple conditions
+- [x] Predicates use JDK interfaces: `Predicate<String>`, `IntPredicate`, `LongPredicate`, `DoublePredicate`
+- [x] Compile-time validation: predicate type matches `@Feature(type = ...)` (e.g., INT → `IntPredicate`)
+- [x] Exact matches and conditions can coexist on same `@Feature` (unified ordered dispatch, ADR-008)
+- [x] Fallback to `@DefaultVariant` when no match
+- [x] Interaction with `FallbackStrategy` when no match and no default
+- [x] Proxy generation: ordered list evaluation when `order` present, map lookup when absent
+- [x] Predicates instantiated via no-arg constructor (or DI when Spring module present)
 
 ### M8: Hooks and Observability — `flagzen-hooks`
 
