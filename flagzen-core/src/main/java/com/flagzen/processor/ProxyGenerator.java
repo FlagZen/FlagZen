@@ -17,8 +17,11 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import javax.lang.model.element.Modifier;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -32,34 +35,16 @@ final class ProxyGenerator {
         ClassName flagProviderType = ClassName.get(FlagProvider.class);
         ClassName supplierOfFeature = ClassName.get(Supplier.class);
         ParameterizedTypeName supplierType = ParameterizedTypeName.get(supplierOfFeature, interfaceType);
-        TypeName variantKeyType = variantKeyType(model.featureType());
-        ParameterizedTypeName variantsMapType = ParameterizedTypeName.get(
-                ClassName.get(Map.class),
-                variantKeyType,
-                supplierType
-        );
 
         TypeSpec.Builder proxyBuilder = TypeSpec.classBuilder(model.proxyClassName())
                 .addModifiers(Modifier.PUBLIC)
                 .addSuperinterface(interfaceType);
 
-        // Fields
-        proxyBuilder.addField(FieldSpec.builder(flagProviderType, "flagProvider", Modifier.PRIVATE, Modifier.FINAL).build());
-        proxyBuilder.addField(FieldSpec.builder(variantsMapType, "variants", Modifier.PRIVATE, Modifier.FINAL).build());
-        proxyBuilder.addField(FieldSpec.builder(supplierType, "defaultVariant", Modifier.PRIVATE, Modifier.FINAL).build());
-        proxyBuilder.addField(FieldSpec.builder(FallbackStrategy.class, "fallbackStrategy", Modifier.PRIVATE, Modifier.FINAL).build());
-
-        // Package-private constructor
-        proxyBuilder.addMethod(MethodSpec.constructorBuilder()
-                .addParameter(flagProviderType, "flagProvider")
-                .addParameter(variantsMapType, "variants")
-                .addParameter(supplierType, "defaultVariant")
-                .addParameter(FallbackStrategy.class, "fallbackStrategy")
-                .addStatement("this.flagProvider = flagProvider")
-                .addStatement("this.variants = variants")
-                .addStatement("this.defaultVariant = defaultVariant")
-                .addStatement("this.fallbackStrategy = fallbackStrategy")
-                .build());
+        if (model.hasOrderedDispatch()) {
+            buildOrderedDispatchProxy(proxyBuilder, model, interfaceType, flagProviderType, supplierType);
+        } else {
+            buildMapBasedProxy(proxyBuilder, model, interfaceType, flagProviderType, supplierType);
+        }
 
         // Private resolve method
         proxyBuilder.addMethod(buildResolveMethod(model, interfaceType, supplierType));
@@ -79,6 +64,85 @@ final class ProxyGenerator {
 
         TypeSpec proxyClass = proxyBuilder.build();
         return JavaFile.builder(model.packageName(), proxyClass).build();
+    }
+
+    private void buildMapBasedProxy(TypeSpec.Builder proxyBuilder, FeatureModel model,
+                                     ClassName interfaceType, ClassName flagProviderType,
+                                     ParameterizedTypeName supplierType) {
+        TypeName variantKeyType = variantKeyType(model.featureType());
+        ParameterizedTypeName variantsMapType = ParameterizedTypeName.get(
+                ClassName.get(Map.class),
+                variantKeyType,
+                supplierType
+        );
+
+        // Fields
+        proxyBuilder.addField(FieldSpec.builder(flagProviderType, "flagProvider", Modifier.PRIVATE, Modifier.FINAL).build());
+        proxyBuilder.addField(FieldSpec.builder(variantsMapType, "variants", Modifier.PRIVATE, Modifier.FINAL).build());
+        proxyBuilder.addField(FieldSpec.builder(supplierType, "defaultVariant", Modifier.PRIVATE, Modifier.FINAL).build());
+        proxyBuilder.addField(FieldSpec.builder(FallbackStrategy.class, "fallbackStrategy", Modifier.PRIVATE, Modifier.FINAL).build());
+
+        // Package-private constructor
+        proxyBuilder.addMethod(MethodSpec.constructorBuilder()
+                .addParameter(flagProviderType, "flagProvider")
+                .addParameter(variantsMapType, "variants")
+                .addParameter(supplierType, "defaultVariant")
+                .addParameter(FallbackStrategy.class, "fallbackStrategy")
+                .addStatement("this.flagProvider = flagProvider")
+                .addStatement("this.variants = variants")
+                .addStatement("this.defaultVariant = defaultVariant")
+                .addStatement("this.fallbackStrategy = fallbackStrategy")
+                .build());
+    }
+
+    private void buildOrderedDispatchProxy(TypeSpec.Builder proxyBuilder, FeatureModel model,
+                                            ClassName interfaceType, ClassName flagProviderType,
+                                            ParameterizedTypeName supplierType) {
+        ParameterizedTypeName predicateType = ParameterizedTypeName.get(
+                ClassName.get(Predicate.class),
+                ClassName.get(String.class)
+        );
+
+        // Fields: flagProvider, defaultVariant, fallbackStrategy (common)
+        proxyBuilder.addField(FieldSpec.builder(flagProviderType, "flagProvider", Modifier.PRIVATE, Modifier.FINAL).build());
+        proxyBuilder.addField(FieldSpec.builder(supplierType, "defaultVariant", Modifier.PRIVATE, Modifier.FINAL).build());
+        proxyBuilder.addField(FieldSpec.builder(FallbackStrategy.class, "fallbackStrategy", Modifier.PRIVATE, Modifier.FINAL).build());
+
+        // Sort variants by order for deterministic field naming and dispatch sequence
+        List<VariantModel> sortedVariants = model.variants().stream()
+                .sorted(Comparator.comparingInt(VariantModel::order))
+                .toList();
+
+        // Generate predicate fields and variant supplier fields
+        MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder()
+                .addParameter(flagProviderType, "flagProvider")
+                .addParameter(supplierType, "defaultVariant")
+                .addParameter(FallbackStrategy.class, "fallbackStrategy")
+                .addStatement("this.flagProvider = flagProvider")
+                .addStatement("this.defaultVariant = defaultVariant")
+                .addStatement("this.fallbackStrategy = fallbackStrategy");
+
+        for (int i = 0; i < sortedVariants.size(); i++) {
+            VariantModel variant = sortedVariants.get(i);
+
+            // Variant supplier field
+            String supplierFieldName = "variant" + i;
+            proxyBuilder.addField(FieldSpec.builder(supplierType, supplierFieldName, Modifier.PRIVATE, Modifier.FINAL).build());
+            ctorBuilder.addStatement("this.$L = ($T) $T::new",
+                    supplierFieldName, supplierType,
+                    ClassName.bestGuess(variant.qualifiedClassName()));
+
+            // Predicate field (only for condition-based variants)
+            if (variant.condition() != null) {
+                String predFieldName = "pred" + i;
+                proxyBuilder.addField(FieldSpec.builder(predicateType, predFieldName, Modifier.PRIVATE, Modifier.FINAL).build());
+                ctorBuilder.addStatement("this.$L = new $T()",
+                        predFieldName,
+                        ClassName.bestGuess(variant.condition().predicateClassName()));
+            }
+        }
+
+        proxyBuilder.addMethod(ctorBuilder.build());
     }
 
     JavaFile generateMetadata(FeatureModel model) {
@@ -287,6 +351,13 @@ final class ProxyGenerator {
     }
 
     private MethodSpec buildStringResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
+        if (model.hasOrderedDispatch()) {
+            return buildOrderedStringResolveMethod(model, interfaceType);
+        }
+        return buildMapBasedStringResolveMethod(model, interfaceType, supplierType);
+    }
+
+    private MethodSpec buildMapBasedStringResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
                 .addModifiers(Modifier.PRIVATE)
                 .returns(interfaceType)
@@ -315,6 +386,65 @@ final class ProxyGenerator {
                         UnmatchedVariantException.class, model.flagKey())
                 .endControlFlow()
                 .addStatement("throw new $T($S, rawValue, variants.keySet())",
+                        UnmatchedVariantException.class, model.flagKey());
+        }
+
+        return builder.build();
+    }
+
+    private MethodSpec buildOrderedStringResolveMethod(FeatureModel model, ClassName interfaceType) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
+                .addModifiers(Modifier.PRIVATE)
+                .returns(interfaceType)
+                .addStatement("$T context = $T.current()", EvaluationContext.class, FlagContext.class)
+                .addStatement("$T<$T> flagValue = (context != null) ? flagProvider.getString($S, context) : flagProvider.getString($S)",
+                        Optional.class, String.class, model.flagKey(), model.flagKey())
+                .addStatement("$T rawValue = flagValue.orElse(null)", String.class);
+
+        // Sort variants by order for evaluation sequence
+        List<VariantModel> sortedVariants = model.variants().stream()
+                .sorted(Comparator.comparingInt(VariantModel::order))
+                .toList();
+
+        builder.beginControlFlow("if (rawValue != null)");
+
+        // Generate ordered if-else chain
+        for (int i = 0; i < sortedVariants.size(); i++) {
+            VariantModel variant = sortedVariants.get(i);
+            String supplierFieldName = "variant" + i;
+
+            if (variant.condition() != null) {
+                // Condition-based: predicate.test(rawValue) or !predicate.test(rawValue)
+                String predFieldName = "pred" + i;
+                if (variant.condition().negated()) {
+                    builder.beginControlFlow("if (!$L.test(rawValue))", predFieldName);
+                } else {
+                    builder.beginControlFlow("if ($L.test(rawValue))", predFieldName);
+                }
+            } else {
+                // Exact match: rawValue.equals("value")
+                builder.beginControlFlow("if (rawValue.equals($S))", variant.variantValue());
+            }
+
+            builder.addStatement("return $L.get()", supplierFieldName);
+            builder.endControlFlow();
+        }
+
+        builder.endControlFlow();
+
+        builder.beginControlFlow("if (defaultVariant != null)")
+                .addStatement("return defaultVariant.get()")
+                .endControlFlow();
+
+        if (model.fallbackStrategy() == FallbackStrategy.NOOP) {
+            builder.addStatement("return null");
+        } else {
+            builder
+                .beginControlFlow("if (rawValue == null)")
+                .addStatement("throw $T.noFlagValue($S)",
+                        UnmatchedVariantException.class, model.flagKey())
+                .endControlFlow()
+                .addStatement("throw new $T($S, rawValue)",
                         UnmatchedVariantException.class, model.flagKey());
         }
 
@@ -475,6 +605,10 @@ final class ProxyGenerator {
             builder.addStatement("$T boolVariants = new $T<>()", boolMapType, ClassName.get("java.util", "HashMap"));
             builder.addStatement("variants.forEach((k, v) -> boolVariants.put($T.parseBoolean(k), v))", Boolean.class);
             builder.addStatement("return new $T(flagProvider, boolVariants, defaultVariant, $T.$L)",
+                    proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
+        } else if (model.hasOrderedDispatch()) {
+            // Ordered dispatch proxy: constructor takes (flagProvider, defaultVariant, fallbackStrategy)
+            builder.addStatement("return new $T(flagProvider, defaultVariant, $T.$L)",
                     proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
         } else {
             builder.addStatement("return new $T(flagProvider, variants, defaultVariant, $T.$L)",
