@@ -164,11 +164,11 @@ Documentation is updated with every release. Each release adds docs for its new 
 
 | Category       | M0 | M1 | M2 | M3 | M4 | M5 | M6 | M7 | M8 | M9 | M10 | M11 | M13 |
 | -------------- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --- | --- | --- |
-| Javadoc        | ok | ok | ok | ok | ok | ok | -  | -  | -  | -  | -   | -   | ok  |
+| Javadoc        | ok | ok | ok | ok | ok | ok | ok | -  | -  | -  | -   | -   | ok  |
 | README         | ok | ok | ok | ok | ok | ok | -  | -  | -  | -  | -   | -   | ok  |
-| Docs site page | ok | ok | ok | ok | ok | ok | -  | -  | -  | -  | -   | -   | ok  |
-| Example        | ok | ok | ok | ok | -  | -  | -  | -  | -  | -  | -   | -   | ok  |
-| Example tests  | ok | ok | ok | ok | -  | -  | -  | -  | -  | -  | -   | -   | ok  |
+| Docs site page | ok | ok | ok | ok | ok | ok | ok | -  | -  | -  | -   | -   | ok  |
+| Example        | ok | ok | ok | ok | -  | -  | ok | -  | -  | -  | -   | -   | ok  |
+| Example tests  | ok | ok | ok | ok | -  | -  | ok | -  | -  | -  | -   | -   | ok  |
 
 ---
 
