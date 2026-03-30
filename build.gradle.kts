@@ -52,6 +52,14 @@ subprojects {
             junit5PluginVersion.set("1.2.1")
         }
 
+        // Skip PITest for modules with no test sources
+        afterEvaluate {
+            val testSrcDir = file("src/test/java")
+            if (!testSrcDir.exists() || testSrcDir.listFiles()?.isEmpty() != false) {
+                tasks.named("pitest") { enabled = false }
+            }
+        }
+
         apply(plugin = "com.vanniktech.maven.publish")
 
         configure<com.vanniktech.maven.publish.MavenPublishBaseExtension> {
