@@ -1,5 +1,6 @@
 package com.flagzen.launchdarkly;
 
+import com.flagzen.EvaluationContext;
 import com.flagzen.spi.FlagProvider;
 import com.launchdarkly.sdk.ContextKind;
 import com.launchdarkly.sdk.EvaluationDetail;
@@ -84,6 +85,47 @@ public final class LaunchDarklyFlagProvider implements FlagProvider {
     @Override
     public OptionalLong getLong(String key) {
         EvaluationDetail<LDValue> detail = client.jsonValueVariationDetail(key, ANONYMOUS_CONTEXT, LDValue.ofNull());
+        if (isAbsent(detail)) {
+            return OptionalLong.empty();
+        }
+        if (!detail.getValue().isNumber()) {
+            return OptionalLong.empty();
+        }
+        return OptionalLong.of(detail.getValue().longValue());
+    }
+
+    @Override
+    public Optional<String> getString(String key, EvaluationContext context) {
+        LDContext ldContext = EvaluationContextMapper.toLDContext(context);
+        EvaluationDetail<String> detail = client.stringVariationDetail(key, ldContext, "");
+        return isAbsent(detail) ? Optional.empty() : Optional.of(detail.getValue());
+    }
+
+    @Override
+    public Optional<Boolean> getBoolean(String key, EvaluationContext context) {
+        LDContext ldContext = EvaluationContextMapper.toLDContext(context);
+        EvaluationDetail<Boolean> detail = client.boolVariationDetail(key, ldContext, false);
+        return isAbsent(detail) ? Optional.empty() : Optional.of(detail.getValue());
+    }
+
+    @Override
+    public OptionalInt getInt(String key, EvaluationContext context) {
+        LDContext ldContext = EvaluationContextMapper.toLDContext(context);
+        EvaluationDetail<Integer> detail = client.intVariationDetail(key, ldContext, 0);
+        return isAbsent(detail) ? OptionalInt.empty() : OptionalInt.of(detail.getValue());
+    }
+
+    @Override
+    public OptionalDouble getDouble(String key, EvaluationContext context) {
+        LDContext ldContext = EvaluationContextMapper.toLDContext(context);
+        EvaluationDetail<Double> detail = client.doubleVariationDetail(key, ldContext, 0.0);
+        return isAbsent(detail) ? OptionalDouble.empty() : OptionalDouble.of(detail.getValue());
+    }
+
+    @Override
+    public OptionalLong getLong(String key, EvaluationContext context) {
+        LDContext ldContext = EvaluationContextMapper.toLDContext(context);
+        EvaluationDetail<LDValue> detail = client.jsonValueVariationDetail(key, ldContext, LDValue.ofNull());
         if (isAbsent(detail)) {
             return OptionalLong.empty();
         }

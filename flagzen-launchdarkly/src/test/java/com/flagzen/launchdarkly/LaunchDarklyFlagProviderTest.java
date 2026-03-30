@@ -1,14 +1,17 @@
 package com.flagzen.launchdarkly;
 
+import com.flagzen.EvaluationContext;
 import com.flagzen.spi.FlagProvider;
 import com.launchdarkly.sdk.EvaluationDetail;
 import com.launchdarkly.sdk.EvaluationReason;
 import com.launchdarkly.sdk.LDContext;
 import com.launchdarkly.sdk.LDValue;
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -23,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -256,5 +260,89 @@ class LaunchDarklyFlagProviderTest {
         FlagProvider provider = LaunchDarklyFlagProvider.create(client);
 
         assertThat(provider.getLong(key)).isEqualTo(expected);
+    }
+
+    // -- Context-aware resolution --
+
+    @Test
+    void resolvesStringFlagWithEvaluationContext() {
+        LDClientInterface client = mock(LDClientInterface.class);
+        when(client.stringVariationDetail(anyString(), any(LDContext.class), anyString()))
+                .thenReturn(EvaluationDetail.fromValue("premium-value", 0, EvaluationReason.targetMatch()));
+
+        FlagProvider provider = LaunchDarklyFlagProvider.create(client);
+        EvaluationContext context = EvaluationContext.builder()
+                .targetingKey("user-123")
+                .attribute("plan", "premium")
+                .build();
+
+        Optional<String> result = provider.getString("feature-flag", context);
+
+        assertThat(result).contains("premium-value");
+
+        ArgumentCaptor<LDContext> ldContextCaptor = ArgumentCaptor.forClass(LDContext.class);
+        verify(client).stringVariationDetail(anyString(), ldContextCaptor.capture(), anyString());
+        LDContext capturedContext = ldContextCaptor.getValue();
+        assertThat(capturedContext.getKey()).isEqualTo("user-123");
+        assertThat(capturedContext.getValue("plan")).isEqualTo(LDValue.of("premium"));
+    }
+
+    static Stream<Arguments> contextAwareTypedResolutionCases() {
+        return Stream.of(
+                Arguments.of("boolean", true),
+                Arguments.of("int", 42),
+                Arguments.of("double", 3.14),
+                Arguments.of("long", 9_999_999_999L)
+        );
+    }
+
+    @ParameterizedTest(name = "context-aware {0} resolution passes context to LD client")
+    @MethodSource("contextAwareTypedResolutionCases")
+    void resolvesTypedFlagsWithEvaluationContext(String type, Object value) {
+        LDClientInterface client = mock(LDClientInterface.class);
+        EvaluationContext context = EvaluationContext.builder()
+                .targetingKey("user-456")
+                .build();
+
+        FlagProvider provider = LaunchDarklyFlagProvider.create(client);
+
+        switch (type) {
+            case "boolean" -> {
+                when(client.boolVariationDetail(anyString(), any(LDContext.class), anyBoolean()))
+                        .thenReturn(EvaluationDetail.fromValue((Boolean) value, 0, EvaluationReason.fallthrough()));
+                assertThat(provider.getBoolean("flag", context)).contains((Boolean) value);
+            }
+            case "int" -> {
+                when(client.intVariationDetail(anyString(), any(LDContext.class), anyInt()))
+                        .thenReturn(EvaluationDetail.fromValue((Integer) value, 0, EvaluationReason.fallthrough()));
+                assertThat(provider.getInt("flag", context)).hasValue((Integer) value);
+            }
+            case "double" -> {
+                when(client.doubleVariationDetail(anyString(), any(LDContext.class), anyDouble()))
+                        .thenReturn(EvaluationDetail.fromValue((Double) value, 0, EvaluationReason.fallthrough()));
+                assertThat(provider.getDouble("flag", context)).hasValue((Double) value);
+            }
+            case "long" -> {
+                when(client.jsonValueVariationDetail(anyString(), any(LDContext.class), any(LDValue.class)))
+                        .thenReturn(EvaluationDetail.fromValue(LDValue.of((Long) value), 0, EvaluationReason.fallthrough()));
+                assertThat(provider.getLong("flag", context)).hasValue((Long) value);
+            }
+        }
+    }
+
+    @Test
+    void usesAnonymousContextWhenNoEvaluationContextProvided() {
+        LDClientInterface client = mock(LDClientInterface.class);
+        when(client.stringVariationDetail(anyString(), any(LDContext.class), anyString()))
+                .thenReturn(EvaluationDetail.fromValue("value", 0, EvaluationReason.fallthrough()));
+
+        FlagProvider provider = LaunchDarklyFlagProvider.create(client);
+        provider.getString("flag");
+
+        ArgumentCaptor<LDContext> ldContextCaptor = ArgumentCaptor.forClass(LDContext.class);
+        verify(client).stringVariationDetail(anyString(), ldContextCaptor.capture(), anyString());
+        LDContext capturedContext = ldContextCaptor.getValue();
+        assertThat(capturedContext.isAnonymous()).isTrue();
+        assertThat(capturedContext.getKey()).isEqualTo("anonymous");
     }
 }
