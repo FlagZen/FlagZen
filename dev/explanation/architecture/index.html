@@ -796,6 +796,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../how-to/conditions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Use Condition Predicates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../how-to/custom-provider/" class="md-nav__link">
         
   
@@ -1433,6 +1461,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#condition-based-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Condition-Based Dispatch
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Condition-Based Dispatch">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-ordered-dispatch-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How ordered dispatch works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-to-use-conditions-vs-exact-matches-vs-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use conditions vs. exact matches vs. providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#type-dispatch-beyond-strings" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1875,6 +1942,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#condition-based-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Condition-Based Dispatch
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Condition-Based Dispatch">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-ordered-dispatch-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How ordered dispatch works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-to-use-conditions-vs-exact-matches-vs-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use conditions vs. exact matches vs. providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#type-dispatch-beyond-strings" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2308,38 +2414,108 @@
 <p>The proxy re-evaluates the flag on every call, so flag changes are reflected immediately across all threads.</p>
 <h2 id="performance-characteristics">Performance Characteristics<a class="headerlink" href="#performance-characteristics" title="Permanent link">&para;</a></h2>
 <p><strong>Proxy construction</strong>: Happens once per feature per dispatcher. Cost: service loading + proxy instantiation. Cached afterward.</p>
-<p><strong>Method call dispatch</strong>: O(1) operation:</p>
+<p><strong>Method call dispatch (value-based)</strong>: O(1) operation:</p>
 <ul>
 <li>Query flag provider: typically <code>Map.get()</code> or similar constant-time operation</li>
 <li>Look up variant: <code>Map.get()</code> in the variant map</li>
 <li>Delegate method: direct method invocation</li>
 </ul>
+<p><strong>Method call dispatch (ordered/condition-based)</strong>: O(n) where n is the number of variants (typically 2-5):</p>
+<ul>
+<li>Query flag provider for the flag value</li>
+<li>Iterate entries in <code>order</code> sequence: exact matches use <code>equals()</code>, conditions call <code>predicate.test()</code></li>
+<li>First match wins (short-circuit)</li>
+</ul>
 <p><strong>Flag provider implementation matters</strong>: If your provider queries a remote service synchronously on every <code>getString()</code> call, dispatch will be slow. Use caching or eager loading (as <code>EnvironmentVariableFlagProvider</code> does).</p>
+<h2 id="condition-based-dispatch">Condition-Based Dispatch<a class="headerlink" href="#condition-based-dispatch" title="Permanent link">&para;</a></h2>
+<p>Value-based dispatch (map lookup) handles the common case: flag value <code>"PREMIUM"</code> maps to <code>PremiumCheckout</code>. But some features need dispatch based on ranges, patterns, or thresholds.</p>
+<p>Condition predicates solve this. Instead of mapping exact values, you bind a variant to a JDK predicate that tests the flag value:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nd">@Feature</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;max-retries&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FeatureType</span><span class="p">.</span><span class="na">INT</span><span class="p">)</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">RetryStrategy</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="n">Request</span><span class="w"> </span><span class="n">req</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="nd">@Variant</span><span class="p">(</span><span class="n">intValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RetryStrategy</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ConservativeRetry</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">RetryStrategy</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="nd">@Variant</span><span class="p">(</span><span class="n">when</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nd">@Condition</span><span class="p">(</span><span class="n">matches</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HighRetryRange</span><span class="p">.</span><span class="na">class</span><span class="p">),</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RetryStrategy</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AggressiveRetry</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">RetryStrategy</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>Where <code>HighRetryRange</code> is a plain <code>IntPredicate</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">HighRetryRange</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">IntPredicate</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">7</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="how-ordered-dispatch-works">How ordered dispatch works<a class="headerlink" href="#how-ordered-dispatch-works" title="Permanent link">&para;</a></h3>
+<p>When any variant on a <code>@Feature</code> specifies <code>order</code>, the annotation processor generates a different proxy:</p>
+<p><strong>Value-based proxy</strong> (no <code>order</code>): map lookup, O(1), identical to the original design.</p>
+<p><strong>Ordered proxy</strong> (with <code>order</code>): linear if-else chain generated at compile time:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1">// Generated: RetryStrategy_FlagZenProxy.resolveVariant()</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">IntPredicate</span><span class="w"> </span><span class="n">pred0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HighRetryRange</span><span class="p">();</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="n">RetryStrategy</span><span class="w"> </span><span class="nf">resolveVariant</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">    </span><span class="n">OptionalInt</span><span class="w"> </span><span class="n">flagValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">flagProvider</span><span class="p">.</span><span class="na">getInt</span><span class="p">(</span><span class="s">&quot;max-retries&quot;</span><span class="p">);</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">flagValue</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* default/fallback */</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">flagValue</span><span class="p">.</span><span class="na">getAsInt</span><span class="p">();</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">variant0</span><span class="p">.</span><span class="na">get</span><span class="p">();</span><span class="w">        </span><span class="c1">// order 1: exact match</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">pred0</span><span class="p">.</span><span class="na">test</span><span class="p">(</span><span class="n">value</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">variant1</span><span class="p">.</span><span class="na">get</span><span class="p">();</span><span class="w">  </span><span class="c1">// order 2: predicate</span>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="w">    </span><span class="c1">// default/fallback</span>
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="p">}</span>
+</code></pre></div>
+<p>Key properties:</p>
+<ul>
+<li><strong>Predicates instantiated once</strong> at proxy construction via <code>new</code> (no reflection, per ADR-009)</li>
+<li><strong>Predicate instances are <code>final</code> fields</strong> — reused for every dispatch call</li>
+<li><strong>Exact matches and conditions coexist</strong> — <code>order</code> determines evaluation sequence (ADR-008)</li>
+<li><strong>No performance regression</strong> — features without <code>order</code> still use O(1) map lookup</li>
+</ul>
+<h3 id="when-to-use-conditions-vs-exact-matches-vs-providers">When to use conditions vs. exact matches vs. providers<a class="headerlink" href="#when-to-use-conditions-vs-exact-matches-vs-providers" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Known flag values ("CLASSIC", "PREMIUM")</td>
+<td>Exact match with <code>@Variant(value = ...)</code></td>
+</tr>
+<tr>
+<td>Value ranges or patterns ("retries &gt;= 7")</td>
+<td><code>@Condition</code> predicate</td>
+</tr>
+<tr>
+<td>User targeting ("show to enterprise users")</td>
+<td>Provider-side targeting (LaunchDarkly, OpenFeature)</td>
+</tr>
+</tbody>
+</table>
+<p>Conditions test the <strong>flag value</strong>, not the evaluation context. Context-based targeting belongs in the flag provider.</p>
 <h2 id="type-dispatch-beyond-strings">Type Dispatch: Beyond Strings<a class="headerlink" href="#type-dispatch-beyond-strings" title="Permanent link">&para;</a></h2>
 <p>The <code>FeatureType</code> enum supports STRING, INT, LONG, BOOLEAN, and DOUBLE. The generated proxy adapts to the declared type:</p>
 <p>For a <code>BOOLEAN</code> feature:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nd">@Feature</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;dark-mode&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FeatureType</span><span class="p">.</span><span class="na">BOOLEAN</span><span class="p">)</span>
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">DarkMode</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">theme</span><span class="p">();</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="nd">@WhenTrue</span><span class="p">(</span><span class="n">of</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DarkMode</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DarkTheme</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">DarkMode</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="nd">@WhenFalse</span><span class="p">(</span><span class="n">of</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DarkMode</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
-<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">LightTheme</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">DarkMode</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nd">@Feature</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;dark-mode&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FeatureType</span><span class="p">.</span><span class="na">BOOLEAN</span><span class="p">)</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">DarkMode</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">theme</span><span class="p">();</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="nd">@WhenTrue</span><span class="p">(</span><span class="n">of</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DarkMode</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DarkTheme</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">DarkMode</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="nd">@WhenFalse</span><span class="p">(</span><span class="n">of</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DarkMode</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">LightTheme</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">DarkMode</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <p>The generated proxy calls <code>provider.getBoolean("dark-mode")</code> instead of <code>getString()</code>, parsing the string value as a boolean. The annotation processor ensures the provider supports typed resolution.</p>
 <h2 id="testing-strategy">Testing Strategy<a class="headerlink" href="#testing-strategy" title="Permanent link">&para;</a></h2>
 <p>The <code>FlagZenExtension</code> (JUnit 5) provides test isolation:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nd">@ExtendWith</span><span class="p">(</span><span class="n">FlagZenExtension</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="nd">@PinFlag</span><span class="p">(</span><span class="n">feature</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;checkout-flow&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">variant</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;CLASSIC&quot;</span><span class="p">)</span>
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="kd">class</span> <span class="nc">CheckoutTest</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">    </span><span class="nd">@Test</span>
-<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">testClassicFlow</span><span class="p">(</span><span class="n">CheckoutFlow</span><span class="w"> </span><span class="n">flow</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">        </span><span class="c1">// Extension creates a test-scoped InMemoryFlagProvider</span>
-<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">        </span><span class="c1">// @PinFlag pins checkout-flow -&gt; CLASSIC</span>
-<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">        </span><span class="c1">// flow.resolve() returns the CLASSIC variant proxy</span>
-<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nd">@ExtendWith</span><span class="p">(</span><span class="n">FlagZenExtension</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="nd">@PinFlag</span><span class="p">(</span><span class="n">feature</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;checkout-flow&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">variant</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;CLASSIC&quot;</span><span class="p">)</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="kd">class</span> <span class="nc">CheckoutTest</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">    </span><span class="nd">@Test</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">testClassicFlow</span><span class="p">(</span><span class="n">CheckoutFlow</span><span class="w"> </span><span class="n">flow</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="w">        </span><span class="c1">// Extension creates a test-scoped InMemoryFlagProvider</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="w">        </span><span class="c1">// @PinFlag pins checkout-flow -&gt; CLASSIC</span>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="w">        </span><span class="c1">// flow.resolve() returns the CLASSIC variant proxy</span>
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="p">}</span>
 </code></pre></div>
 <p>Each test method gets its own <code>TestFlagContext</code> with an isolated provider, guaranteeing test independence without complex setup or mocking.</p>
 <h2 id="design-trade-offs">Design Trade-Offs<a class="headerlink" href="#design-trade-offs" title="Permanent link">&para;</a></h2>
@@ -2380,38 +2556,38 @@
 <li>Uses <code>ImportBeanDefinitionRegistrar</code> for dynamic bean discovery</li>
 </ul>
 <p>This allows seamless injection:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nd">@Service</span>
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderService</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span><span class="nd">@Autowired</span>
-<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">CheckoutFlow</span><span class="w"> </span><span class="n">checkout</span><span class="p">;</span>
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">    </span><span class="c1">// Injected by Spring, proxied by FlagZen</span>
-<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nd">@Service</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderService</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">    </span><span class="nd">@Autowired</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">CheckoutFlow</span><span class="w"> </span><span class="n">checkout</span><span class="p">;</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">    </span><span class="c1">// Injected by Spring, proxied by FlagZen</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="reactive-reactor-mutiny">Reactive (Reactor / Mutiny)<a class="headerlink" href="#reactive-reactor-mutiny" title="Permanent link">&para;</a></h3>
 <p><code>ReactorContextAccessor</code> and <code>MutinyContextAccessor</code> provide evaluation context from reactive contexts. The dispatcher passes this context to providers, enabling user-scoped flag decisions in reactive pipelines.</p>
 <h2 id="where-code-lives">Where Code Lives<a class="headerlink" href="#where-code-lives" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>src/main/java/com/flagzen/
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>  Feature.java                  # User-facing annotation
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>  Variant.java                  # User-facing annotation
-<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>  DefaultVariant.java           # User-facing annotation
-<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>  FeatureDispatcher.java        # User-facing interface
-<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>  FallbackStrategy.java         # Enum
-<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>  FeatureType.java              # Enum
-<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>  EvaluationContext.java        # Value object for context
-<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>
-<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>src/main/java/com/flagzen/spi/
-<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>  FlagProvider.java             # SPI interface
-<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>  ContextAccessor.java          # SPI interface
-<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>
-<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a>src/main/java/com/flagzen/internal/
-<a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>  DefaultFeatureDispatcher.java # Implementation (package-private)
-<a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a>  InMemoryFlagProvider.java     # Test provider
-<a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a>  # Generated code written here by annotation processor
-<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a>
-<a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a>src/main/java/com/flagzen/processor/
-<a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a>  FlagZenProcessor.java         # Annotation processor
-<a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a>  ProxyGenerator.java           # Code generator
-<a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a>  FeatureModel.java             # Internal data structures
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>src/main/java/com/flagzen/
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>  Feature.java                  # User-facing annotation
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>  Variant.java                  # User-facing annotation
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>  DefaultVariant.java           # User-facing annotation
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>  FeatureDispatcher.java        # User-facing interface
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>  FallbackStrategy.java         # Enum
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>  FeatureType.java              # Enum
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>  EvaluationContext.java        # Value object for context
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>
+<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>src/main/java/com/flagzen/spi/
+<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>  FlagProvider.java             # SPI interface
+<a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a>  ContextAccessor.java          # SPI interface
+<a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a>
+<a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a>src/main/java/com/flagzen/internal/
+<a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a>  DefaultFeatureDispatcher.java # Implementation (package-private)
+<a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a>  InMemoryFlagProvider.java     # Test provider
+<a id="__codelineno-20-17" name="__codelineno-20-17" href="#__codelineno-20-17"></a>  # Generated code written here by annotation processor
+<a id="__codelineno-20-18" name="__codelineno-20-18" href="#__codelineno-20-18"></a>
+<a id="__codelineno-20-19" name="__codelineno-20-19" href="#__codelineno-20-19"></a>src/main/java/com/flagzen/processor/
+<a id="__codelineno-20-20" name="__codelineno-20-20" href="#__codelineno-20-20"></a>  FlagZenProcessor.java         # Annotation processor
+<a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a>  ProxyGenerator.java           # Code generator
+<a id="__codelineno-20-22" name="__codelineno-20-22" href="#__codelineno-20-22"></a>  FeatureModel.java             # Internal data structures
 </code></pre></div>
 <h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
 <p>FlagZen's architecture achieves type-safe, compile-time-validated, zero-reflection feature flags through:</p>
