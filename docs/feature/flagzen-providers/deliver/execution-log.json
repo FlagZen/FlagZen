@@ -29,6 +29,41 @@
       "s": "EXECUTED",
       "d": "PASS",
       "t": "2026-03-30T17:23:47Z"
+    },
+    {
+      "sid": "01-01",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-30T17:24:09Z"
+    },
+    {
+      "sid": "01-02",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-30T17:28:44Z"
+    },
+    {
+      "sid": "01-02",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-30T17:29:40Z"
+    },
+    {
+      "sid": "01-02",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: all behaviors covered by parametrized acceptance tests (boolean 4 cases, int 3, double 3, long 4 including non-numeric)",
+      "t": "2026-03-30T17:29:47Z"
+    },
+    {
+      "sid": "01-02",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-03-30T17:30:19Z"
     }
   ]
 }

@@ -5,16 +5,20 @@ import com.launchdarkly.sdk.ContextKind;
 import com.launchdarkly.sdk.EvaluationDetail;
 import com.launchdarkly.sdk.EvaluationReason;
 import com.launchdarkly.sdk.LDContext;
+import com.launchdarkly.sdk.LDValue;
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface;
 
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 
 /**
  * A {@link FlagProvider} that delegates flag resolution to the LaunchDarkly Java Server SDK.
  *
  * <p>This adapter bridges FlagZen's typed flag resolution with LaunchDarkly's feature flag
- * service. Flag values are resolved using {@code stringVariationDetail} to access evaluation
- * reasons for absence detection.
+ * service. Flag values are resolved using native typed variation methods to avoid string
+ * round-tripping.
  *
  * <p>Absence detection is reason-kind-based (ADR-021):
  * <ul>
@@ -57,6 +61,36 @@ public final class LaunchDarklyFlagProvider implements FlagProvider {
     public Optional<String> getString(String key) {
         EvaluationDetail<String> detail = client.stringVariationDetail(key, ANONYMOUS_CONTEXT, "");
         return isAbsent(detail) ? Optional.empty() : Optional.of(detail.getValue());
+    }
+
+    @Override
+    public Optional<Boolean> getBoolean(String key) {
+        EvaluationDetail<Boolean> detail = client.boolVariationDetail(key, ANONYMOUS_CONTEXT, false);
+        return isAbsent(detail) ? Optional.empty() : Optional.of(detail.getValue());
+    }
+
+    @Override
+    public OptionalInt getInt(String key) {
+        EvaluationDetail<Integer> detail = client.intVariationDetail(key, ANONYMOUS_CONTEXT, 0);
+        return isAbsent(detail) ? OptionalInt.empty() : OptionalInt.of(detail.getValue());
+    }
+
+    @Override
+    public OptionalDouble getDouble(String key) {
+        EvaluationDetail<Double> detail = client.doubleVariationDetail(key, ANONYMOUS_CONTEXT, 0.0);
+        return isAbsent(detail) ? OptionalDouble.empty() : OptionalDouble.of(detail.getValue());
+    }
+
+    @Override
+    public OptionalLong getLong(String key) {
+        EvaluationDetail<LDValue> detail = client.jsonValueVariationDetail(key, ANONYMOUS_CONTEXT, LDValue.ofNull());
+        if (isAbsent(detail)) {
+            return OptionalLong.empty();
+        }
+        if (!detail.getValue().isNumber()) {
+            return OptionalLong.empty();
+        }
+        return OptionalLong.of(detail.getValue().longValue());
     }
 
     private boolean isAbsent(EvaluationDetail<?> detail) {
