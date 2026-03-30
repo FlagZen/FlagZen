@@ -1,6 +1,7 @@
 package com.flagzen.processor;
 
 import com.flagzen.CloseTo;
+import com.flagzen.Condition;
 import com.flagzen.DefaultVariant;
 import com.flagzen.FallbackStrategy;
 import com.flagzen.Feature;
@@ -393,22 +394,30 @@ public class FlagZenProcessor extends AbstractProcessor {
             return;
         }
 
+        ConditionModel conditionModel = extractConditionModel(variantAnnotation);
+        int order = variantAnnotation.order();
+
         if (featureType == FeatureType.INT) {
             for (int intVal : variantAnnotation.intValue()) {
-                variants.add(new VariantModel(qualifiedName, "", intVal, featureType));
+                variants.add(new VariantModel(qualifiedName, "", intVal, Long.MIN_VALUE,
+                        Double.NaN, 0.0, false, featureType, conditionModel, order));
             }
         } else if (featureType == FeatureType.LONG) {
             for (long longVal : variantAnnotation.longValue()) {
-                variants.add(VariantModel.ofLong(qualifiedName, longVal));
+                variants.add(new VariantModel(qualifiedName, "", Integer.MIN_VALUE, longVal,
+                        Double.NaN, 0.0, false, FeatureType.LONG, conditionModel, order));
             }
         } else if (featureType == FeatureType.DOUBLE) {
             for (CloseTo closeTo : variantAnnotation.doubleValue()) {
-                variants.add(VariantModel.ofDouble(qualifiedName, closeTo.value(), closeTo.delta()));
+                variants.add(new VariantModel(qualifiedName, "", Integer.MIN_VALUE, Long.MIN_VALUE,
+                        closeTo.value(), closeTo.delta(), false, FeatureType.DOUBLE, conditionModel, order));
             }
         } else if (featureType == FeatureType.BOOLEAN) {
             String boolStr = variantAnnotation.booleanValue();
             if (!boolStr.isEmpty()) {
-                variants.add(VariantModel.ofBoolean(qualifiedName, Boolean.parseBoolean(boolStr)));
+                variants.add(new VariantModel(qualifiedName, "", Integer.MIN_VALUE, Long.MIN_VALUE,
+                        Double.NaN, 0.0, Boolean.parseBoolean(boolStr), FeatureType.BOOLEAN,
+                        conditionModel, order));
             }
         } else {
             for (String stringValue : variantAnnotation.value()) {
@@ -420,8 +429,46 @@ public class FlagZenProcessor extends AbstractProcessor {
                     );
                     return;
                 }
-                variants.add(new VariantModel(qualifiedName, stringValue));
+                variants.add(new VariantModel(qualifiedName, stringValue, conditionModel, order));
             }
+        }
+    }
+
+    private ConditionModel extractConditionModel(Variant variantAnnotation) {
+        Condition condition = variantAnnotation.when();
+
+        TypeMirror matchesMirror = extractConditionMatches(condition);
+        TypeMirror notMatchesMirror = extractConditionNotMatches(condition);
+
+        boolean hasMatches = matchesMirror != null
+                && !matchesMirror.toString().equals(Condition.Sentinel.class.getCanonicalName());
+        boolean hasNotMatches = notMatchesMirror != null
+                && !notMatchesMirror.toString().equals(Condition.Sentinel.class.getCanonicalName());
+
+        if (hasMatches) {
+            return new ConditionModel(matchesMirror.toString(), false);
+        }
+        if (hasNotMatches) {
+            return new ConditionModel(notMatchesMirror.toString(), true);
+        }
+        return null;
+    }
+
+    private TypeMirror extractConditionMatches(Condition condition) {
+        try {
+            condition.matches();
+            return null;
+        } catch (MirroredTypeException e) {
+            return e.getTypeMirror();
+        }
+    }
+
+    private TypeMirror extractConditionNotMatches(Condition condition) {
+        try {
+            condition.notMatches();
+            return null;
+        } catch (MirroredTypeException e) {
+            return e.getTypeMirror();
         }
     }
 

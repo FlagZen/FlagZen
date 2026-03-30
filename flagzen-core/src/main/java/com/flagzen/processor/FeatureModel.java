@@ -36,4 +36,11 @@ record FeatureModel(
     String metadataClassName() {
         return interfaceName + "_FlagZenMetadata";
     }
+
+    /**
+     * Returns true if any variant has an explicit dispatch order (order != Integer.MAX_VALUE).
+     */
+    boolean hasOrderedDispatch() {
+        return variants.stream().anyMatch(v -> v.order() != Integer.MAX_VALUE);
+    }
 }

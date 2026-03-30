@@ -7,14 +7,24 @@ import com.flagzen.FeatureType;
  */
 record VariantModel(String qualifiedClassName, String variantValue, int intVariantValue,
                     long longVariantValue, double doubleVariantValue, double doubleDelta,
-                    boolean booleanVariantValue, FeatureType featureType) {
+                    boolean booleanVariantValue, FeatureType featureType,
+                    ConditionModel condition, int order) {
 
     /**
-     * Creates a STRING-typed variant model (backward compatible).
+     * Creates a STRING-typed variant model (backward compatible, no condition).
      */
     VariantModel(String qualifiedClassName, String variantValue) {
         this(qualifiedClassName, variantValue, Integer.MIN_VALUE, Long.MIN_VALUE,
-                Double.NaN, 0.0, false, FeatureType.STRING);
+                Double.NaN, 0.0, false, FeatureType.STRING, null, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Creates a STRING-typed variant model with condition and order.
+     */
+    VariantModel(String qualifiedClassName, String variantValue,
+                 ConditionModel condition, int order) {
+        this(qualifiedClassName, variantValue, Integer.MIN_VALUE, Long.MIN_VALUE,
+                Double.NaN, 0.0, false, FeatureType.STRING, condition, order);
     }
 
     /**
@@ -22,7 +32,7 @@ record VariantModel(String qualifiedClassName, String variantValue, int intVaria
      */
     VariantModel(String qualifiedClassName, String variantValue, int intVariantValue, FeatureType featureType) {
         this(qualifiedClassName, variantValue, intVariantValue, Long.MIN_VALUE,
-                Double.NaN, 0.0, false, featureType);
+                Double.NaN, 0.0, false, featureType, null, Integer.MAX_VALUE);
     }
 
     /**
@@ -30,7 +40,7 @@ record VariantModel(String qualifiedClassName, String variantValue, int intVaria
      */
     static VariantModel ofBoolean(String qualifiedClassName, boolean booleanValue) {
         return new VariantModel(qualifiedClassName, "", Integer.MIN_VALUE, Long.MIN_VALUE,
-                Double.NaN, 0.0, booleanValue, FeatureType.BOOLEAN);
+                Double.NaN, 0.0, booleanValue, FeatureType.BOOLEAN, null, Integer.MAX_VALUE);
     }
 
     /**
@@ -38,7 +48,7 @@ record VariantModel(String qualifiedClassName, String variantValue, int intVaria
      */
     static VariantModel ofLong(String qualifiedClassName, long longValue) {
         return new VariantModel(qualifiedClassName, "", Integer.MIN_VALUE, longValue,
-                Double.NaN, 0.0, false, FeatureType.LONG);
+                Double.NaN, 0.0, false, FeatureType.LONG, null, Integer.MAX_VALUE);
     }
 
     /**
@@ -46,7 +56,7 @@ record VariantModel(String qualifiedClassName, String variantValue, int intVaria
      */
     static VariantModel ofDouble(String qualifiedClassName, double doubleValue, double delta) {
         return new VariantModel(qualifiedClassName, "", Integer.MIN_VALUE, Long.MIN_VALUE,
-                doubleValue, delta, false, FeatureType.DOUBLE);
+                doubleValue, delta, false, FeatureType.DOUBLE, null, Integer.MAX_VALUE);
     }
 
     /**
