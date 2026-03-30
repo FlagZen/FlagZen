@@ -21,6 +21,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.DoublePredicate;
+import java.util.function.IntPredicate;
+import java.util.function.LongPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -98,10 +101,7 @@ final class ProxyGenerator {
     private void buildOrderedDispatchProxy(TypeSpec.Builder proxyBuilder, FeatureModel model,
                                             ClassName interfaceType, ClassName flagProviderType,
                                             ParameterizedTypeName supplierType) {
-        ParameterizedTypeName predicateType = ParameterizedTypeName.get(
-                ClassName.get(Predicate.class),
-                ClassName.get(String.class)
-        );
+        TypeName predicateType = predicateTypeForFeature(model.featureType());
 
         // Fields: flagProvider, defaultVariant, fallbackStrategy (common)
         proxyBuilder.addField(FieldSpec.builder(flagProviderType, "flagProvider", Modifier.PRIVATE, Modifier.FINAL).build());
@@ -143,6 +143,18 @@ final class ProxyGenerator {
         }
 
         proxyBuilder.addMethod(ctorBuilder.build());
+    }
+
+    private static TypeName predicateTypeForFeature(FeatureType featureType) {
+        return switch (featureType) {
+            case INT -> ClassName.get(IntPredicate.class);
+            case LONG -> ClassName.get(LongPredicate.class);
+            case DOUBLE -> ClassName.get(DoublePredicate.class);
+            case BOOLEAN -> ParameterizedTypeName.get(
+                    ClassName.get(Predicate.class), ClassName.get(Boolean.class));
+            default -> ParameterizedTypeName.get(
+                    ClassName.get(Predicate.class), ClassName.get(String.class));
+        };
     }
 
     JavaFile generateMetadata(FeatureModel model) {
@@ -215,6 +227,34 @@ final class ProxyGenerator {
     }
 
     private MethodSpec buildIntResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
+        if (model.hasOrderedDispatch()) {
+            return buildOrderedIntResolveMethod(model, interfaceType);
+        }
+        return buildMapBasedIntResolveMethod(model, interfaceType, supplierType);
+    }
+
+    private MethodSpec buildLongResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
+        if (model.hasOrderedDispatch()) {
+            return buildOrderedLongResolveMethod(model, interfaceType);
+        }
+        return buildMapBasedLongResolveMethod(model, interfaceType, supplierType);
+    }
+
+    private MethodSpec buildDoubleResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
+        if (model.hasOrderedDispatch()) {
+            return buildOrderedDoubleResolveMethod(model, interfaceType);
+        }
+        return buildMapBasedDoubleResolveMethod(model, interfaceType, supplierType);
+    }
+
+    private MethodSpec buildBooleanResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
+        if (model.hasOrderedDispatch()) {
+            return buildOrderedBooleanResolveMethod(model, interfaceType);
+        }
+        return buildMapBasedBooleanResolveMethod(model, interfaceType, supplierType);
+    }
+
+    private MethodSpec buildMapBasedIntResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
         ClassName optionalIntType = ClassName.get("java.util", "OptionalInt");
         MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
                 .addModifiers(Modifier.PRIVATE)
@@ -248,7 +288,62 @@ final class ProxyGenerator {
         return builder.build();
     }
 
-    private MethodSpec buildLongResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
+    private MethodSpec buildOrderedIntResolveMethod(FeatureModel model, ClassName interfaceType) {
+        ClassName optionalIntType = ClassName.get("java.util", "OptionalInt");
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
+                .addModifiers(Modifier.PRIVATE)
+                .returns(interfaceType)
+                .addStatement("$T context = $T.current()", EvaluationContext.class, FlagContext.class)
+                .addStatement("$T flagValue = (context != null) ? flagProvider.getInt($S, context) : flagProvider.getInt($S)",
+                        optionalIntType, model.flagKey(), model.flagKey());
+
+        List<VariantModel> sortedVariants = model.variants().stream()
+                .sorted(Comparator.comparingInt(VariantModel::order))
+                .toList();
+
+        builder.beginControlFlow("if (flagValue.isPresent())")
+                .addStatement("int value = flagValue.getAsInt()");
+
+        for (int i = 0; i < sortedVariants.size(); i++) {
+            VariantModel variant = sortedVariants.get(i);
+            String supplierFieldName = "variant" + i;
+
+            if (variant.condition() != null) {
+                String predFieldName = "pred" + i;
+                if (variant.condition().negated()) {
+                    builder.beginControlFlow("if (!$L.test(value))", predFieldName);
+                } else {
+                    builder.beginControlFlow("if ($L.test(value))", predFieldName);
+                }
+            } else {
+                builder.beginControlFlow("if (value == $L)", variant.intVariantValue());
+            }
+
+            builder.addStatement("return $L.get()", supplierFieldName);
+            builder.endControlFlow();
+        }
+
+        builder.endControlFlow();
+
+        builder.beginControlFlow("if (defaultVariant != null)")
+                .addStatement("return defaultVariant.get()")
+                .endControlFlow();
+
+        if (model.fallbackStrategy() == FallbackStrategy.NOOP) {
+            builder.addStatement("return null");
+        } else {
+            builder.beginControlFlow("if (flagValue.isEmpty())")
+                    .addStatement("throw $T.noFlagValue($S)",
+                            UnmatchedVariantException.class, model.flagKey())
+                    .endControlFlow()
+                    .addStatement("throw new $T($S, $T.valueOf(flagValue.getAsInt()))",
+                            UnmatchedVariantException.class, model.flagKey(), String.class);
+        }
+
+        return builder.build();
+    }
+
+    private MethodSpec buildMapBasedLongResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
         ClassName optionalLongType = ClassName.get("java.util", "OptionalLong");
         MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
                 .addModifiers(Modifier.PRIVATE)
@@ -282,7 +377,62 @@ final class ProxyGenerator {
         return builder.build();
     }
 
-    private MethodSpec buildDoubleResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
+    private MethodSpec buildOrderedLongResolveMethod(FeatureModel model, ClassName interfaceType) {
+        ClassName optionalLongType = ClassName.get("java.util", "OptionalLong");
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
+                .addModifiers(Modifier.PRIVATE)
+                .returns(interfaceType)
+                .addStatement("$T context = $T.current()", EvaluationContext.class, FlagContext.class)
+                .addStatement("$T flagValue = (context != null) ? flagProvider.getLong($S, context) : flagProvider.getLong($S)",
+                        optionalLongType, model.flagKey(), model.flagKey());
+
+        List<VariantModel> sortedVariants = model.variants().stream()
+                .sorted(Comparator.comparingInt(VariantModel::order))
+                .toList();
+
+        builder.beginControlFlow("if (flagValue.isPresent())")
+                .addStatement("long value = flagValue.getAsLong()");
+
+        for (int i = 0; i < sortedVariants.size(); i++) {
+            VariantModel variant = sortedVariants.get(i);
+            String supplierFieldName = "variant" + i;
+
+            if (variant.condition() != null) {
+                String predFieldName = "pred" + i;
+                if (variant.condition().negated()) {
+                    builder.beginControlFlow("if (!$L.test(value))", predFieldName);
+                } else {
+                    builder.beginControlFlow("if ($L.test(value))", predFieldName);
+                }
+            } else {
+                builder.beginControlFlow("if (value == $LL)", variant.longVariantValue());
+            }
+
+            builder.addStatement("return $L.get()", supplierFieldName);
+            builder.endControlFlow();
+        }
+
+        builder.endControlFlow();
+
+        builder.beginControlFlow("if (defaultVariant != null)")
+                .addStatement("return defaultVariant.get()")
+                .endControlFlow();
+
+        if (model.fallbackStrategy() == FallbackStrategy.NOOP) {
+            builder.addStatement("return null");
+        } else {
+            builder.beginControlFlow("if (flagValue.isEmpty())")
+                    .addStatement("throw $T.noFlagValue($S)",
+                            UnmatchedVariantException.class, model.flagKey())
+                    .endControlFlow()
+                    .addStatement("throw new $T($S, $T.valueOf(flagValue.getAsLong()))",
+                            UnmatchedVariantException.class, model.flagKey(), String.class);
+        }
+
+        return builder.build();
+    }
+
+    private MethodSpec buildMapBasedDoubleResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
         ClassName optionalDoubleType = ClassName.get("java.util", "OptionalDouble");
         MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
                 .addModifiers(Modifier.PRIVATE)
@@ -317,7 +467,63 @@ final class ProxyGenerator {
         return builder.build();
     }
 
-    private MethodSpec buildBooleanResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
+    private MethodSpec buildOrderedDoubleResolveMethod(FeatureModel model, ClassName interfaceType) {
+        ClassName optionalDoubleType = ClassName.get("java.util", "OptionalDouble");
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
+                .addModifiers(Modifier.PRIVATE)
+                .returns(interfaceType)
+                .addStatement("$T context = $T.current()", EvaluationContext.class, FlagContext.class)
+                .addStatement("$T flagValue = (context != null) ? flagProvider.getDouble($S, context) : flagProvider.getDouble($S)",
+                        optionalDoubleType, model.flagKey(), model.flagKey());
+
+        List<VariantModel> sortedVariants = model.variants().stream()
+                .sorted(Comparator.comparingInt(VariantModel::order))
+                .toList();
+
+        builder.beginControlFlow("if (flagValue.isPresent())")
+                .addStatement("double value = flagValue.getAsDouble()");
+
+        for (int i = 0; i < sortedVariants.size(); i++) {
+            VariantModel variant = sortedVariants.get(i);
+            String supplierFieldName = "variant" + i;
+
+            if (variant.condition() != null) {
+                String predFieldName = "pred" + i;
+                if (variant.condition().negated()) {
+                    builder.beginControlFlow("if (!$L.test(value))", predFieldName);
+                } else {
+                    builder.beginControlFlow("if ($L.test(value))", predFieldName);
+                }
+            } else {
+                builder.beginControlFlow("if ($T.abs(value - $L) <= $L)",
+                        Math.class, variant.doubleVariantValue(), variant.doubleDelta());
+            }
+
+            builder.addStatement("return $L.get()", supplierFieldName);
+            builder.endControlFlow();
+        }
+
+        builder.endControlFlow();
+
+        builder.beginControlFlow("if (defaultVariant != null)")
+                .addStatement("return defaultVariant.get()")
+                .endControlFlow();
+
+        if (model.fallbackStrategy() == FallbackStrategy.NOOP) {
+            builder.addStatement("return null");
+        } else {
+            builder.beginControlFlow("if (flagValue.isEmpty())")
+                    .addStatement("throw $T.noFlagValue($S)",
+                            UnmatchedVariantException.class, model.flagKey())
+                    .endControlFlow()
+                    .addStatement("throw new $T($S, $T.valueOf(flagValue.getAsDouble()))",
+                            UnmatchedVariantException.class, model.flagKey(), String.class);
+        }
+
+        return builder.build();
+    }
+
+    private MethodSpec buildMapBasedBooleanResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
                 .addModifiers(Modifier.PRIVATE)
                 .returns(interfaceType)
@@ -344,6 +550,60 @@ final class ProxyGenerator {
                             UnmatchedVariantException.class, model.flagKey())
                     .endControlFlow()
                     .addStatement("throw new $T($S, $T.valueOf(flagValue.get()), variants.keySet())",
+                            UnmatchedVariantException.class, model.flagKey(), String.class);
+        }
+
+        return builder.build();
+    }
+
+    private MethodSpec buildOrderedBooleanResolveMethod(FeatureModel model, ClassName interfaceType) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("resolveVariant")
+                .addModifiers(Modifier.PRIVATE)
+                .returns(interfaceType)
+                .addStatement("$T context = $T.current()", EvaluationContext.class, FlagContext.class)
+                .addStatement("$T<$T> flagValue = (context != null) ? flagProvider.getBoolean($S, context) : flagProvider.getBoolean($S)",
+                        Optional.class, Boolean.class, model.flagKey(), model.flagKey());
+
+        List<VariantModel> sortedVariants = model.variants().stream()
+                .sorted(Comparator.comparingInt(VariantModel::order))
+                .toList();
+
+        builder.beginControlFlow("if (flagValue.isPresent())")
+                .addStatement("boolean value = flagValue.get()");
+
+        for (int i = 0; i < sortedVariants.size(); i++) {
+            VariantModel variant = sortedVariants.get(i);
+            String supplierFieldName = "variant" + i;
+
+            if (variant.condition() != null) {
+                String predFieldName = "pred" + i;
+                if (variant.condition().negated()) {
+                    builder.beginControlFlow("if (!$L.test(value))", predFieldName);
+                } else {
+                    builder.beginControlFlow("if ($L.test(value))", predFieldName);
+                }
+            } else {
+                builder.beginControlFlow("if (value == $L)", variant.booleanVariantValue());
+            }
+
+            builder.addStatement("return $L.get()", supplierFieldName);
+            builder.endControlFlow();
+        }
+
+        builder.endControlFlow();
+
+        builder.beginControlFlow("if (defaultVariant != null)")
+                .addStatement("return defaultVariant.get()")
+                .endControlFlow();
+
+        if (model.fallbackStrategy() == FallbackStrategy.NOOP) {
+            builder.addStatement("return null");
+        } else {
+            builder.beginControlFlow("if (flagValue.isEmpty())")
+                    .addStatement("throw $T.noFlagValue($S)",
+                            UnmatchedVariantException.class, model.flagKey())
+                    .endControlFlow()
+                    .addStatement("throw new $T($S, $T.valueOf(flagValue.get()))",
                             UnmatchedVariantException.class, model.flagKey(), String.class);
         }
 
@@ -562,7 +822,11 @@ final class ProxyGenerator {
                 .addParameter(variantsMapType, "variants")
                 .addParameter(supplierType, "defaultVariant");
 
-        if (model.featureType() == FeatureType.INT) {
+        if (model.hasOrderedDispatch()) {
+            // Ordered dispatch proxy: constructor takes (flagProvider, defaultVariant, fallbackStrategy)
+            builder.addStatement("return new $T(flagProvider, defaultVariant, $T.$L)",
+                    proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
+        } else if (model.featureType() == FeatureType.INT) {
             // Convert Map<String, Supplier<T>> to Map<Integer, Supplier<T>>
             ParameterizedTypeName intMapType = ParameterizedTypeName.get(
                     ClassName.get(Map.class),
@@ -605,10 +869,6 @@ final class ProxyGenerator {
             builder.addStatement("$T boolVariants = new $T<>()", boolMapType, ClassName.get("java.util", "HashMap"));
             builder.addStatement("variants.forEach((k, v) -> boolVariants.put($T.parseBoolean(k), v))", Boolean.class);
             builder.addStatement("return new $T(flagProvider, boolVariants, defaultVariant, $T.$L)",
-                    proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
-        } else if (model.hasOrderedDispatch()) {
-            // Ordered dispatch proxy: constructor takes (flagProvider, defaultVariant, fallbackStrategy)
-            builder.addStatement("return new $T(flagProvider, defaultVariant, $T.$L)",
                     proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
         } else {
             builder.addStatement("return new $T(flagProvider, variants, defaultVariant, $T.$L)",
