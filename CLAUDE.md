@@ -52,6 +52,8 @@ When creating a commit, always check `git status` for the entire repo and includ
 
 Do not leave tracked files with pending changes out of a commit. If unrelated changes exist, commit them separately with an appropriate message rather than leaving them dangling.
 
+In commit messages, wrap any `@`-prefixed word in backticks (e.g., `` `@Feature` ``) so GitHub does not interpret it as a user mention.
+
 ## Architecture
 
 See `docs/feature/flagzen/design/architecture-design.md` for full architecture.
