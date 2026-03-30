@@ -1,2 +1,3 @@
 com.flagzen.acceptance.fixtures.CheckoutFlowMetadata
 com.flagzen.acceptance.fixtures.RetryStrategyMetadata
+com.flagzen.acceptance.fixtures.PricingTierMetadata

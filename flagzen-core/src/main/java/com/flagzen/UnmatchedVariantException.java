@@ -30,4 +30,18 @@ public class UnmatchedVariantException extends FlagZenException {
         return new UnmatchedVariantException(
                 "No flag value was found for key '" + flagKey + "'");
     }
+
+    /**
+     * Creates an exception for condition-based features where no predicate matched.
+     *
+     * @param flagKey the flag key
+     * @param flagValue the flag value that was evaluated
+     * @param predicatesEvaluated description of predicates that were evaluated
+     */
+    public static UnmatchedVariantException forConditionFeature(
+            String flagKey, String flagValue, String predicatesEvaluated) {
+        return new UnmatchedVariantException(
+                "No variant matches flag value '" + flagValue + "' for key '" + flagKey
+                        + "'. Predicates evaluated: [" + predicatesEvaluated + "]");
+    }
 }

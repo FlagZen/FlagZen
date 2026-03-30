@@ -336,8 +336,9 @@ final class ProxyGenerator {
                     .addStatement("throw $T.noFlagValue($S)",
                             UnmatchedVariantException.class, model.flagKey())
                     .endControlFlow()
-                    .addStatement("throw new $T($S, $T.valueOf(flagValue.getAsInt()))",
-                            UnmatchedVariantException.class, model.flagKey(), String.class);
+                    .addStatement("throw $T.forConditionFeature($S, $T.valueOf(flagValue.getAsInt()), $S)",
+                            UnmatchedVariantException.class, model.flagKey(), String.class,
+                            buildPredicateDescription(model));
         }
 
         return builder.build();
@@ -425,8 +426,9 @@ final class ProxyGenerator {
                     .addStatement("throw $T.noFlagValue($S)",
                             UnmatchedVariantException.class, model.flagKey())
                     .endControlFlow()
-                    .addStatement("throw new $T($S, $T.valueOf(flagValue.getAsLong()))",
-                            UnmatchedVariantException.class, model.flagKey(), String.class);
+                    .addStatement("throw $T.forConditionFeature($S, $T.valueOf(flagValue.getAsLong()), $S)",
+                            UnmatchedVariantException.class, model.flagKey(), String.class,
+                            buildPredicateDescription(model));
         }
 
         return builder.build();
@@ -516,8 +518,9 @@ final class ProxyGenerator {
                     .addStatement("throw $T.noFlagValue($S)",
                             UnmatchedVariantException.class, model.flagKey())
                     .endControlFlow()
-                    .addStatement("throw new $T($S, $T.valueOf(flagValue.getAsDouble()))",
-                            UnmatchedVariantException.class, model.flagKey(), String.class);
+                    .addStatement("throw $T.forConditionFeature($S, $T.valueOf(flagValue.getAsDouble()), $S)",
+                            UnmatchedVariantException.class, model.flagKey(), String.class,
+                            buildPredicateDescription(model));
         }
 
         return builder.build();
@@ -603,8 +606,9 @@ final class ProxyGenerator {
                     .addStatement("throw $T.noFlagValue($S)",
                             UnmatchedVariantException.class, model.flagKey())
                     .endControlFlow()
-                    .addStatement("throw new $T($S, $T.valueOf(flagValue.get()))",
-                            UnmatchedVariantException.class, model.flagKey(), String.class);
+                    .addStatement("throw $T.forConditionFeature($S, $T.valueOf(flagValue.get()), $S)",
+                            UnmatchedVariantException.class, model.flagKey(), String.class,
+                            buildPredicateDescription(model));
         }
 
         return builder.build();
@@ -704,8 +708,9 @@ final class ProxyGenerator {
                 .addStatement("throw $T.noFlagValue($S)",
                         UnmatchedVariantException.class, model.flagKey())
                 .endControlFlow()
-                .addStatement("throw new $T($S, rawValue)",
-                        UnmatchedVariantException.class, model.flagKey());
+                .addStatement("throw $T.forConditionFeature($S, rawValue, $S)",
+                        UnmatchedVariantException.class, model.flagKey(),
+                        buildPredicateDescription(model));
         }
 
         return builder.build();
@@ -876,6 +881,27 @@ final class ProxyGenerator {
         }
 
         return builder.build();
+    }
+
+    /**
+     * Builds a predicate description string for condition-based features,
+     * used in UnmatchedVariantException error messages.
+     */
+    private static String buildPredicateDescription(FeatureModel model) {
+        List<VariantModel> sortedVariants = model.variants().stream()
+                .sorted(Comparator.comparingInt(VariantModel::order))
+                .toList();
+        return sortedVariants.stream()
+                .filter(v -> v.condition() != null)
+                .map(v -> {
+                    String simpleName = v.condition().predicateClassName();
+                    int lastDot = simpleName.lastIndexOf('.');
+                    if (lastDot >= 0) {
+                        simpleName = simpleName.substring(lastDot + 1);
+                    }
+                    return simpleName + "(order=" + v.order() + ")";
+                })
+                .collect(Collectors.joining(", "));
     }
 
     private static TypeName variantKeyType(FeatureType featureType) {
