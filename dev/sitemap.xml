@@ -2,94 +2,102 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://flagzen.com/dev/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/explanation/architecture/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/explanation/design-decisions/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/explanation/logo/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/explanation/zero-reflection/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/how-to/custom-provider/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/how-to/environment-variables/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/how-to/evaluation-context/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
+    </url>
+    <url>
+         <loc>https://flagzen.com/dev/how-to/launchdarkly/</loc>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/how-to/multi-value-variants/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/how-to/openfeature/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/how-to/spring-boot/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
+    </url>
+    <url>
+         <loc>https://flagzen.com/dev/how-to/togglz/</loc>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/how-to/typed-dispatch/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/reference/annotations/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/reference/conflict-strategy/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/reference/feature-dispatcher/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/reference/flag-provider/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/reference/key-mapping/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/reference/modules/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/reference/spring-auto-configuration/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/reference/testing-api/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/tutorials/first-feature-flag/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/tutorials/getting-started/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
     <url>
          <loc>https://flagzen.com/dev/tutorials/testing/</loc>
-         <lastmod>2026-03-29</lastmod>
+         <lastmod>2026-03-30</lastmod>
     </url>
 </urlset>

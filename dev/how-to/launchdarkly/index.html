@@ -12,29 +12,31 @@
         <meta name="author" content="FlagZen Contributors">
       
       
-        <link rel="canonical" href="https://flagzen.com/dev/">
+        <link rel="canonical" href="https://flagzen.com/dev/how-to/launchdarkly/">
       
       
+        <link rel="prev" href="../openfeature/">
       
-        <link rel="next" href="tutorials/getting-started/">
+      
+        <link rel="next" href="../togglz/">
       
       
         
       
       
-      <link rel="icon" href="assets/logo.png">
+      <link rel="icon" href="../../assets/logo.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>FlagZen</title>
+        <title>Connect to LaunchDarkly - FlagZen</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -53,7 +55,7 @@
       
     
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#flagzen" class="md-skip">
+        <a href="#how-to-connect-to-launchdarkly" class="md-skip">
           Skip to content
         </a>
       
@@ -96,9 +98,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="FlagZen" class="md-header__button md-logo" aria-label="FlagZen" data-md-component="logo">
+    <a href="../.." title="FlagZen" class="md-header__button md-logo" aria-label="FlagZen" data-md-component="logo">
       
-  <img src="assets/logo-white-circle-bg.png" alt="logo">
+  <img src="../../assets/logo-white-circle-bg.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -115,7 +117,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              Connect to LaunchDarkly
             
           </span>
         </div>
@@ -224,11 +226,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="." class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -249,7 +249,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="tutorials/getting-started/" class="md-tabs__link">
+        <a href="../../tutorials/getting-started/" class="md-tabs__link">
           
   
   
@@ -265,11 +265,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="how-to/typed-dispatch/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../typed-dispatch/" class="md-tabs__link">
           
   
   
@@ -289,7 +291,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="reference/annotations/" class="md-tabs__link">
+        <a href="../../reference/annotations/" class="md-tabs__link">
           
   
   
@@ -309,7 +311,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="explanation/architecture/" class="md-tabs__link">
+        <a href="../../explanation/architecture/" class="md-tabs__link">
           
   
   
@@ -343,9 +345,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="FlagZen" class="md-nav__button md-logo" aria-label="FlagZen" data-md-component="logo">
+    <a href="../.." title="FlagZen" class="md-nav__button md-logo" aria-label="FlagZen" data-md-component="logo">
       
-  <img src="assets/logo-white-circle-bg.png" alt="logo">
+  <img src="../../assets/logo-white-circle-bg.png" alt="logo">
 
     </a>
     FlagZen
@@ -369,37 +371,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Home
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -415,70 +390,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#why-flagzen" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Why FlagZen?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-links" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick Links
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#works-with" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Works With
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -544,7 +455,7 @@
   
   
     <li class="md-nav__item">
-      <a href="tutorials/getting-started/" class="md-nav__link">
+      <a href="../../tutorials/getting-started/" class="md-nav__link">
         
   
   
@@ -572,7 +483,7 @@
   
   
     <li class="md-nav__item">
-      <a href="tutorials/first-feature-flag/" class="md-nav__link">
+      <a href="../../tutorials/first-feature-flag/" class="md-nav__link">
         
   
   
@@ -600,7 +511,7 @@
   
   
     <li class="md-nav__item">
-      <a href="tutorials/testing/" class="md-nav__link">
+      <a href="../../tutorials/testing/" class="md-nav__link">
         
   
   
@@ -632,28 +543,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   
@@ -671,7 +585,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -689,7 +603,7 @@
   
   
     <li class="md-nav__item">
-      <a href="how-to/typed-dispatch/" class="md-nav__link">
+      <a href="../typed-dispatch/" class="md-nav__link">
         
   
   
@@ -717,7 +631,7 @@
   
   
     <li class="md-nav__item">
-      <a href="how-to/multi-value-variants/" class="md-nav__link">
+      <a href="../multi-value-variants/" class="md-nav__link">
         
   
   
@@ -745,7 +659,7 @@
   
   
     <li class="md-nav__item">
-      <a href="how-to/environment-variables/" class="md-nav__link">
+      <a href="../environment-variables/" class="md-nav__link">
         
   
   
@@ -773,7 +687,7 @@
   
   
     <li class="md-nav__item">
-      <a href="how-to/spring-boot/" class="md-nav__link">
+      <a href="../spring-boot/" class="md-nav__link">
         
   
   
@@ -801,7 +715,7 @@
   
   
     <li class="md-nav__item">
-      <a href="how-to/openfeature/" class="md-nav__link">
+      <a href="../openfeature/" class="md-nav__link">
         
   
   
@@ -826,10 +740,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="how-to/launchdarkly/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Connect to LaunchDarkly
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -845,6 +786,164 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Goal
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Steps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-add-the-dependency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Add the dependency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-the-launchdarkly-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Create the LaunchDarkly client
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-bridge-to-flagzen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Bridge to FlagZen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-resolve-flags-with-evaluation-context-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Resolve flags with evaluation context (optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-use-typed-flag-resolution-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Use typed flag resolution (optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-use-with-spring-boot-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Use with Spring Boot (optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-absence-detection-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How absence detection works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Result
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See Also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -857,7 +956,7 @@
   
   
     <li class="md-nav__item">
-      <a href="how-to/togglz/" class="md-nav__link">
+      <a href="../togglz/" class="md-nav__link">
         
   
   
@@ -885,7 +984,7 @@
   
   
     <li class="md-nav__item">
-      <a href="how-to/custom-provider/" class="md-nav__link">
+      <a href="../custom-provider/" class="md-nav__link">
         
   
   
@@ -913,7 +1012,7 @@
   
   
     <li class="md-nav__item">
-      <a href="how-to/evaluation-context/" class="md-nav__link">
+      <a href="../evaluation-context/" class="md-nav__link">
         
   
   
@@ -1002,7 +1101,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/annotations/" class="md-nav__link">
+      <a href="../../reference/annotations/" class="md-nav__link">
         
   
   
@@ -1030,7 +1129,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/flag-provider/" class="md-nav__link">
+      <a href="../../reference/flag-provider/" class="md-nav__link">
         
   
   
@@ -1058,7 +1157,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/feature-dispatcher/" class="md-nav__link">
+      <a href="../../reference/feature-dispatcher/" class="md-nav__link">
         
   
   
@@ -1086,7 +1185,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/key-mapping/" class="md-nav__link">
+      <a href="../../reference/key-mapping/" class="md-nav__link">
         
   
   
@@ -1114,7 +1213,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/conflict-strategy/" class="md-nav__link">
+      <a href="../../reference/conflict-strategy/" class="md-nav__link">
         
   
   
@@ -1142,7 +1241,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/testing-api/" class="md-nav__link">
+      <a href="../../reference/testing-api/" class="md-nav__link">
         
   
   
@@ -1170,7 +1269,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/spring-auto-configuration/" class="md-nav__link">
+      <a href="../../reference/spring-auto-configuration/" class="md-nav__link">
         
   
   
@@ -1198,7 +1297,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/modules/" class="md-nav__link">
+      <a href="../../reference/modules/" class="md-nav__link">
         
   
   
@@ -1287,7 +1386,7 @@
   
   
     <li class="md-nav__item">
-      <a href="explanation/architecture/" class="md-nav__link">
+      <a href="../../explanation/architecture/" class="md-nav__link">
         
   
   
@@ -1315,7 +1414,7 @@
   
   
     <li class="md-nav__item">
-      <a href="explanation/zero-reflection/" class="md-nav__link">
+      <a href="../../explanation/zero-reflection/" class="md-nav__link">
         
   
   
@@ -1343,7 +1442,7 @@
   
   
     <li class="md-nav__item">
-      <a href="explanation/design-decisions/" class="md-nav__link">
+      <a href="../../explanation/design-decisions/" class="md-nav__link">
         
   
   
@@ -1371,7 +1470,7 @@
   
   
     <li class="md-nav__item">
-      <a href="explanation/logo/" class="md-nav__link">
+      <a href="../../explanation/logo/" class="md-nav__link">
         
   
   
@@ -1426,10 +1525,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#why-flagzen" class="md-nav__link">
+  <a href="#goal" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why FlagZen?
+        Goal
       
     </span>
   </a>
@@ -1437,10 +1536,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-links" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick Links
+        Prerequisites
       
     </span>
   </a>
@@ -1448,10 +1547,93 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
+  <a href="#steps" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Installation
+        Steps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-add-the-dependency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Add the dependency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-the-launchdarkly-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Create the LaunchDarkly client
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-bridge-to-flagzen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Bridge to FlagZen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-resolve-flags-with-evaluation-context-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Resolve flags with evaluation context (optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-use-typed-flag-resolution-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Use typed flag resolution (optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-use-with-spring-boot-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Use with Spring Boot (optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-absence-detection-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How absence detection works
       
     </span>
   </a>
@@ -1459,10 +1641,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#works-with" class="md-nav__link">
+  <a href="#result" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Works With
+        Result
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See Also
       
     </span>
   </a>
@@ -1489,107 +1682,107 @@
   
 
 
-<h1 id="flagzen">FlagZen<a class="headerlink" href="#flagzen" title="Permanent link">&para;</a></h1>
-<!-- markdownlint-disable MD033 -->
-<p align="center">
-  <img src="assets/logo.png" alt="FlagZen" width="120">
-</p>
-<!-- markdownlint-enable MD033 -->
-
-<p><strong>Type-safe polymorphic dispatch layer for feature flags in Java 17+.</strong></p>
-<p>FlagZen sits between your code and your flag provider. Define a <code>@Feature</code> interface, implement <code>@Variant</code> classes, and the generated proxy routes method calls to the active variant at runtime. No <code>if/else</code> chains, no string comparisons, no reflection.</p>
-<p>Your flag provider (LaunchDarkly, OpenFeature, Togglz) handles A/B testing, rollouts, and targeting. FlagZen handles type-safe dispatch.</p>
-<h2 id="why-flagzen">Why FlagZen?<a class="headerlink" href="#why-flagzen" title="Permanent link">&para;</a></h2>
+<h1 id="how-to-connect-to-launchdarkly">How to Connect to LaunchDarkly<a class="headerlink" href="#how-to-connect-to-launchdarkly" title="Permanent link">&para;</a></h1>
+<p>Bridge FlagZen to LaunchDarkly's feature flag platform.</p>
+<h2 id="goal">Goal<a class="headerlink" href="#goal" title="Permanent link">&para;</a></h2>
+<p>Use LaunchDarkly as your FlagZen flag source with native typed resolution and full evaluation context support.</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Type-safe</strong>: feature flags are interfaces, not strings. The compiler catches wiring errors.</li>
-<li><strong>Zero reflection</strong>: all dispatch code is generated at compile time by an annotation processor.</li>
-<li><strong>Dynamic</strong>: proxies re-evaluate the flag on every method call. Change the flag, change the behavior -- no restart.</li>
-<li><strong>Testable</strong>: pin flags in tests with <code>@PinFlag</code>, load from files with <code>@FlagSource</code>, or use <code>TestFlagContext</code> programmatically.</li>
-<li><strong>Provider-agnostic</strong>: plug in LaunchDarkly, OpenFeature, Togglz, environment variables, or your own source via the <code>FlagProvider</code> SPI. FlagZen passes evaluation context through to your provider for targeting and A/B testing -- it doesn't reimplement what your provider already does.</li>
+<li>FlagZen basics: <code>@Feature</code>, <code>@Variant</code>, <code>FeatureDispatcher</code></li>
+<li>LaunchDarkly account with an SDK key</li>
+<li>LaunchDarkly Java Server SDK 7.x</li>
 </ul>
-<h2 id="quick-links">Quick Links<a class="headerlink" href="#quick-links" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong><a href="tutorials/getting-started/">Tutorials</a></strong></td>
-<td>New to FlagZen? Start with the getting started guide.</td>
-</tr>
-<tr>
-<td><strong><a href="how-to/typed-dispatch/">How-To Guides</a></strong></td>
-<td>Solve specific problems: typed dispatch, Spring Boot, env vars.</td>
-</tr>
-<tr>
-<td><strong><a href="reference/annotations/">Reference</a></strong></td>
-<td>Complete API reference for all annotations, interfaces, and modules.</td>
-</tr>
-<tr>
-<td><strong><a href="explanation/architecture/">Explanation</a></strong></td>
-<td>Understand the architecture and design decisions behind FlagZen.</td>
-</tr>
-</tbody>
-</table>
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<h2 id="steps">Steps<a class="headerlink" href="#steps" title="Permanent link">&para;</a></h2>
+<h3 id="1-add-the-dependency">1. Add the dependency<a class="headerlink" href="#1-add-the-dependency" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>dependencies {
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    implementation(&quot;com.flagzen:flagzen-core:1.1.0&quot;)
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    annotationProcessor(&quot;com.flagzen:flagzen-core:1.1.0&quot;)
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>}
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    implementation(&quot;com.flagzen:flagzen-launchdarkly:1.2.0&quot;)
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>}
 </code></pre></div>
-<p>See <a href="tutorials/getting-started/">Getting Started</a> for the full walkthrough.</p>
-<h2 id="works-with">Works With<a class="headerlink" href="#works-with" title="Permanent link">&para;</a></h2>
+<p>The LaunchDarkly Java Server SDK is included transitively.</p>
+<h3 id="2-create-the-launchdarkly-client">2. Create the LaunchDarkly client<a class="headerlink" href="#2-create-the-launchdarkly-client" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">LDClient</span><span class="w"> </span><span class="n">ldClient</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LDClient</span><span class="p">(</span><span class="s">&quot;sdk-your-key&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p>The client connects to LaunchDarkly and streams flag updates. See the <a href="https://docs.launchdarkly.com/sdk/server-side/java">LaunchDarkly Java SDK docs</a> for configuration options.</p>
+<h3 id="3-bridge-to-flagzen">3. Bridge to FlagZen<a class="headerlink" href="#3-bridge-to-flagzen" title="Permanent link">&para;</a></h3>
+<p>Wrap the client with <code>LaunchDarklyFlagProvider</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">FlagProvider</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LaunchDarklyFlagProvider</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">ldClient</span><span class="p">);</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">FeatureDispatcher</span><span class="w"> </span><span class="n">dispatcher</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FeatureDispatcher</span><span class="p">.</span><span class="na">withProvider</span><span class="p">(</span><span class="n">provider</span><span class="p">);</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">CheckoutFlow</span><span class="w"> </span><span class="n">flow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dispatcher</span><span class="p">.</span><span class="na">resolve</span><span class="p">(</span><span class="n">CheckoutFlow</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+</code></pre></div>
+<h3 id="4-resolve-flags-with-evaluation-context-optional">4. Resolve flags with evaluation context (optional)<a class="headerlink" href="#4-resolve-flags-with-evaluation-context-optional" title="Permanent link">&para;</a></h3>
+<p>Pass targeting context for personalized flag resolution:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">EvaluationContext</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EvaluationContext</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="p">.</span><span class="na">targetingKey</span><span class="p">(</span><span class="s">&quot;user-7291&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="p">.</span><span class="na">attribute</span><span class="p">(</span><span class="s">&quot;plan&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;enterprise&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="p">.</span><span class="na">attribute</span><span class="p">(</span><span class="s">&quot;age&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">Optional</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">&quot;checkout-flow&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="p">);</span>
+</code></pre></div>
+<p>The adapter maps the targeting key to <code>LDContext</code> key and attributes to custom <code>LDValue</code> fields. When no context is provided, an anonymous <code>LDContext</code> is used.</p>
+<h3 id="5-use-typed-flag-resolution-optional">5. Use typed flag resolution (optional)<a class="headerlink" href="#5-use-typed-flag-resolution-optional" title="Permanent link">&para;</a></h3>
+<p>The adapter delegates to LaunchDarkly's native typed methods, avoiding string round-tripping:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">Optional</span><span class="o">&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span><span class="w"> </span><span class="n">enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getBoolean</span><span class="p">(</span><span class="s">&quot;dark-mode&quot;</span><span class="p">);</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">OptionalInt</span><span class="w"> </span><span class="n">retries</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getInt</span><span class="p">(</span><span class="s">&quot;max-retries&quot;</span><span class="p">);</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">OptionalDouble</span><span class="w"> </span><span class="n">ratio</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getDouble</span><span class="p">(</span><span class="s">&quot;sampling-ratio&quot;</span><span class="p">);</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">OptionalLong</span><span class="w"> </span><span class="n">limit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getLong</span><span class="p">(</span><span class="s">&quot;rate-limit&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p>Long values use LaunchDarkly's JSON value API, supporting the full <code>long</code> range (unlike OpenFeature which is limited to <code>int</code> range).</p>
+<h3 id="6-use-with-spring-boot-optional">6. Use with Spring Boot (optional)<a class="headerlink" href="#6-use-with-spring-boot-optional" title="Permanent link">&para;</a></h3>
+<p>Define the provider as a Spring bean:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nd">@Configuration</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">FlagsConfig</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nd">@Bean</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">FlagProvider</span><span class="w"> </span><span class="nf">flagProvider</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">        </span><span class="n">LDClient</span><span class="w"> </span><span class="n">ldClient</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LDClient</span><span class="p">(</span><span class="s">&quot;sdk-your-key&quot;</span><span class="p">);</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">LaunchDarklyFlagProvider</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">ldClient</span><span class="p">);</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="p">}</span>
+</code></pre></div>
+<p>Spring auto-configuration detects it and registers all <code>@Feature</code> proxies as beans.</p>
+<h2 id="how-absence-detection-works">How absence detection works<a class="headerlink" href="#how-absence-detection-works" title="Permanent link">&para;</a></h2>
+<p>The adapter uses LaunchDarkly's evaluation reason to detect absent flags:</p>
 <table>
 <thead>
 <tr>
-<th>Provider</th>
-<th>Module</th>
-<th>A/B Testing</th>
-<th>Targeting</th>
-<th>Dashboard</th>
+<th>Reason</th>
+<th>Result</th>
+<th>Why</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><a href="how-to/launchdarkly/">LaunchDarkly</a></td>
-<td><code>flagzen-launchdarkly</code></td>
-<td>Yes</td>
-<td>Yes</td>
-<td>Yes</td>
+<td><code>FALLTHROUGH</code>, <code>TARGET_MATCH</code>, <code>RULE_MATCH</code></td>
+<td>Value returned</td>
+<td>Real resolution</td>
 </tr>
 <tr>
-<td><a href="how-to/openfeature/">OpenFeature</a></td>
-<td><code>flagzen-openfeature</code></td>
-<td>Depends on backend</td>
-<td>Depends on backend</td>
-<td>Depends on backend</td>
+<td><code>OFF</code></td>
+<td>Off-variation value returned</td>
+<td>Deliberately configured off-value</td>
 </tr>
 <tr>
-<td><a href="how-to/togglz/">Togglz</a></td>
-<td><code>flagzen-togglz</code></td>
-<td>No</td>
-<td>Via UserProvider</td>
-<td>Web console</td>
+<td><code>ERROR</code> (flag not found, malformed, etc.)</td>
+<td>Empty</td>
+<td>Evaluation failed</td>
 </tr>
 <tr>
-<td><a href="how-to/environment-variables/">Environment variables</a></td>
-<td><code>flagzen-env</code></td>
-<td>No</td>
-<td>No</td>
-<td>No</td>
-</tr>
-<tr>
-<td>Custom</td>
-<td><a href="how-to/custom-provider/">Write your own</a></td>
-<td>You decide</td>
-<td>You decide</td>
-<td>You decide</td>
+<td><code>PREREQUISITE_FAILED</code></td>
+<td>Empty</td>
+<td>Prerequisite flag not satisfied</td>
 </tr>
 </tbody>
 </table>
+<p>This means a flag that is turned OFF in LaunchDarkly still returns a value (the configured off-variation), which FlagZen dispatches on normally.</p>
+<h2 id="result">Result<a class="headerlink" href="#result" title="Permanent link">&para;</a></h2>
+<p>FlagZen dispatches to variants based on flags from LaunchDarkly. All five types (string, boolean, int, long, double) are resolved natively without string parsing.</p>
+<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../evaluation-context/">How-to: Evaluation Context</a> -- targeted flag resolution</li>
+<li><a href="../spring-boot/">How-to: Spring Boot Integration</a> -- register proxies as beans</li>
+<li><a href="../openfeature/">How-to: OpenFeature</a> -- vendor-neutral alternative</li>
+<li><a href="../custom-provider/">How-to: Custom Provider</a> -- implement your own flag source</li>
+</ul>
 
 
 
@@ -1663,10 +1856,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

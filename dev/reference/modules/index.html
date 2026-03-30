@@ -740,6 +740,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../how-to/launchdarkly/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Connect to LaunchDarkly
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/togglz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Connect to Togglz
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../how-to/custom-provider/" class="md-nav__link">
         
   
@@ -2114,7 +2170,7 @@
 <a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="c1">// provider.getString(&quot;checkout-flow&quot;) returns Optional.of(&quot;PREMIUM&quot;)</span>
 </code></pre></div>
 <h3 id="flagzen-launchdarkly"><code>flagzen-launchdarkly</code><a class="headerlink" href="#flagzen-launchdarkly" title="Permanent link">&para;</a></h3>
-<p>LaunchDarkly SDK adapter.</p>
+<p>LaunchDarkly Java Server SDK adapter with native typed resolution.</p>
 <table>
 <thead>
 <tr>
@@ -2133,7 +2189,7 @@
 </tr>
 <tr>
 <td>Version</td>
-<td><code>1.1.0</code></td>
+<td><code>1.2.0</code></td>
 </tr>
 <tr>
 <td>Depends On</td>
@@ -2147,17 +2203,20 @@
 </table>
 <p><strong>What it provides</strong>:</p>
 <ul>
-<li><code>LaunchDarklyFlagProvider</code> — adapter to LaunchDarkly SDK</li>
-<li>Context mapping from <code>EvaluationContext</code> to LaunchDarkly users/attributes</li>
+<li><code>LaunchDarklyFlagProvider</code> — adapter using native typed <code>*VariationDetail</code> methods (no string round-tripping)</li>
+<li><code>EvaluationContext</code> mapping to <code>LDContext</code> (single-kind "user" context)</li>
+<li>Reason-kind-based absence detection (ERROR, PREREQUISITE_FAILED = absent; OFF = resolved)</li>
+<li>Long value support via <code>jsonValueVariationDetail</code> (full <code>long</code> range)</li>
+<li>Anonymous <code>LDContext</code> singleton for non-context calls</li>
 </ul>
 <p><strong>When to use</strong>: When you manage flags via LaunchDarkly's control plane.</p>
 <p><strong>Gradle</strong>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>dependencies {
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    implementation(&quot;com.flagzen:flagzen-launchdarkly:1.1.0&quot;)
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    implementation(&quot;com.flagzen:flagzen-launchdarkly:1.2.0&quot;)
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>}
 </code></pre></div>
 <h3 id="flagzen-togglz"><code>flagzen-togglz</code><a class="headerlink" href="#flagzen-togglz" title="Permanent link">&para;</a></h3>
-<p>Togglz SDK adapter.</p>
+<p>Togglz feature toggle adapter with boolean and string resolution.</p>
 <table>
 <thead>
 <tr>
@@ -2176,7 +2235,7 @@
 </tr>
 <tr>
 <td>Version</td>
-<td><code>1.1.0</code></td>
+<td><code>1.2.0</code></td>
 </tr>
 <tr>
 <td>Depends On</td>
@@ -2190,12 +2249,15 @@
 </table>
 <p><strong>What it provides</strong>:</p>
 <ul>
-<li><code>TogglzFlagProvider</code> — adapter to Togglz feature toggle framework</li>
+<li><code>TogglzFlagProvider</code> — adapter using <code>FeatureState.isEnabled()</code> for boolean, strategy parameter <code>"value"</code> for string</li>
+<li><code>FeatureLookup</code> — case-insensitive string-to-Feature cache</li>
+<li>Numeric types via default <code>FlagProvider</code> string parsing</li>
+<li>One-time INFO log when <code>EvaluationContext</code> is passed (context not supported by Togglz)</li>
 </ul>
 <p><strong>When to use</strong>: When you manage flags via Togglz.</p>
 <p><strong>Gradle</strong>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>dependencies {
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    implementation(&quot;com.flagzen:flagzen-togglz:1.1.0&quot;)
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    implementation(&quot;com.flagzen:flagzen-togglz:1.2.0&quot;)
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>}
 </code></pre></div>
 <h3 id="flagzen-openfeature"><code>flagzen-openfeature</code><a class="headerlink" href="#flagzen-openfeature" title="Permanent link">&para;</a></h3>
@@ -2516,7 +2578,7 @@
 <td>flagzen-togglz</td>
 <td>17+</td>
 <td>N/A</td>
-<td>Togglz 2.x</td>
+<td>Togglz 4.x</td>
 <td><a href="https://javadoc.io/doc/com.flagzen/flagzen-togglz">API docs</a></td>
 </tr>
 <tr>
