@@ -19,11 +19,13 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -110,6 +112,24 @@ public class FlagZenProcessor extends AbstractProcessor {
         List<String> variantEnumValues = collectVariantEnumValues(featureElement);
         if (!variantEnumValues.isEmpty()) {
             validateVariantValuesAgainstEnum(variants, variantEnumValues, interfaceName, roundEnv);
+        }
+
+        if (hasDuplicateOrderValues(variants, flagKey, featureElement)) {
+            return;
+        }
+
+        boolean hasConditions = variants.stream().anyMatch(v -> v.condition() != null);
+        if (fallbackStrategy == FallbackStrategy.REQUIRED
+                && hasConditions
+                && defaultVariantClassName == null) {
+            processingEnv.getMessager().printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "Feature \"" + flagKey + "\" uses REQUIRED fallback with condition-based variants "
+                            + "but has no @DefaultVariant. Add a @DefaultVariant to ensure a fallback "
+                            + "when no condition matches.",
+                    featureElement
+            );
+            return;
         }
 
         if (fallbackStrategy == FallbackStrategy.REQUIRED
@@ -394,7 +414,7 @@ public class FlagZenProcessor extends AbstractProcessor {
             return;
         }
 
-        ConditionModel conditionModel = extractConditionModel(variantAnnotation);
+        ConditionModel conditionModel = extractConditionModel(variantAnnotation, featureType, variantElement);
         int order = variantAnnotation.order();
 
         if (featureType == FeatureType.INT) {
@@ -434,7 +454,9 @@ public class FlagZenProcessor extends AbstractProcessor {
         }
     }
 
-    private ConditionModel extractConditionModel(Variant variantAnnotation) {
+    private ConditionModel extractConditionModel(Variant variantAnnotation,
+                                                   FeatureType featureType,
+                                                   Element variantElement) {
         Condition condition = variantAnnotation.when();
 
         TypeMirror matchesMirror = extractConditionMatches(condition);
@@ -445,6 +467,26 @@ public class FlagZenProcessor extends AbstractProcessor {
         boolean hasNotMatches = notMatchesMirror != null
                 && !notMatchesMirror.toString().equals(Condition.Sentinel.class.getCanonicalName());
 
+        if (hasMatches && hasNotMatches) {
+            processingEnv.getMessager().printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "@Condition: matches and notMatches are mutually exclusive. "
+                            + "Use only one on each @Condition.",
+                    variantElement
+            );
+            return null;
+        }
+
+        TypeMirror predicateMirror = hasMatches ? matchesMirror : hasNotMatches ? notMatchesMirror : null;
+        if (predicateMirror != null) {
+            if (!validatePredicateType(predicateMirror, featureType, variantElement)) {
+                return null;
+            }
+            if (!validatePredicateConstructor(predicateMirror, variantElement)) {
+                return null;
+            }
+        }
+
         if (hasMatches) {
             return new ConditionModel(matchesMirror.toString(), false);
         }
@@ -452,6 +494,91 @@ public class FlagZenProcessor extends AbstractProcessor {
             return new ConditionModel(notMatchesMirror.toString(), true);
         }
         return null;
+    }
+
+    private boolean validatePredicateType(TypeMirror predicateMirror, FeatureType featureType,
+                                           Element variantElement) {
+        String expectedInterface = switch (featureType) {
+            case STRING -> "java.util.function.Predicate";
+            case INT -> "java.util.function.IntPredicate";
+            case LONG -> "java.util.function.LongPredicate";
+            case DOUBLE -> "java.util.function.DoublePredicate";
+            case BOOLEAN -> null;
+        };
+        if (expectedInterface == null) {
+            return true;
+        }
+
+        TypeElement predicateElement = (TypeElement) processingEnv.getTypeUtils()
+                .asElement(predicateMirror);
+        if (predicateElement == null) {
+            return true;
+        }
+
+        TypeElement expectedElement = processingEnv.getElementUtils()
+                .getTypeElement(expectedInterface);
+        if (expectedElement == null) {
+            return true;
+        }
+
+        TypeMirror expectedRaw = processingEnv.getTypeUtils().erasure(expectedElement.asType());
+        boolean assignable = false;
+        for (TypeMirror iface : predicateElement.getInterfaces()) {
+            TypeMirror erased = processingEnv.getTypeUtils().erasure(iface);
+            if (processingEnv.getTypeUtils().isAssignable(erased, expectedRaw)) {
+                assignable = true;
+                break;
+            }
+        }
+
+        if (!assignable) {
+            processingEnv.getMessager().printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "Predicate class " + predicateElement.getSimpleName()
+                            + " must implement " + expectedInterface
+                            + " for feature type " + featureType + ".",
+                    variantElement
+            );
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validatePredicateConstructor(TypeMirror predicateMirror, Element variantElement) {
+        TypeElement predicateElement = (TypeElement) processingEnv.getTypeUtils()
+                .asElement(predicateMirror);
+        if (predicateElement == null) {
+            return true;
+        }
+
+        if (predicateElement.getModifiers().contains(Modifier.ABSTRACT)) {
+            processingEnv.getMessager().printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "Predicate class " + predicateElement.getSimpleName()
+                            + " must not be abstract and must have an accessible no-arg constructor.",
+                    variantElement
+            );
+            return false;
+        }
+
+        List<ExecutableElement> constructors = ElementFilter.constructorsIn(
+                predicateElement.getEnclosedElements());
+
+        boolean hasNoArgConstructor = constructors.isEmpty()
+                || constructors.stream().anyMatch(c ->
+                        c.getParameters().isEmpty()
+                        && !c.getModifiers().contains(Modifier.PRIVATE));
+
+        if (!hasNoArgConstructor) {
+            processingEnv.getMessager().printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "Predicate class " + predicateElement.getSimpleName()
+                            + " must have an accessible no-arg constructor.",
+                    variantElement
+            );
+            return false;
+        }
+        return true;
     }
 
     private TypeMirror extractConditionMatches(Condition condition) {
@@ -673,6 +800,35 @@ public class FlagZenProcessor extends AbstractProcessor {
             incomplete = true;
         }
         return incomplete;
+    }
+
+    private boolean hasDuplicateOrderValues(List<VariantModel> variants, String flagKey,
+                                               TypeElement featureElement) {
+        Map<Integer, List<String>> orderToClassNames = new HashMap<>();
+        for (VariantModel variant : variants) {
+            if (variant.order() == Integer.MAX_VALUE) {
+                continue;
+            }
+            String simpleName = variant.qualifiedClassName()
+                    .substring(variant.qualifiedClassName().lastIndexOf('.') + 1);
+            orderToClassNames
+                    .computeIfAbsent(variant.order(), k -> new ArrayList<>())
+                    .add(simpleName);
+        }
+        boolean foundDuplicate = false;
+        for (Map.Entry<Integer, List<String>> entry : orderToClassNames.entrySet()) {
+            if (entry.getValue().size() > 1) {
+                String classNames = String.join(" and ", entry.getValue());
+                processingEnv.getMessager().printMessage(
+                        Diagnostic.Kind.ERROR,
+                        "Duplicate order value " + entry.getKey() + " for feature \""
+                                + flagKey + "\". Found on: " + classNames,
+                        featureElement
+                );
+                foundDuplicate = true;
+            }
+        }
+        return foundDuplicate;
     }
 
     private boolean hasDuplicateVariantValues(List<VariantModel> variants, String flagKey,
