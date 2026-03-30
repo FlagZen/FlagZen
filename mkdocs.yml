@@ -61,6 +61,8 @@ nav:
       - Read Flags from Environment Variables: how-to/environment-variables.md
       - Integrate with Spring Boot: how-to/spring-boot.md
       - Connect to OpenFeature: how-to/openfeature.md
+      - Connect to LaunchDarkly: how-to/launchdarkly.md
+      - Connect to Togglz: how-to/togglz.md
       - Write a Custom FlagProvider: how-to/custom-provider.md
       - Use Evaluation Context for Targeting: how-to/evaluation-context.md
   - Reference:

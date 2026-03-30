@@ -152,20 +152,23 @@ FlagProvider provider = new EnvironmentVariableFlagProvider.builder()
 
 ### `flagzen-launchdarkly`
 
-LaunchDarkly SDK adapter.
+LaunchDarkly Java Server SDK adapter with native typed resolution.
 
 |  Attribute   |                     Value                      |
 | ------------ | ---------------------------------------------- |
 | Group ID     | `com.flagzen`                                  |
 | Artifact ID  | `flagzen-launchdarkly`                         |
-| Version      | `1.1.0`                                        |
+| Version      | `1.2.0`                                        |
 | Depends On   | `flagzen-core`, `launchdarkly-java-server-sdk` |
 | Java Version | 17+                                            |
 
 **What it provides**:
 
-- `LaunchDarklyFlagProvider` — adapter to LaunchDarkly SDK
-- Context mapping from `EvaluationContext` to LaunchDarkly users/attributes
+- `LaunchDarklyFlagProvider` — adapter using native typed `*VariationDetail` methods (no string round-tripping)
+- `EvaluationContext` mapping to `LDContext` (single-kind "user" context)
+- Reason-kind-based absence detection (ERROR, PREREQUISITE_FAILED = absent; OFF = resolved)
+- Long value support via `jsonValueVariationDetail` (full `long` range)
+- Anonymous `LDContext` singleton for non-context calls
 
 **When to use**: When you manage flags via LaunchDarkly's control plane.
 
@@ -173,25 +176,28 @@ LaunchDarkly SDK adapter.
 
 ```gradle
 dependencies {
-    implementation("com.flagzen:flagzen-launchdarkly:1.1.0")
+    implementation("com.flagzen:flagzen-launchdarkly:1.2.0")
 }
 ```
 
 ### `flagzen-togglz`
 
-Togglz SDK adapter.
+Togglz feature toggle adapter with boolean and string resolution.
 
 |  Attribute   |             Value             |
 | ------------ | ----------------------------- |
 | Group ID     | `com.flagzen`                 |
 | Artifact ID  | `flagzen-togglz`              |
-| Version      | `1.1.0`                       |
+| Version      | `1.2.0`                       |
 | Depends On   | `flagzen-core`, `togglz-core` |
 | Java Version | 17+                           |
 
 **What it provides**:
 
-- `TogglzFlagProvider` — adapter to Togglz feature toggle framework
+- `TogglzFlagProvider` — adapter using `FeatureState.isEnabled()` for boolean, strategy parameter `"value"` for string
+- `FeatureLookup` — case-insensitive string-to-Feature cache
+- Numeric types via default `FlagProvider` string parsing
+- One-time INFO log when `EvaluationContext` is passed (context not supported by Togglz)
 
 **When to use**: When you manage flags via Togglz.
 
@@ -199,7 +205,7 @@ Togglz SDK adapter.
 
 ```gradle
 dependencies {
-    implementation("com.flagzen:flagzen-togglz:1.1.0")
+    implementation("com.flagzen:flagzen-togglz:1.2.0")
 }
 ```
 
@@ -387,7 +393,7 @@ dependencies {
 | flagzen-reactor      | 17+  | N/A         | Works standalone or in Spring  | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-reactor)       |
 | flagzen-mutiny       | 17+  | N/A         | Works standalone or in Quarkus | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-mutiny)        |
 | flagzen-launchdarkly | 17+  | N/A         | LaunchDarkly SDK 7.0+          | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-launchdarkly)  |
-| flagzen-togglz       | 17+  | N/A         | Togglz 2.x                     | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-togglz)        |
+| flagzen-togglz       | 17+  | N/A         | Togglz 4.x                     | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-togglz)        |
 | flagzen-openfeature  | 17+  | N/A         | OpenFeature SDK 1.0+           | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-openfeature)   |
 
 ## Minimal Setup
