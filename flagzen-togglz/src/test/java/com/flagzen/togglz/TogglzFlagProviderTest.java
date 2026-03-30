@@ -1,5 +1,6 @@
 package com.flagzen.togglz;
 
+import com.flagzen.EvaluationContext;
 import com.flagzen.spi.FlagProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,10 +11,16 @@ import org.togglz.core.Feature;
 import org.togglz.core.manager.FeatureManager;
 import org.togglz.core.repository.FeatureState;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -157,6 +164,114 @@ class TogglzFlagProviderTest {
         FlagProvider provider = TogglzFlagProvider.create(featureManager);
 
         assertThat(provider.getDouble("DARK_MODE")).isEqualTo(OptionalDouble.of(3.14));
+    }
+
+    // --- Context-aware overloads delegate to non-context versions ---
+
+    @Test
+    void contextAwareGetStringDelegatesToNonContextVersion() {
+        FeatureManager featureManager = mock(FeatureManager.class);
+        when(featureManager.getFeatures()).thenReturn(Set.of(TestFeature.values()));
+        when(featureManager.getFeatureState(TestFeature.DARK_MODE))
+                .thenReturn(featureWithParameter(TestFeature.DARK_MODE, true, "premium"));
+
+        FlagProvider provider = TogglzFlagProvider.create(featureManager);
+        EvaluationContext context = EvaluationContext.builder()
+                .targetingKey("user-123")
+                .build();
+
+        assertThat(provider.getString("DARK_MODE", context))
+                .isEqualTo(provider.getString("DARK_MODE"));
+    }
+
+    @Test
+    void contextAwareGetBooleanDelegatesToNonContextVersion() {
+        FeatureManager featureManager = mock(FeatureManager.class);
+        when(featureManager.getFeatures()).thenReturn(Set.of(TestFeature.values()));
+        when(featureManager.getFeatureState(TestFeature.DARK_MODE))
+                .thenReturn(new FeatureState(TestFeature.DARK_MODE, true));
+
+        FlagProvider provider = TogglzFlagProvider.create(featureManager);
+        EvaluationContext context = EvaluationContext.builder()
+                .targetingKey("user-123")
+                .build();
+
+        assertThat(provider.getBoolean("DARK_MODE", context))
+                .isEqualTo(provider.getBoolean("DARK_MODE"));
+    }
+
+    // --- One-time INFO log on first context-aware call ---
+
+    @Test
+    void logsInfoWarningOnFirstContextAwareCall() {
+        FeatureManager featureManager = mock(FeatureManager.class);
+        when(featureManager.getFeatures()).thenReturn(Set.of(TestFeature.values()));
+        when(featureManager.getFeatureState(TestFeature.DARK_MODE))
+                .thenReturn(new FeatureState(TestFeature.DARK_MODE, true));
+
+        FlagProvider provider = TogglzFlagProvider.create(featureManager);
+        EvaluationContext context = EvaluationContext.builder()
+                .targetingKey("user-123")
+                .build();
+
+        List<LogRecord> records = captureLogsFor(TogglzFlagProvider.class, () ->
+                provider.getString("DARK_MODE", context));
+
+        assertThat(records)
+                .hasSize(1)
+                .first()
+                .satisfies(record -> {
+                    assertThat(record.getLevel()).isEqualTo(Level.INFO);
+                    assertThat(record.getMessage()).contains("does not support explicit EvaluationContext");
+                });
+    }
+
+    @Test
+    void doesNotLogWarningOnSubsequentContextAwareCalls() {
+        FeatureManager featureManager = mock(FeatureManager.class);
+        when(featureManager.getFeatures()).thenReturn(Set.of(TestFeature.values()));
+        when(featureManager.getFeatureState(TestFeature.DARK_MODE))
+                .thenReturn(new FeatureState(TestFeature.DARK_MODE, true));
+
+        FlagProvider provider = TogglzFlagProvider.create(featureManager);
+        EvaluationContext context = EvaluationContext.builder()
+                .targetingKey("user-123")
+                .build();
+
+        // First call - triggers the warning
+        provider.getString("DARK_MODE", context);
+
+        // Second call - should NOT log again
+        List<LogRecord> records = captureLogsFor(TogglzFlagProvider.class, () ->
+                provider.getBoolean("DARK_MODE", context));
+
+        assertThat(records).isEmpty();
+    }
+
+    private static List<LogRecord> captureLogsFor(Class<?> clazz, Runnable action) {
+        Logger logger = Logger.getLogger(clazz.getName());
+        List<LogRecord> records = new ArrayList<>();
+        Handler handler = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                records.add(record);
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        logger.addHandler(handler);
+        try {
+            action.run();
+        } finally {
+            logger.removeHandler(handler);
+        }
+        return records;
     }
 
     private static FeatureState featureWithParameter(Feature feature, boolean enabled, String value) {

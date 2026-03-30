@@ -1,11 +1,14 @@
 package com.flagzen.togglz;
 
+import com.flagzen.EvaluationContext;
 import com.flagzen.spi.FlagProvider;
 import org.togglz.core.Feature;
 import org.togglz.core.manager.FeatureManager;
 import org.togglz.core.repository.FeatureState;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Logger;
 
 /**
  * A {@link FlagProvider} that delegates flag resolution to the Togglz feature toggle library.
@@ -25,8 +28,11 @@ import java.util.Optional;
  */
 public final class TogglzFlagProvider implements FlagProvider {
 
+    private static final Logger LOGGER = Logger.getLogger(TogglzFlagProvider.class.getName());
+
     private final FeatureManager featureManager;
     private final FeatureLookup featureLookup;
+    private final AtomicBoolean contextWarningLogged = new AtomicBoolean(false);
 
     private TogglzFlagProvider(FeatureManager featureManager) {
         this.featureManager = featureManager;
@@ -71,5 +77,24 @@ public final class TogglzFlagProvider implements FlagProvider {
             return Optional.empty();
         }
         return Optional.of(state.isEnabled());
+    }
+
+    @Override
+    public Optional<String> getString(String key, EvaluationContext context) {
+        logContextWarning();
+        return getString(key);
+    }
+
+    @Override
+    public Optional<Boolean> getBoolean(String key, EvaluationContext context) {
+        logContextWarning();
+        return getBoolean(key);
+    }
+
+    private void logContextWarning() {
+        if (contextWarningLogged.compareAndSet(false, true)) {
+            LOGGER.info("TogglzFlagProvider does not support explicit EvaluationContext. "
+                    + "Configure a Togglz UserProvider for user targeting.");
+        }
     }
 }
