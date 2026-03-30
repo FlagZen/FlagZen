@@ -39,18 +39,7 @@ public final class FlagKeyFormats {
      * @return a camelCase formatter
      */
     public static FlagKeyFormat camelCase() {
-        return segments -> {
-            if (segments.isEmpty()) {
-                return "";
-            }
-            StringBuilder result = new StringBuilder(segments.get(0));
-            for (int i = 1; i < segments.size(); i++) {
-                String segment = segments.get(i);
-                result.append(Character.toUpperCase(segment.charAt(0)))
-                      .append(segment.substring(1));
-            }
-            return result.toString();
-        };
+        return segments -> capitalizeSegments(segments, true);
     }
 
     /**
@@ -62,19 +51,27 @@ public final class FlagKeyFormats {
      * @return a PascalCase formatter
      */
     public static FlagKeyFormat pascalCase() {
-        return segments -> {
-            if (segments.isEmpty()) {
-                return "";
+        return segments -> capitalizeSegments(segments, false);
+    }
+
+    private static String capitalizeSegments(java.util.List<String> segments, boolean lowercaseFirst) {
+        if (segments.isEmpty()) {
+            return "";
+        }
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < segments.size(); i++) {
+            String segment = segments.get(i);
+            if (segment.isEmpty()) {
+                continue;
             }
-            StringBuilder result = new StringBuilder();
-            for (String segment : segments) {
-                if (!segment.isEmpty()) {
-                    result.append(Character.toUpperCase(segment.charAt(0)))
-                          .append(segment.substring(1));
-                }
+            if (i == 0 && lowercaseFirst) {
+                result.append(segment);
+            } else {
+                result.append(Character.toUpperCase(segment.charAt(0)))
+                      .append(segment.substring(1));
             }
-            return result.toString();
-        };
+        }
+        return result.toString();
     }
 
     /**

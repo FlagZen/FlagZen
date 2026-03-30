@@ -239,9 +239,9 @@ public final class EnvironmentVariableFlagProvider implements FlagProvider {
                 Consumer<String> warningConsumer,
                 Set<String> conflicted
         ) {
-            String message = "Flag key '" + flagKey
-                    + "' mapped from env var '" + newEnvVar
-                    + "' overrides previous mapping from '" + previousEnvVar + "'";
+            String message = String.format(
+                    "Flag key '%s' mapped from env var '%s' overrides previous mapping from '%s'",
+                    flagKey, newEnvVar, previousEnvVar);
             if (strategy == ConflictStrategy.ERROR) {
                 throw new IllegalStateException(message);
             }
