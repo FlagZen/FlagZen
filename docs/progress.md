@@ -142,11 +142,11 @@ M12 (Documentation) is continuous — Javadoc and docs are updated with every re
 
 ### M5: Provider Adapters — `flagzen-providers`
 
-**Status: IN PROGRESS** | **Release: v1.1.0 (partial), v1.2.0 (remaining)** | Depends on: M0 | [Artifacts](feature/flagzen-openfeature/)
+**Status: DONE** | **Release: v1.1.0 (partial), v1.2.0 (remaining)** | Depends on: M0 | [Artifacts](feature/flagzen-providers/)
 
 - [x] `flagzen-openfeature` (OpenFeature SDK adapter) — **v1.1.0** (vendor-neutral, proves SPI)
-- [ ] `flagzen-launchdarkly` (LaunchDarkly SDK adapter) — v1.2.0
-- [ ] `flagzen-togglz` (Togglz adapter) — v1.2.0
+- [x] `flagzen-launchdarkly` (LaunchDarkly SDK adapter) — v1.2.0
+- [x] `flagzen-togglz` (Togglz adapter) — v1.2.0
 
 ### M12: Documentation — `flagzen-docs`
 
