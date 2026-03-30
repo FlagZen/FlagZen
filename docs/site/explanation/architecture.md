@@ -305,13 +305,83 @@ The proxy re-evaluates the flag on every call, so flag changes are reflected imm
 
 **Proxy construction**: Happens once per feature per dispatcher. Cost: service loading + proxy instantiation. Cached afterward.
 
-**Method call dispatch**: O(1) operation:
+**Method call dispatch (value-based)**: O(1) operation:
 
 - Query flag provider: typically `Map.get()` or similar constant-time operation
 - Look up variant: `Map.get()` in the variant map
 - Delegate method: direct method invocation
 
+**Method call dispatch (ordered/condition-based)**: O(n) where n is the number of variants (typically 2-5):
+
+- Query flag provider for the flag value
+- Iterate entries in `order` sequence: exact matches use `equals()`, conditions call `predicate.test()`
+- First match wins (short-circuit)
+
 **Flag provider implementation matters**: If your provider queries a remote service synchronously on every `getString()` call, dispatch will be slow. Use caching or eager loading (as `EnvironmentVariableFlagProvider` does).
+
+## Condition-Based Dispatch
+
+Value-based dispatch (map lookup) handles the common case: flag value `"PREMIUM"` maps to `PremiumCheckout`. But some features need dispatch based on ranges, patterns, or thresholds.
+
+Condition predicates solve this. Instead of mapping exact values, you bind a variant to a JDK predicate that tests the flag value:
+
+```java
+@Feature(value = "max-retries", type = FeatureType.INT)
+public interface RetryStrategy { void execute(Request req); }
+
+@Variant(intValue = 3, of = RetryStrategy.class, order = 1)
+public class ConservativeRetry implements RetryStrategy { ... }
+
+@Variant(when = @Condition(matches = HighRetryRange.class), of = RetryStrategy.class, order = 2)
+public class AggressiveRetry implements RetryStrategy { ... }
+```
+
+Where `HighRetryRange` is a plain `IntPredicate`:
+
+```java
+public class HighRetryRange implements IntPredicate {
+    public boolean test(int value) { return value >= 7; }
+}
+```
+
+### How ordered dispatch works
+
+When any variant on a `@Feature` specifies `order`, the annotation processor generates a different proxy:
+
+**Value-based proxy** (no `order`): map lookup, O(1), identical to the original design.
+
+**Ordered proxy** (with `order`): linear if-else chain generated at compile time:
+
+```java
+// Generated: RetryStrategy_FlagZenProxy.resolveVariant()
+private final IntPredicate pred0 = new HighRetryRange();
+
+RetryStrategy resolveVariant() {
+    OptionalInt flagValue = flagProvider.getInt("max-retries");
+    if (flagValue.isEmpty()) { /* default/fallback */ }
+    int value = flagValue.getAsInt();
+    if (value == 3) return variant0.get();        // order 1: exact match
+    if (pred0.test(value)) return variant1.get();  // order 2: predicate
+    // default/fallback
+}
+```
+
+Key properties:
+
+- **Predicates instantiated once** at proxy construction via `new` (no reflection, per ADR-009)
+- **Predicate instances are `final` fields** — reused for every dispatch call
+- **Exact matches and conditions coexist** — `order` determines evaluation sequence (ADR-008)
+- **No performance regression** — features without `order` still use O(1) map lookup
+
+### When to use conditions vs. exact matches vs. providers
+
+| Need | Approach |
+| --- | --- |
+| Known flag values ("CLASSIC", "PREMIUM") | Exact match with `@Variant(value = ...)` |
+| Value ranges or patterns ("retries >= 7") | `@Condition` predicate |
+| User targeting ("show to enterprise users") | Provider-side targeting (LaunchDarkly, OpenFeature) |
+
+Conditions test the **flag value**, not the evaluation context. Context-based targeting belongs in the flag provider.
 
 ## Type Dispatch: Beyond Strings
 
