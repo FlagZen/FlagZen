@@ -30,4 +30,17 @@ public @interface Variant {
 
     /** The feature interface this variant belongs to. */
     Class<?> of() default void.class;
+
+    /**
+     * A condition that must be satisfied for this variant to activate.
+     * Defaults to an unconditioned {@code @Condition} (sentinel values),
+     * meaning the variant dispatches based on flag value alone.
+     */
+    Condition when() default @Condition;
+
+    /**
+     * Explicit dispatch order for this variant. Lower values are evaluated first.
+     * Defaults to {@link Integer#MAX_VALUE}, meaning no explicit ordering.
+     */
+    int order() default Integer.MAX_VALUE;
 }

@@ -1,0 +1,150 @@
+{
+  "roadmap": {
+    "project_id": "flagzen-conditions",
+    "created_at": "2026-03-30T18:18:33Z",
+    "total_steps": 7,
+    "phases": 3
+  },
+  "phases": [
+    {
+      "id": "01",
+      "name": "Annotations and Processor Models",
+      "steps": [
+        {
+          "id": "01-01",
+          "name": "@Condition annotation and @Variant extensions",
+          "criteria": "Given a @Variant annotation, when the 'when' attribute is set to @Condition(matches = SomePredicate.class), then the annotation compiles. The 'order' attribute on @Variant accepts an int. @Condition has matches and notMatches attributes (mutually exclusive). A sentinel class is used for the default @Condition when no condition is specified. Existing @Variant declarations without 'when' or 'order' compile unchanged.",
+          "test_file": "",
+          "scenario_name": "",
+          "description": "Create @Condition annotation in com.flagzen with matches/notMatches attributes and sentinel class. Add 'when' (default sentinel) and 'order' (default Integer.MAX_VALUE) attributes to @Variant. Ensure backward compatibility with existing @Variant usage.",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/Condition.java",
+            "flagzen-core/src/main/java/com/flagzen/Variant.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/ConditionAnnotationTest.java"
+          ],
+          "dependencies": [],
+          "estimated_hours": 2
+        },
+        {
+          "id": "01-02",
+          "name": "ConditionModel and processor model extensions",
+          "criteria": "Given a @Variant with @Condition, when the processor collects variant models, then VariantModel includes a non-null ConditionModel with predicateClass and negated fields. FeatureModel.hasOrderedDispatch returns true when any variant has order != Integer.MAX_VALUE. For features with no conditions, hasOrderedDispatch is false.",
+          "test_file": "",
+          "scenario_name": "",
+          "description": "Create ConditionModel record in com.flagzen.processor. Extend VariantModel with optional condition (nullable ConditionModel) and order field. Extend FeatureModel with hasOrderedDispatch computed field. Update FlagZenProcessor to read @Condition from @Variant.when and populate the new model fields.",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ConditionModel.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/VariantModel.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FeatureModel.java",
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/ConditionModelCollectionTest.java"
+          ],
+          "dependencies": ["01-01"],
+          "estimated_hours": 3
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "Processor Validation and Proxy Generation",
+      "steps": [
+        {
+          "id": "02-01",
+          "name": "Processor validation for condition predicates",
+          "criteria": "Given @Condition(matches = X.class), when X does not implement the correct JDK predicate interface for the feature type, then compilation fails. When X has no accessible no-arg constructor, compilation fails. When two variants have the same order value, compilation fails. When matches and notMatches are both specified, compilation fails. When REQUIRED strategy is used with conditions but no @DefaultVariant, compilation fails.",
+          "test_file": "",
+          "scenario_name": "",
+          "description": "Add validation to FlagZenProcessor: predicate type matches @Feature(type=...), predicate has no-arg constructor, order uniqueness, matches/notMatches mutual exclusivity, REQUIRED + conditions requires @DefaultVariant. Use compile-testing library for error message assertions.",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/FlagZenProcessor.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/ConditionValidationTest.java"
+          ],
+          "dependencies": ["01-02"],
+          "estimated_hours": 3
+        },
+        {
+          "id": "02-02",
+          "name": "Unified ordered proxy generation for STRING features",
+          "criteria": "Given a @Feature with condition-based variants using order and Predicate<String>, when compiled, the generated proxy evaluates variants in order sequence -- exact matches compare flag value, conditions call predicate.test(). First match wins. When no match, @DefaultVariant or FallbackStrategy is used. Predicates are instantiated once via new in the proxy constructor. Features without order use existing map-based O(1) lookup (no regression).",
+          "test_file": "",
+          "scenario_name": "",
+          "description": "Extend ProxyGenerator with ordered dispatch path for STRING features. When FeatureModel.hasOrderedDispatch is true, generate: (1) predicate fields, (2) ordered entry list, (3) resolveVariant iterates entries in order. Keep existing map-based path for features without order. Test with compile-testing + runtime proxy invocation.",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/OrderedDispatchProxyTest.java"
+          ],
+          "dependencies": ["02-01"],
+          "estimated_hours": 4
+        },
+        {
+          "id": "02-03",
+          "name": "Ordered proxy generation for INT, LONG, DOUBLE, BOOLEAN types and notMatches",
+          "criteria": "Given a @Feature(type=INT) with @Condition(matches = IntPredicate.class), the proxy correctly converts flag value to int and calls intPredicate.test(intValue). Same for LONG/LongPredicate, DOUBLE/DoublePredicate. @Condition(notMatches = X.class) negates the predicate result. Boolean features with conditions work correctly.",
+          "test_file": "",
+          "scenario_name": "",
+          "description": "Extend ordered dispatch generation for all FeatureType values. Handle type conversion in generated code (getString -> parse to typed value for predicate call). Implement notMatches negation in generated dispatch code. Test each type with compile-testing + runtime invocation.",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/test/java/com/flagzen/processor/TypedConditionDispatchTest.java"
+          ],
+          "dependencies": ["02-02"],
+          "estimated_hours": 3
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "name": "Metadata, Error Messages, and Integration",
+      "steps": [
+        {
+          "id": "03-01",
+          "name": "Metadata SPI extension and condition-aware error messages",
+          "criteria": "Given a @Feature with conditions, when the FeatureMetadata creates a proxy, it correctly passes ordered entries including predicate instances. UnmatchedVariantException for condition features lists evaluated predicates instead of known variant values. FeatureDispatcher.resolve() works for condition-based features.",
+          "test_file": "",
+          "scenario_name": "",
+          "description": "Extend metadata generation to support ordered dispatch (ProxyGenerator.generateMetadata). Modify UnmatchedVariantException to include predicate information in messages. Ensure DefaultFeatureDispatcher can construct condition-based proxies via metadata. Test end-to-end: define feature with conditions, compile, resolve via FeatureDispatcher.",
+          "files_to_modify": [
+            "flagzen-core/src/main/java/com/flagzen/processor/ProxyGenerator.java",
+            "flagzen-core/src/main/java/com/flagzen/UnmatchedVariantException.java",
+            "flagzen-core/src/main/java/com/flagzen/spi/FeatureMetadata.java",
+            "flagzen-core/src/main/java/com/flagzen/internal/DefaultFeatureDispatcher.java",
+            "flagzen-core/src/test/java/com/flagzen/ConditionDispatchIntegrationTest.java"
+          ],
+          "dependencies": ["02-03"],
+          "estimated_hours": 3
+        },
+        {
+          "id": "03-02",
+          "name": "Backward compatibility and regression verification",
+          "criteria": "All existing tests pass unchanged. Features without @Condition or order use map-based O(1) dispatch (no regression). Existing @Variant declarations compile and behave identically. PITest mutation kill rate for flagzen-core remains >= 80%.",
+          "test_file": "",
+          "scenario_name": "",
+          "description": "Run full flagzen-core test suite and acceptance tests. Verify no existing test breaks. Add specific regression test confirming value-based features still use map lookup. Verify compile time is not meaningfully impacted for features without conditions.",
+          "files_to_modify": [
+            "flagzen-core/src/test/java/com/flagzen/processor/ConditionBackwardCompatibilityTest.java"
+          ],
+          "dependencies": ["03-01"],
+          "estimated_hours": 1.5
+        }
+      ]
+    }
+  ],
+  "implementation_scope": {
+    "source_directories": [
+      "flagzen-core/src/main/java/com/flagzen/",
+      "flagzen-core/src/main/java/com/flagzen/processor/",
+      "flagzen-core/src/main/java/com/flagzen/internal/",
+      "flagzen-core/src/main/java/com/flagzen/spi/"
+    ],
+    "test_directories": [
+      "flagzen-core/src/test/java/com/flagzen/",
+      "flagzen-core/src/test/java/com/flagzen/processor/"
+    ],
+    "excluded_patterns": []
+  },
+  "validation": {
+    "status": "approved",
+    "reviewer": "orchestrator",
+    "approved_at": "2026-03-30T18:30:00Z"
+  }
+}
