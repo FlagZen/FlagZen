@@ -12,7 +12,7 @@ The foundation module. Contains annotations, annotation processor, proxy generat
 | ------------ | --------------------------------- |
 | Group ID     | `com.flagzen`                     |
 | Artifact ID  | `flagzen-core`                    |
-| Version      | `1.1.0`                           |
+| Version      | `1.2.0`                           |
 | Dependencies | None (zero external dependencies) |
 | Java Version | 17+                               |
 
@@ -23,13 +23,15 @@ The foundation module. Contains annotations, annotation processor, proxy generat
 - `@DefaultVariant` annotation
 - `@WhenTrue` / `@WhenFalse` convenience annotations
 - `@CloseTo` annotation for approximate double matching
+- `@Condition` annotation for predicate-based dispatch (v1.2.0)
 - `FeatureType` enum (STRING, INT, LONG, BOOLEAN, DOUBLE)
 - `FallbackStrategy` enum (EXCEPTION, NOOP)
 - `FeatureDispatcher` interface (with default factory method)
 - `FlagProvider` SPI interface
 - `EvaluationContext` for targeted flag resolution
 - `ContextAccessor` SPI for ambient context sources
-- Annotation processor for code generation
+- Annotation processor for code generation (value-based + condition-based dispatch)
+- Unified ordered dispatch: exact matches and conditions coexist with `@Variant(order = N)`
 - `InMemoryFlagProvider` for dev/test
 - Generated proxy classes (`{Feature}_FlagZenProxy`)
 
@@ -39,8 +41,8 @@ The foundation module. Contains annotations, annotation processor, proxy generat
 
 ```gradle
 dependencies {
-    implementation("com.flagzen:flagzen-core:1.1.0")
-    annotationProcessor("com.flagzen:flagzen-core:1.1.0")
+    implementation("com.flagzen:flagzen-core:1.2.0")
+    annotationProcessor("com.flagzen:flagzen-core:1.2.0")
 }
 ```
 
@@ -276,7 +278,7 @@ Reactor `ContextAccessor` for reactive context propagation.
 | ------------ | ------------------------------ |
 | Group ID     | `com.flagzen`                  |
 | Artifact ID  | `flagzen-reactor`              |
-| Version      | `1.1.0`                        |
+| Version      | `1.3.0` (planned)             |
 | Depends On   | `flagzen-core`, `reactor-core` |
 | Java Version | 17+                            |
 
@@ -291,7 +293,7 @@ Reactor `ContextAccessor` for reactive context propagation.
 
 ```gradle
 dependencies {
-    implementation("com.flagzen:flagzen-reactor:1.1.0")
+    implementation("com.flagzen:flagzen-reactor:1.3.0") // not yet released
 }
 ```
 
@@ -303,7 +305,7 @@ Mutiny `ContextAccessor` for reactive context propagation.
 | ------------ | --------------------------------- |
 | Group ID     | `com.flagzen`                     |
 | Artifact ID  | `flagzen-mutiny`                  |
-| Version      | `1.1.0`                           |
+| Version      | `1.3.0` (planned)                |
 | Depends On   | `flagzen-core`, `smallrye-mutiny` |
 | Java Version | 17+                               |
 
@@ -318,7 +320,7 @@ Mutiny `ContextAccessor` for reactive context propagation.
 
 ```gradle
 dependencies {
-    implementation("com.flagzen:flagzen-mutiny:1.1.0")
+    implementation("com.flagzen:flagzen-mutiny:1.3.0") // not yet released
 }
 ```
 
@@ -390,8 +392,8 @@ dependencies {
 | flagzen-key-mapping  | 17+  | N/A         | Zero external dependencies     | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-key-mapping)   |
 | flagzen-env          | 17+  | N/A         | Pure Java, no Spring required  | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-env)           |
 | flagzen-spring       | 17+  | 2.7+        | Tested with 2.7 LTS and 3.x    | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-spring)        |
-| flagzen-reactor      | 17+  | N/A         | Works standalone or in Spring  | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-reactor)       |
-| flagzen-mutiny       | 17+  | N/A         | Works standalone or in Quarkus | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-mutiny)        |
+| flagzen-reactor      | 17+  | N/A         | v1.3.0 (planned)              | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-reactor)       |
+| flagzen-mutiny       | 17+  | N/A         | v1.3.0 (planned)              | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-mutiny)        |
 | flagzen-launchdarkly | 17+  | N/A         | LaunchDarkly SDK 7.0+          | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-launchdarkly)  |
 | flagzen-togglz       | 17+  | N/A         | Togglz 4.x                     | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-togglz)        |
 | flagzen-openfeature  | 17+  | N/A         | OpenFeature SDK 1.0+           | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-openfeature)   |
