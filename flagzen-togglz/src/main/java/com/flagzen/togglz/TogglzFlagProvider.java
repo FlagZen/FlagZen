@@ -45,7 +45,19 @@ public final class TogglzFlagProvider implements FlagProvider {
 
     @Override
     public Optional<String> getString(String key) {
-        return getBoolean(key).map(String::valueOf);
+        Optional<Feature> feature = featureLookup.resolve(key);
+        if (feature.isEmpty()) {
+            return Optional.empty();
+        }
+        FeatureState state = featureManager.getFeatureState(feature.get());
+        if (state == null) {
+            return Optional.empty();
+        }
+        String parameter = state.getParameter("value");
+        if (parameter != null && !parameter.isEmpty()) {
+            return Optional.of(parameter);
+        }
+        return Optional.of(String.valueOf(state.isEnabled()));
     }
 
     @Override
