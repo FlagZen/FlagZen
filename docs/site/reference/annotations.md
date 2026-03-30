@@ -47,22 +47,26 @@ Maps one or more flag values to a variant implementation class. A feature requir
 
 ### Attributes
 
-|   Attribute    |    Type     |   Default    |                                           Description                                            |
-| -------------- | ----------- | ------------ | ------------------------------------------------------------------------------------------------ |
-| `value`        | `String[]`  | `{}`         | String variant value(s) for `STRING`-type features. Auto-wraps scalars to single-element arrays. |
-| `intValue`     | `int[]`     | `{}`         | Integer variant value(s) for `INT`-type features. Auto-wraps scalars.                            |
-| `longValue`    | `long[]`    | `{}`         | Long variant value(s) for `LONG`-type features. Auto-wraps scalars.                              |
-| `doubleValue`  | `CloseTo[]` | `{}`         | Double variant value(s) with approximate matching for `DOUBLE`-type features.                    |
-| `booleanValue` | `String`    | `""` (empty) | Boolean variant value: `"true"` or `"false"`. Empty string means not set.                        |
-| `of`           | `Class<?>`  | `void.class` | The feature interface this variant belongs to. Required.                                         |
+|   Attribute    |      Type      |       Default        |                                           Description                                            |
+| -------------- | -------------- | -------------------- | ------------------------------------------------------------------------------------------------ |
+| `value`        | `String[]`     | `{}`                 | String variant value(s) for `STRING`-type features. Auto-wraps scalars to single-element arrays. |
+| `intValue`     | `int[]`        | `{}`                 | Integer variant value(s) for `INT`-type features. Auto-wraps scalars.                            |
+| `longValue`    | `long[]`       | `{}`                 | Long variant value(s) for `LONG`-type features. Auto-wraps scalars.                              |
+| `doubleValue`  | `CloseTo[]`    | `{}`                 | Double variant value(s) with approximate matching for `DOUBLE`-type features.                    |
+| `booleanValue` | `String`       | `""` (empty)         | Boolean variant value: `"true"` or `"false"`. Empty string means not set.                        |
+| `of`           | `Class<?>`     | `void.class`         | The feature interface this variant belongs to. Required.                                         |
+| `when`         | `@Condition`   | `@Condition` (empty) | Condition predicate for conditional dispatch. See [`@Condition`](#condition) below.               |
+| `order`        | `int`          | `Integer.MAX_VALUE`  | Evaluation order (ascending, first match wins). Required when mixing exact matches + conditions.  |
 
 ### Constraints
 
 - Must be applied to a class (not an interface)
 - The class must implement the interface specified in `of`
-- At least one value array must be non-empty, or `booleanValue` must be non-empty
+- For value-based variants: at least one value array must be non-empty, or `booleanValue` must be non-empty
+- For condition-based variants: `when` must reference a non-sentinel `@Condition`
 - All value types must match the feature's declared `type`
 - Variant values must be unique across all `@Variant` annotations for the same feature
+- No two variants may share the same `order` value within a feature
 - Cannot be used on abstract classes or inner classes
 
 ### Compile-Time Validation
@@ -105,6 +109,77 @@ public class ConservativeRetry implements RetryStrategy {
     @Override
     public int getMaxRetries() { return 3; }
 }
+```
+
+**Condition-based variant**
+
+```java
+@Variant(when = @Condition(matches = HighRetryRange.class), of = RetryStrategy.class, order = 2)
+public class AggressiveRetry implements RetryStrategy {
+    @Override
+    public void execute(Request req) { /* retry aggressively */ }
+}
+```
+
+## `@Condition`
+
+Specifies a condition predicate for conditional variant dispatch. Used exclusively inside `@Variant(when = ...)`.
+
+### Attributes
+
+|  Attribute   |    Type    |              Default               |                                                 Description                                                 |
+| ------------ | ---------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `matches`    | `Class<?>` | `Condition.Sentinel.class` (none)  | Predicate class that must match the flag value. Must implement the JDK predicate type for the feature type. |
+| `notMatches` | `Class<?>` | `Condition.Sentinel.class` (none)  | Predicate class that must NOT match. Mutually exclusive with `matches`.                                     |
+
+### Predicate type matching
+
+The predicate class must implement the JDK functional interface matching the feature's declared type:
+
+| `@Feature(type = ...)` | Required predicate interface |
+| --- | --- |
+| `STRING` (default) | `java.util.function.Predicate<String>` |
+| `INT` | `java.util.function.IntPredicate` |
+| `LONG` | `java.util.function.LongPredicate` |
+| `DOUBLE` | `java.util.function.DoublePredicate` |
+
+### Constraints
+
+- `matches` and `notMatches` are mutually exclusive -- specifying both is a compile error
+- The predicate class must have a public no-arg constructor
+- The predicate class must not be abstract
+- Used only inside `@Variant(when = ...)` -- not standalone on classes
+- When `FallbackStrategy.REQUIRED` is used with conditions, `@DefaultVariant` is required at compile time (predicate completeness cannot be verified statically)
+
+### Predicate lifecycle
+
+- Instantiated once via `new` at proxy construction time (no reflection)
+- Stored as a `final` field in the generated proxy
+- Reused for every dispatch call (must be stateless or thread-safe)
+- Exceptions from `predicate.test()` propagate directly to the caller (not caught by FlagZen)
+
+### Examples
+
+```java
+// String predicate: matches flag values starting with "enterprise-"
+public class EnterprisePrefix implements Predicate<String> {
+    @Override
+    public boolean test(String value) {
+        return value != null && value.startsWith("enterprise-");
+    }
+}
+
+// Int predicate: matches retry counts >= 7
+public class HighRetryRange implements IntPredicate {
+    @Override
+    public boolean test(int value) {
+        return value >= 7;
+    }
+}
+
+// Negation: activate when predicate does NOT match
+@Variant(when = @Condition(notMatches = LowValue.class), of = PricingStrategy.class, order = 1)
+public class PremiumPricing implements PricingStrategy { ... }
 ```
 
 ## `@DefaultVariant`
@@ -263,16 +338,21 @@ public interface ExperimentalUI {
 
 The annotation processor performs these validations at compile time:
 
-|                        Check                         |    Scope    |                       Failure                       |
-| ---------------------------------------------------- | ----------- | --------------------------------------------------- |
-| `@Feature` applied only to interfaces                | per feature | Error: cannot apply to class                        |
-| `@Variant` applied only to classes                   | per variant | Error: cannot apply to interface                    |
-| Variant implements feature interface                 | per variant | Error: class does not implement feature             |
-| All variant values match feature type                | per variant | Error: type mismatch                                |
-| No duplicate variant values                          | per feature | Error: duplicate value                              |
-| Feature has at least one variant or default          | per feature | Error: no variants found (unless `@DefaultVariant`) |
-| Boolean feature has `@WhenTrue` or `@DefaultVariant` | per feature | Error: boolean feature with no true variant         |
-| `CloseTo` only in DOUBLE features                    | per variant | Error: type mismatch                                |
+|                              Check                              |    Scope    |                           Failure                           |
+| --------------------------------------------------------------- | ----------- | ----------------------------------------------------------- |
+| `@Feature` applied only to interfaces                           | per feature | Error: cannot apply to class                                |
+| `@Variant` applied only to classes                              | per variant | Error: cannot apply to interface                            |
+| Variant implements feature interface                            | per variant | Error: class does not implement feature                     |
+| All variant values match feature type                           | per variant | Error: type mismatch                                        |
+| No duplicate variant values                                     | per feature | Error: duplicate value                                      |
+| Feature has at least one variant or default                     | per feature | Error: no variants found (unless `@DefaultVariant`)         |
+| Boolean feature has `@WhenTrue` or `@DefaultVariant`            | per feature | Error: boolean feature with no true variant                 |
+| `CloseTo` only in DOUBLE features                               | per variant | Error: type mismatch                                        |
+| Predicate type matches feature type                             | per variant | Error: predicate must implement `IntPredicate` (etc.)       |
+| Predicate has public no-arg constructor                         | per variant | Error: predicate class must have no-arg constructor         |
+| `matches` and `notMatches` mutually exclusive                   | per variant | Error: cannot specify both matches and notMatches           |
+| No duplicate `order` values                                     | per feature | Error: duplicate order value                                |
+| REQUIRED + conditions requires `@DefaultVariant`                | per feature | Error: `@DefaultVariant` required for condition features    |
 
 ## Generated Code
 

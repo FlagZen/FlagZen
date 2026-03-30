@@ -63,6 +63,7 @@ nav:
       - Connect to OpenFeature: how-to/openfeature.md
       - Connect to LaunchDarkly: how-to/launchdarkly.md
       - Connect to Togglz: how-to/togglz.md
+      - Use Condition Predicates: how-to/conditions.md
       - Write a Custom FlagProvider: how-to/custom-provider.md
       - Use Evaluation Context for Targeting: how-to/evaluation-context.md
   - Reference:
