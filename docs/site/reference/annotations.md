@@ -55,8 +55,8 @@ Maps one or more flag values to a variant implementation class. A feature requir
 | `doubleValue`  | `CloseTo[]`    | `{}`                 | Double variant value(s) with approximate matching for `DOUBLE`-type features.                    |
 | `booleanValue` | `String`       | `""` (empty)         | Boolean variant value: `"true"` or `"false"`. Empty string means not set.                        |
 | `of`           | `Class<?>`     | `void.class`         | The feature interface this variant belongs to. Required.                                         |
-| `when`         | `@Condition`   | `@Condition` (empty) | Condition predicate for conditional dispatch. See [`@Condition`](#condition) below.               |
-| `order`        | `int`          | `Integer.MAX_VALUE`  | Evaluation order (ascending, first match wins). Required when mixing exact matches + conditions.  |
+| `when`         | `@Condition`   | `@Condition` (empty) | Condition predicate for conditional dispatch. See [`@Condition`](#condition) below.              |
+| `order`        | `int`          | `Integer.MAX_VALUE`  | Evaluation order (ascending, first match wins). Required when mixing exact matches + conditions. |
 
 ### Constraints
 

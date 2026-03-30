@@ -278,7 +278,7 @@ Reactor `ContextAccessor` for reactive context propagation.
 | ------------ | ------------------------------ |
 | Group ID     | `com.flagzen`                  |
 | Artifact ID  | `flagzen-reactor`              |
-| Version      | `1.3.0` (planned)             |
+| Version      | `1.3.0` (planned)              |
 | Depends On   | `flagzen-core`, `reactor-core` |
 | Java Version | 17+                            |
 
@@ -305,7 +305,7 @@ Mutiny `ContextAccessor` for reactive context propagation.
 | ------------ | --------------------------------- |
 | Group ID     | `com.flagzen`                     |
 | Artifact ID  | `flagzen-mutiny`                  |
-| Version      | `1.3.0` (planned)                |
+| Version      | `1.3.0` (planned)                 |
 | Depends On   | `flagzen-core`, `smallrye-mutiny` |
 | Java Version | 17+                               |
 
@@ -392,8 +392,8 @@ dependencies {
 | flagzen-key-mapping  | 17+  | N/A         | Zero external dependencies     | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-key-mapping)   |
 | flagzen-env          | 17+  | N/A         | Pure Java, no Spring required  | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-env)           |
 | flagzen-spring       | 17+  | 2.7+        | Tested with 2.7 LTS and 3.x    | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-spring)        |
-| flagzen-reactor      | 17+  | N/A         | v1.3.0 (planned)              | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-reactor)       |
-| flagzen-mutiny       | 17+  | N/A         | v1.3.0 (planned)              | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-mutiny)        |
+| flagzen-reactor      | 17+  | N/A         | v1.3.0 (planned)               | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-reactor)       |
+| flagzen-mutiny       | 17+  | N/A         | v1.3.0 (planned)               | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-mutiny)        |
 | flagzen-launchdarkly | 17+  | N/A         | LaunchDarkly SDK 7.0+          | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-launchdarkly)  |
 | flagzen-togglz       | 17+  | N/A         | Togglz 4.x                     | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-togglz)        |
 | flagzen-openfeature  | 17+  | N/A         | OpenFeature SDK 1.0+           | [API docs](https://javadoc.io/doc/com.flagzen/flagzen-openfeature)   |
