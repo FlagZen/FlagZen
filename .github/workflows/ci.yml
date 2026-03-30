@@ -79,34 +79,40 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run PITest
-        run: ./gradlew :flagzen-core:pitest
+        run: ./gradlew pitest
 
       - name: Check mutation kill rate
         run: |
-          REPORT="flagzen-core/build/reports/pitest/mutations.xml"
-          if [ ! -f "$REPORT" ]; then
-            echo "PITest XML report not found"
-            exit 1
-          fi
-          TOTAL=$(grep -c '<mutation ' "$REPORT")
-          KILLED=$(grep -c "status='KILLED'" "$REPORT" || true)
-          if [ "$TOTAL" -eq 0 ]; then
-            echo "No mutations found in report"
-            exit 1
-          fi
-          KILL_RATE=$((KILLED * 100 / TOTAL))
-          echo "Mutation kill rate: ${KILL_RATE}% (${KILLED}/${TOTAL})"
-          if [ "$KILL_RATE" -lt 80 ]; then
-            echo "Kill rate ${KILL_RATE}% is below 80% threshold"
+          FAILED=0
+          for REPORT in */build/reports/pitest/mutations.xml; do
+            MODULE=$(echo "$REPORT" | cut -d'/' -f1)
+            if [ ! -f "$REPORT" ]; then
+              continue
+            fi
+            TOTAL=$(grep -c '<mutation ' "$REPORT")
+            KILLED=$(grep -c "status='KILLED'" "$REPORT" || true)
+            if [ "$TOTAL" -eq 0 ]; then
+              echo "${MODULE}: no mutations found (skipped)"
+              continue
+            fi
+            KILL_RATE=$((KILLED * 100 / TOTAL))
+            echo "${MODULE}: ${KILL_RATE}% (${KILLED}/${TOTAL})"
+            if [ "$KILL_RATE" -lt 80 ]; then
+              echo "  FAIL: ${MODULE} kill rate ${KILL_RATE}% is below 80% threshold"
+              FAILED=1
+            fi
+          done
+          if [ "$FAILED" -eq 1 ]; then
             exit 1
           fi
 
-      - name: Upload PITest report
+      - name: Upload PITest reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pitest-report
-          path: flagzen-core/build/reports/pitest/
+          name: pitest-reports
+          path: |
+            **/build/reports/pitest/
           retention-days: 14
 
   release:
