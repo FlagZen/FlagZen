@@ -5,10 +5,8 @@ import com.flagzen.FallbackStrategy;
 import com.flagzen.FeatureType;
 import com.flagzen.FlagContext;
 import com.flagzen.UnmatchedVariantException;
-import com.flagzen.spi.FeatureMetadata;
 import com.flagzen.spi.FlagProvider;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -155,65 +153,6 @@ final class ProxyGenerator {
             default -> ParameterizedTypeName.get(
                     ClassName.get(Predicate.class), ClassName.get(String.class));
         };
-    }
-
-    JavaFile generateMetadata(FeatureModel model) {
-        ClassName interfaceType = ClassName.get(model.packageName(), model.interfaceName());
-        ClassName proxyType = ClassName.get(model.packageName(), model.proxyClassName());
-        ClassName flagProviderType = ClassName.get(FlagProvider.class);
-        ClassName supplierOfFeature = ClassName.get(Supplier.class);
-        ParameterizedTypeName supplierType = ParameterizedTypeName.get(supplierOfFeature, interfaceType);
-        // Metadata always uses String keys (SPI contract)
-        ParameterizedTypeName variantsMapType = ParameterizedTypeName.get(
-                ClassName.get(Map.class),
-                ClassName.get(String.class),
-                supplierType
-        );
-        ParameterizedTypeName metadataType = ParameterizedTypeName.get(
-                ClassName.get(FeatureMetadata.class),
-                interfaceType
-        );
-
-        TypeSpec.Builder metadataBuilder = TypeSpec.classBuilder(model.metadataClassName())
-                .addModifiers(Modifier.PUBLIC)
-                .addSuperinterface(metadataType);
-
-        // featureType()
-        metadataBuilder.addMethod(MethodSpec.methodBuilder("featureType")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(ClassName.get(Class.class), interfaceType))
-                .addStatement("return $T.class", interfaceType)
-                .build());
-
-        // flagKey()
-        metadataBuilder.addMethod(MethodSpec.methodBuilder("flagKey")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(String.class)
-                .addStatement("return $S", model.flagKey())
-                .build());
-
-        // fallbackStrategy()
-        metadataBuilder.addMethod(MethodSpec.methodBuilder("fallbackStrategy")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(FallbackStrategy.class)
-                .addStatement("return $T.$L", FallbackStrategy.class, model.fallbackStrategy().name())
-                .build());
-
-        // variantSuppliers()
-        metadataBuilder.addMethod(buildVariantSuppliersMethod(model, interfaceType, supplierType, variantsMapType));
-
-        // defaultVariantSupplier()
-        metadataBuilder.addMethod(buildDefaultVariantSupplierMethod(model, interfaceType, supplierType));
-
-        // createProxy()
-        metadataBuilder.addMethod(buildCreateProxyMethod(model, interfaceType, proxyType,
-                flagProviderType, variantsMapType, supplierType));
-
-        TypeSpec metadataClass = metadataBuilder.build();
-        return JavaFile.builder(model.packageName(), metadataClass).build();
     }
 
     private MethodSpec buildResolveMethod(FeatureModel model, ClassName interfaceType, ParameterizedTypeName supplierType) {
@@ -787,101 +726,6 @@ final class ProxyGenerator {
         };
     }
 
-    private MethodSpec buildVariantSuppliersMethod(FeatureModel model, ClassName interfaceType,
-                                                    ParameterizedTypeName supplierType,
-                                                    ParameterizedTypeName variantsMapType) {
-        MethodSpec.Builder builder = MethodSpec.methodBuilder("variantSuppliers")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(variantsMapType);
-
-        if (model.variants().isEmpty()) {
-            builder.addStatement("return $T.of()", Map.class);
-        } else {
-            CodeBlock.Builder mapBuilder = CodeBlock.builder().add("return $T.of(", Map.class);
-            for (int i = 0; i < model.variants().size(); i++) {
-                VariantModel variant = model.variants().get(i);
-                if (i > 0) mapBuilder.add(",");
-                // Metadata always uses string keys (SPI contract)
-                mapBuilder.add("\n    $S, ($T) $T::new",
-                        variant.variantKeyLiteral(),
-                        supplierType,
-                        ClassName.bestGuess(variant.qualifiedClassName()));
-            }
-            mapBuilder.add(")");
-            builder.addStatement(mapBuilder.build());
-        }
-
-        return builder.build();
-    }
-
-    private MethodSpec buildCreateProxyMethod(FeatureModel model, ClassName interfaceType,
-                                                ClassName proxyType, ClassName flagProviderType,
-                                                ParameterizedTypeName variantsMapType,
-                                                ParameterizedTypeName supplierType) {
-        MethodSpec.Builder builder = MethodSpec.methodBuilder("createProxy")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(interfaceType)
-                .addParameter(flagProviderType, "flagProvider")
-                .addParameter(variantsMapType, "variants")
-                .addParameter(supplierType, "defaultVariant");
-
-        if (model.hasOrderedDispatch()) {
-            // Ordered dispatch proxy: constructor takes (flagProvider, defaultVariant, fallbackStrategy)
-            builder.addStatement("return new $T(flagProvider, defaultVariant, $T.$L)",
-                    proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
-        } else if (model.featureType() == FeatureType.INT) {
-            // Convert Map<String, Supplier<T>> to Map<Integer, Supplier<T>>
-            ParameterizedTypeName intMapType = ParameterizedTypeName.get(
-                    ClassName.get(Map.class),
-                    ClassName.get(Integer.class),
-                    supplierType
-            );
-            builder.addStatement("$T intVariants = new $T<>()", intMapType, ClassName.get("java.util", "HashMap"));
-            builder.addStatement("variants.forEach((k, v) -> intVariants.put($T.parseInt(k), v))", Integer.class);
-            builder.addStatement("return new $T(flagProvider, intVariants, defaultVariant, $T.$L)",
-                    proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
-        } else if (model.featureType() == FeatureType.LONG) {
-            // Convert Map<String, Supplier<T>> to Map<Long, Supplier<T>>
-            ParameterizedTypeName longMapType = ParameterizedTypeName.get(
-                    ClassName.get(Map.class),
-                    ClassName.get(Long.class),
-                    supplierType
-            );
-            builder.addStatement("$T longVariants = new $T<>()", longMapType, ClassName.get("java.util", "HashMap"));
-            builder.addStatement("variants.forEach((k, v) -> longVariants.put($T.parseLong(k), v))", Long.class);
-            builder.addStatement("return new $T(flagProvider, longVariants, defaultVariant, $T.$L)",
-                    proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
-        } else if (model.featureType() == FeatureType.DOUBLE) {
-            // Convert Map<String, Supplier<T>> to Map<Double, Supplier<T>>
-            ParameterizedTypeName doubleMapType = ParameterizedTypeName.get(
-                    ClassName.get(Map.class),
-                    ClassName.get(Double.class),
-                    supplierType
-            );
-            builder.addStatement("$T doubleVariants = new $T<>()", doubleMapType, ClassName.get("java.util", "HashMap"));
-            builder.addStatement("variants.forEach((k, v) -> doubleVariants.put($T.parseDouble(k), v))", Double.class);
-            builder.addStatement("return new $T(flagProvider, doubleVariants, defaultVariant, $T.$L)",
-                    proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
-        } else if (model.featureType() == FeatureType.BOOLEAN) {
-            // Convert Map<String, Supplier<T>> to Map<Boolean, Supplier<T>>
-            ParameterizedTypeName boolMapType = ParameterizedTypeName.get(
-                    ClassName.get(Map.class),
-                    ClassName.get(Boolean.class),
-                    supplierType
-            );
-            builder.addStatement("$T boolVariants = new $T<>()", boolMapType, ClassName.get("java.util", "HashMap"));
-            builder.addStatement("variants.forEach((k, v) -> boolVariants.put($T.parseBoolean(k), v))", Boolean.class);
-            builder.addStatement("return new $T(flagProvider, boolVariants, defaultVariant, $T.$L)",
-                    proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
-        } else {
-            builder.addStatement("return new $T(flagProvider, variants, defaultVariant, $T.$L)",
-                    proxyType, FallbackStrategy.class, model.fallbackStrategy().name());
-        }
-
-        return builder.build();
-    }
 
     /**
      * Builds a predicate description string for condition-based features,
@@ -914,21 +758,4 @@ final class ProxyGenerator {
         };
     }
 
-    private MethodSpec buildDefaultVariantSupplierMethod(FeatureModel model, ClassName interfaceType,
-                                                          ParameterizedTypeName supplierType) {
-        MethodSpec.Builder builder = MethodSpec.methodBuilder("defaultVariantSupplier")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(supplierType);
-
-        if (model.defaultVariantClassName() != null) {
-            builder.addStatement("return ($T) $T::new",
-                    supplierType,
-                    ClassName.bestGuess(model.defaultVariantClassName()));
-        } else {
-            builder.addStatement("return null");
-        }
-
-        return builder.build();
-    }
 }
