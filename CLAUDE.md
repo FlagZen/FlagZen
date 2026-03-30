@@ -69,7 +69,7 @@ See `docs/adrs/` for architectural decision records.
 
 ## Mutation Testing Strategy
 
-This project uses **per-feature** mutation testing. PITest runs in CI after the build job succeeds, scoped to `com.flagzen.*` classes in flagzen-core. Kill rate gate: >= 80%. Current baseline: 86% kill rate.
+This project uses **per-feature** mutation testing. PITest is configured on all publishable submodules (everything except flagzen-acceptance-tests and flagzen-examples) via the root `build.gradle.kts`. Kill rate gate: >= 80%. Run with `./gradlew pitest` (all modules) or `./gradlew :flagzen-core:pitest` (single module).
 
 ## Progress Tracking
 

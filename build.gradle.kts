@@ -1,6 +1,7 @@
 plugins {
     java
     id("com.vanniktech.maven.publish") version "0.30.0" apply false
+    id("info.solidsoft.pitest") version "1.19.0-rc.3" apply false
 }
 
 allprojects {
@@ -40,6 +41,17 @@ subprojects {
     val isPublishable = project.name != "flagzen-acceptance-tests" && project.name != "flagzen-examples"
 
     if (isPublishable) {
+        apply(plugin = "info.solidsoft.pitest")
+
+        configure<info.solidsoft.gradle.pitest.PitestPluginExtension> {
+            targetClasses.set(listOf("com.flagzen.*"))
+            targetTests.set(listOf("com.flagzen.*"))
+            threads.set(4)
+            outputFormats.set(listOf("HTML", "XML"))
+            timestampedReports.set(false)
+            junit5PluginVersion.set("1.2.1")
+        }
+
         apply(plugin = "com.vanniktech.maven.publish")
 
         configure<com.vanniktech.maven.publish.MavenPublishBaseExtension> {

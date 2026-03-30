@@ -1,15 +1,5 @@
 plugins {
     `java-library`
-    id("info.solidsoft.pitest") version "1.19.0-rc.3"
-}
-
-pitest {
-    targetClasses.set(listOf("com.flagzen.*"))
-    targetTests.set(listOf("com.flagzen.*"))
-    threads.set(4)
-    outputFormats.set(listOf("HTML", "XML"))
-    timestampedReports.set(false)
-    junit5PluginVersion.set("1.2.1")
 }
 
 dependencies {
