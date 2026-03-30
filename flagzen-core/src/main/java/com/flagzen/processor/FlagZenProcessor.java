@@ -417,6 +417,13 @@ public class FlagZenProcessor extends AbstractProcessor {
         ConditionModel conditionModel = extractConditionModel(variantAnnotation, featureType, variantElement);
         int order = variantAnnotation.order();
 
+        // Condition-only variant: no typed value, just a predicate
+        if (conditionModel != null && !hasTypedValue(variantAnnotation)) {
+            variants.add(new VariantModel(qualifiedName, "", Integer.MIN_VALUE, Long.MIN_VALUE,
+                    Double.NaN, 0.0, false, featureType, conditionModel, order));
+            return;
+        }
+
         if (featureType == FeatureType.INT) {
             for (int intVal : variantAnnotation.intValue()) {
                 variants.add(new VariantModel(qualifiedName, "", intVal, Long.MIN_VALUE,
@@ -597,6 +604,14 @@ public class FlagZenProcessor extends AbstractProcessor {
         } catch (MirroredTypeException e) {
             return e.getTypeMirror();
         }
+    }
+
+    private boolean hasTypedValue(Variant annotation) {
+        return annotation.value().length > 0
+                || annotation.intValue().length > 0
+                || annotation.longValue().length > 0
+                || annotation.doubleValue().length > 0
+                || !annotation.booleanValue().isEmpty();
     }
 
     private boolean hasTypeMismatch(Variant annotation, FeatureType featureType,
