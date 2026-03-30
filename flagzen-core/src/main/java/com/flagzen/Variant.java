@@ -36,7 +36,7 @@ public @interface Variant {
      * Defaults to an unconditioned {@code @Condition} (sentinel values),
      * meaning the variant dispatches based on flag value alone.
      */
-    Condition when() default @Condition;
+    Condition when() default @Condition(matches = Condition.Sentinel.class);
 
     /**
      * Explicit dispatch order for this variant. Lower values are evaluated first.

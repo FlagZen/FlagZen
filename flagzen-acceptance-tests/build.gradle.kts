@@ -16,7 +16,7 @@ dependencies {
     testImplementation("io.cucumber:cucumber-junit-platform-engine:7.22.0")
 
     testImplementation("org.assertj:assertj-core:3.27.3")
-    testImplementation("com.google.testing.compile:compile-testing:0.21.0")
+    testImplementation("com.google.testing.compile:compile-testing:0.23.0")
     testImplementation(platform("org.springframework.boot:spring-boot-dependencies:3.4.3"))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-autoconfigure")

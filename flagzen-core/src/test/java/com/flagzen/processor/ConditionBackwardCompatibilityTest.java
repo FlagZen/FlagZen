@@ -83,6 +83,7 @@ class ConditionBackwardCompatibilityTest {
 
         // When: the project compiles
         Compilation compilation = javac()
+                .withClasspathFrom(FlagZenProcessor.class.getClassLoader())
                 .withProcessors(new FlagZenProcessor())
                 .compile(feature, cardVariant, bankVariant, defaultVariant);
 
