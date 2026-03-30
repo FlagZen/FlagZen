@@ -13,9 +13,9 @@
 [![Docs](https://img.shields.io/badge/docs-flagzen.com-blue)](https://flagzen.com)
 [![Java](https://img.shields.io/badge/Java-17%2B-orange)](https://openjdk.org/projects/jdk/17/)
 
-Compile-time, zero-reflection feature flag framework for Java 17+.
+Type-safe polymorphic dispatch layer for feature flags in Java 17+.
 
-FlagZen turns feature flags into polymorphic dispatch: define a `@Feature` interface, implement `@Variant` classes, and the generated proxy routes method calls to the active variant at runtime. No `if/else` chains, no string comparisons, no reflection.
+FlagZen sits between your code and your flag provider (LaunchDarkly, OpenFeature, Togglz, env vars). Define a `@Feature` interface, implement `@Variant` classes, and the generated proxy routes method calls to the active variant at runtime. No `if/else` chains, no string comparisons, no reflection.
 
 ## Quick Start
 
@@ -66,6 +66,21 @@ flow.execute(); // "streamlined"
 
 The proxy re-evaluates the flag on every method call -- change the flag value, and the next call dispatches to the new variant. No restart needed.
 
+## What FlagZen Does (and Doesn't)
+
+FlagZen is a **dispatch layer**, not a flag management platform. It gives you type-safe, compile-time-verified feature dispatch on top of whatever flag source you already use.
+
+| Responsibility | FlagZen | Your Flag Provider |
+| --- | --- | --- |
+| Type-safe feature interfaces | Yes | -- |
+| Compile-time variant validation | Yes | -- |
+| Polymorphic dispatch (no `if/else`) | Yes | -- |
+| A/B testing and percentage rollouts | -- | Yes (LaunchDarkly, OpenFeature, etc.) |
+| User targeting and segmentation | -- | Yes (via evaluation context passthrough) |
+| Flag management UI / dashboard | -- | Yes |
+
+FlagZen passes evaluation context (user ID, attributes) through to your provider, which decides what value to return. FlagZen then dispatches to the matching variant. The provider owns targeting logic; FlagZen owns dispatch logic.
+
 ## Modules
 
 | Module | Description |
@@ -76,6 +91,8 @@ The proxy re-evaluates the flag on every method call -- change the flag value, a
 | `flagzen-env` | Environment variable `FlagProvider` with configurable key mapping |
 | `flagzen-spring` | Spring Boot auto-configuration: `@Autowired` feature proxy injection |
 | `flagzen-openfeature` | OpenFeature SDK adapter |
+| `flagzen-launchdarkly` | LaunchDarkly Java Server SDK adapter |
+| `flagzen-togglz` | Togglz feature toggle adapter |
 
 ## Module Documentation
 
@@ -87,6 +104,8 @@ Each module has its own README with installation, usage, and API details:
 - [flagzen-env](flagzen-env/README.md) -- environment variable flag provider
 - [flagzen-spring](flagzen-spring/README.md) -- Spring Boot auto-configuration
 - [flagzen-openfeature](flagzen-openfeature/README.md) -- OpenFeature SDK adapter
+- [flagzen-launchdarkly](flagzen-launchdarkly/README.md) -- LaunchDarkly Java Server SDK adapter
+- [flagzen-togglz](flagzen-togglz/README.md) -- Togglz feature toggle adapter
 - [flagzen-examples](flagzen-examples/README.md) -- runnable examples (not published to Maven Central)
 
 ## Typed Dispatch
