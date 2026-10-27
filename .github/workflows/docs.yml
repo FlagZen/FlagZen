@@ -6,6 +6,7 @@ on:
     paths:
       - 'docs/site/**'
       - 'docs/overrides/**'
+      - '.github/scripts/write-root-files.sh'
       - 'mkdocs.yml'
     tags: ['v*']
   workflow_dispatch:
@@ -66,3 +67,14 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: |
           mike deploy --push "${{ github.event.inputs.version }}"
+
+      - name: Publish root sitemap and robots.txt
+        run: |
+          git worktree add "$RUNNER_TEMP/gh-pages" gh-pages
+          .github/scripts/write-root-files.sh "$RUNNER_TEMP/gh-pages" https://flagzen.com
+          cd "$RUNNER_TEMP/gh-pages"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Update root sitemap and robots.txt"
+            git push origin gh-pages
+          fi
