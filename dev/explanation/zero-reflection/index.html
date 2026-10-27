@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -33,10 +33,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1939,8 +1939,8 @@
 <h3 id="reflection-is-measurable-overhead">Reflection is Measurable Overhead<a class="headerlink" href="#reflection-is-measurable-overhead" title="Permanent link">&para;</a></h3>
 <p>Let's compare two approaches for a simple flag resolution:</p>
 <p><strong>Reflection-based</strong> (pseudo-code):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">String</span><span class="w"> </span><span class="n">flagValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">&quot;checkout-flow&quot;</span><span class="p">).</span><span class="na">orElse</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">);</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">Class</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="n">variantClass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="s">&quot;com.example.&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">flagValue</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;Checkout&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">String</span><span class="w"> </span><span class="n">flagValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">"checkout-flow"</span><span class="p">).</span><span class="na">orElse</span><span class="p">(</span><span class="s">""</span><span class="p">);</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">Class</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="n">variantClass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="s">"com.example."</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">flagValue</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"Checkout"</span><span class="p">);</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">Constructor</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="n">ctor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">variantClass</span><span class="p">.</span><span class="na">getConstructor</span><span class="p">();</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">CheckoutFlow</span><span class="w"> </span><span class="n">variant</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">CheckoutFlow</span><span class="p">)</span><span class="w"> </span><span class="n">ctor</span><span class="p">.</span><span class="na">newInstance</span><span class="p">();</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">return</span><span class="w"> </span><span class="n">variant</span><span class="p">.</span><span class="na">execute</span><span class="p">();</span>
@@ -1953,7 +1953,7 @@
 </ol>
 <p>Each operation has overhead: classloader synchronization, metadata parsing, validation, security checks.</p>
 <p><strong>Generated-code approach</strong> (what FlagZen does):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">String</span><span class="w"> </span><span class="n">flagValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">&quot;checkout-flow&quot;</span><span class="p">).</span><span class="na">orElse</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">String</span><span class="w"> </span><span class="n">flagValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">"checkout-flow"</span><span class="p">).</span><span class="na">orElse</span><span class="p">(</span><span class="s">""</span><span class="p">);</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">Supplier</span><span class="o">&lt;</span><span class="n">CheckoutFlow</span><span class="o">&gt;</span><span class="w"> </span><span class="n">factory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">variantMap</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">flagValue</span><span class="p">);</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">factory</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="na">get</span><span class="p">().</span><span class="na">execute</span><span class="p">();</span>
@@ -2003,12 +2003,12 @@
 <p>To use reflection in GraalVM native image, you must declare reflective targets in <code>reflect-config.json</code>, a static configuration file:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">[</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="p">{</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.example.ClassicCheckout&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">&quot;methods&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;init&gt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;parameterTypes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">}]</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"com.example.ClassicCheckout"</span><span class="p">,</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">"methods"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;init&gt;"</span><span class="p">,</span><span class="w"> </span><span class="nt">"parameterTypes"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">}]</span>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="p">},</span>
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p">{</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.example.PremiumCheckout&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="nt">&quot;methods&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;init&gt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;parameterTypes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">}]</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"com.example.PremiumCheckout"</span><span class="p">,</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="nt">"methods"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;init&gt;"</span><span class="p">,</span><span class="w"> </span><span class="nt">"parameterTypes"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">}]</span>
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="p">}</span>
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span><span class="c1">// ... and so on for every variant</span>
 <a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">]</span>
@@ -2025,7 +2025,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">// Generated code: plain bytecode, no reflection</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CheckoutFlow_FlagZenProxy</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">CheckoutFlow</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">execute</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">flagValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">&quot;checkout-flow&quot;</span><span class="p">).</span><span class="na">orElse</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">);</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">flagValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">"checkout-flow"</span><span class="p">).</span><span class="na">orElse</span><span class="p">(</span><span class="s">""</span><span class="p">);</span>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="n">Supplier</span><span class="o">&lt;</span><span class="n">CheckoutFlow</span><span class="o">&gt;</span><span class="w"> </span><span class="n">factory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">variants</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">flagValue</span><span class="p">);</span>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">factory</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">factory</span><span class="p">.</span><span class="na">get</span><span class="p">().</span><span class="na">execute</span><span class="p">();</span>
@@ -2041,7 +2041,7 @@
 <h3 id="reflection-based-debugging">Reflection-based Debugging<a class="headerlink" href="#reflection-based-debugging" title="Permanent link">&para;</a></h3>
 <p>In a debugger, stepping into a reflection-based variant resolution shows:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>... (application code)
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>&gt; Class.forName(&quot;com.example.PremiumCheckout&quot;)
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>&gt; Class.forName("com.example.PremiumCheckout")
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  // Stepping into Method.invoke(...) shows HotSpot internals,
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  // not your code
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>&lt; returns proxy instance
@@ -2100,16 +2100,16 @@
 <h2 id="how-we-enforce-zero-reflection">How We Enforce Zero Reflection<a class="headerlink" href="#how-we-enforce-zero-reflection" title="Permanent link">&para;</a></h2>
 <p>The FlagZen codebase uses architectural enforcement to prevent accidental reflection:</p>
 <p><strong>ArchUnit test</strong> (in build):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nd">@AnalyzeClasses</span><span class="p">(</span><span class="n">packages</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;com.flagzen&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nd">@AnalyzeClasses</span><span class="p">(</span><span class="n">packages</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"com.flagzen"</span><span class="p">)</span>
 <a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ArchitectureTests</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="nd">@ArchTest</span>
 <a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="n">ArchRule</span><span class="w"> </span><span class="n">noReflection</span><span class="w"> </span><span class="o">=</span>
 <a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">        </span><span class="n">noClasses</span><span class="p">()</span>
 <a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">            </span><span class="p">.</span><span class="na">that</span><span class="p">()</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">            </span><span class="p">.</span><span class="na">resideInAPackage</span><span class="p">(</span><span class="s">&quot;com.flagzen..&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">            </span><span class="p">.</span><span class="na">resideInAPackage</span><span class="p">(</span><span class="s">"com.flagzen.."</span><span class="p">)</span>
 <a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">            </span><span class="p">.</span><span class="na">should</span><span class="p">()</span>
 <a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">            </span><span class="p">.</span><span class="na">dependOnClassesThat</span><span class="p">()</span>
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">            </span><span class="p">.</span><span class="na">resideInAPackage</span><span class="p">(</span><span class="s">&quot;java.lang.reflect..&quot;</span><span class="p">);</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">            </span><span class="p">.</span><span class="na">resideInAPackage</span><span class="p">(</span><span class="s">"java.lang.reflect.."</span><span class="p">);</span>
 <a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="p">}</span>
 </code></pre></div>
 <p>This test fails the build if any flagzen-core code imports or uses <code>java.lang.reflect.*</code>.</p>
@@ -2208,6 +2208,12 @@
     <div class="md-footer-meta__inner md-grid">
       <div class="md-copyright">
   
+  <div class="md-copyright__highlight">
+    Maintained by
+    <a href="https://craftosphere.com" title="Craftosphere">
+      <img src="../../assets/craftosphere-logo-tOW.svg" alt="Craftosphere" height="20" style="height: 1.6em; vertical-align: middle;">
+    </a>
+  </div>
   
     Made with
     <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
@@ -2245,10 +2251,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>

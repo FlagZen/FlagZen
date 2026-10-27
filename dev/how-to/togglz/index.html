@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -33,10 +33,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1801,7 +1801,7 @@
 <h2 id="steps">Steps<a class="headerlink" href="#steps" title="Permanent link">&para;</a></h2>
 <h3 id="1-add-the-dependency">1. Add the dependency<a class="headerlink" href="#1-add-the-dependency" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>dependencies {
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    implementation(&quot;com.flagzen:flagzen-togglz:1.2.0&quot;)
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    implementation("com.flagzen:flagzen-togglz:1.2.0")
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>}
 </code></pre></div>
 <p>Togglz Core is included transitively.</p>
@@ -1821,27 +1821,27 @@
 </code></pre></div>
 <h3 id="4-resolve-boolean-flags">4. Resolve boolean flags<a class="headerlink" href="#4-resolve-boolean-flags" title="Permanent link">&para;</a></h3>
 <p>Boolean flags map directly to Togglz's enabled/disabled state:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">Optional</span><span class="o">&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span><span class="w"> </span><span class="n">enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getBoolean</span><span class="p">(</span><span class="s">&quot;DARK_MODE&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">Optional</span><span class="o">&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span><span class="w"> </span><span class="n">enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getBoolean</span><span class="p">(</span><span class="s">"DARK_MODE"</span><span class="p">);</span>
 </code></pre></div>
 <p>Feature key lookup is case-insensitive: <code>"dark_mode"</code>, <code>"Dark_Mode"</code>, and <code>"DARK_MODE"</code> all resolve to the same Togglz feature.</p>
 <h3 id="5-use-string-values-via-strategy-parameters-optional">5. Use string values via strategy parameters (optional)<a class="headerlink" href="#5-use-string-values-via-strategy-parameters-optional" title="Permanent link">&para;</a></h3>
 <p>Togglz is primarily a boolean toggle system, but you can attach string values using activation strategy parameters. Set a parameter named <code>"value"</code> on the feature state:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">FeatureState</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FeatureState</span><span class="p">(</span><span class="n">MyFeatures</span><span class="p">.</span><span class="na">CHECKOUT_FLOW</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">);</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">state</span><span class="p">.</span><span class="na">setStrategyId</span><span class="p">(</span><span class="s">&quot;custom-strategy&quot;</span><span class="p">);</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">state</span><span class="p">.</span><span class="na">setParameter</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;PREMIUM&quot;</span><span class="p">);</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">state</span><span class="p">.</span><span class="na">setStrategyId</span><span class="p">(</span><span class="s">"custom-strategy"</span><span class="p">);</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">state</span><span class="p">.</span><span class="na">setParameter</span><span class="p">(</span><span class="s">"value"</span><span class="p">,</span><span class="w"> </span><span class="s">"PREMIUM"</span><span class="p">);</span>
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">featureManager</span><span class="p">.</span><span class="na">setFeatureState</span><span class="p">(</span><span class="n">state</span><span class="p">);</span>
 </code></pre></div>
 <p>Then resolve it:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">Optional</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">variant</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">&quot;CHECKOUT_FLOW&quot;</span><span class="p">);</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1">// Returns Optional.of(&quot;PREMIUM&quot;)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">Optional</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">variant</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">"CHECKOUT_FLOW"</span><span class="p">);</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1">// Returns Optional.of("PREMIUM")</span>
 </code></pre></div>
 <p>If no <code>"value"</code> parameter is set, <code>getString</code> returns the enabled state as a string (<code>"true"</code> or <code>"false"</code>).</p>
 <h3 id="6-use-numeric-values-optional">6. Use numeric values (optional)<a class="headerlink" href="#6-use-numeric-values-optional" title="Permanent link">&para;</a></h3>
 <p>Numeric types (<code>getInt</code>, <code>getLong</code>, <code>getDouble</code>) work by parsing the string value. Set a numeric <code>"value"</code> parameter:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">state</span><span class="p">.</span><span class="na">setParameter</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;42&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">state</span><span class="p">.</span><span class="na">setParameter</span><span class="p">(</span><span class="s">"value"</span><span class="p">,</span><span class="w"> </span><span class="s">"42"</span><span class="p">);</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">featureManager</span><span class="p">.</span><span class="na">setFeatureState</span><span class="p">(</span><span class="n">state</span><span class="p">);</span>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">OptionalInt</span><span class="w"> </span><span class="n">retries</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getInt</span><span class="p">(</span><span class="s">&quot;CHECKOUT_FLOW&quot;</span><span class="p">);</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">OptionalInt</span><span class="w"> </span><span class="n">retries</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getInt</span><span class="p">(</span><span class="s">"CHECKOUT_FLOW"</span><span class="p">);</span>
 <a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="c1">// Returns OptionalInt.of(42)</span>
 </code></pre></div>
 <h3 id="7-use-with-spring-boot-optional">7. Use with Spring Boot (optional)<a class="headerlink" href="#7-use-with-spring-boot-optional" title="Permanent link">&para;</a></h3>
@@ -1910,6 +1910,12 @@
     <div class="md-footer-meta__inner md-grid">
       <div class="md-copyright">
   
+  <div class="md-copyright__highlight">
+    Maintained by
+    <a href="https://craftosphere.com" title="Craftosphere">
+      <img src="../../assets/craftosphere-logo-tOW.svg" alt="Craftosphere" height="20" style="height: 1.6em; vertical-align: middle;">
+    </a>
+  </div>
   
     Made with
     <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
@@ -1947,10 +1953,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>

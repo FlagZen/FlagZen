@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -33,10 +33,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1701,16 +1701,16 @@
 <h2 id="steps">Steps<a class="headerlink" href="#steps" title="Permanent link">&para;</a></h2>
 <h3 id="1-add-the-dependency">1. Add the dependency<a class="headerlink" href="#1-add-the-dependency" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>dependencies {
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    implementation(&quot;com.flagzen:flagzen-openfeature:1.1.0&quot;)
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    implementation(&quot;dev.openfeature:sdk:1.12.0&quot;)
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    implementation("com.flagzen:flagzen-openfeature:1.1.0")
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    implementation("dev.openfeature:sdk:1.12.0")
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    // Plus your OpenFeature provider:
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    implementation(&quot;dev.openfeature.contrib.providers:flagd:0.9.0&quot;)
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    implementation("dev.openfeature.contrib.providers:flagd:0.9.0")
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>}
 </code></pre></div>
 <h3 id="2-configure-openfeature-with-your-provider">2. Configure OpenFeature with your provider<a class="headerlink" href="#2-configure-openfeature-with-your-provider" title="Permanent link">&para;</a></h3>
 <p>Set up OpenFeature with your chosen backend (example uses Flagd):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">OpenFeatureAPI</span><span class="w"> </span><span class="n">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OpenFeatureAPI</span><span class="p">.</span><span class="na">getInstance</span><span class="p">();</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">api</span><span class="p">.</span><span class="na">setProviderAndWait</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">FlagdProvider</span><span class="p">(</span><span class="s">&quot;http://localhost:8013&quot;</span><span class="p">));</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">api</span><span class="p">.</span><span class="na">setProviderAndWait</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">FlagdProvider</span><span class="p">(</span><span class="s">"http://localhost:8013"</span><span class="p">));</span>
 </code></pre></div>
 <h3 id="3-bridge-to-flagzen">3. Bridge to FlagZen<a class="headerlink" href="#3-bridge-to-flagzen" title="Permanent link">&para;</a></h3>
 <p>Get an OpenFeature <code>Client</code> and wrap it with <code>OpenFeatureFlagProvider</code>:</p>
@@ -1721,18 +1721,18 @@
 </code></pre></div>
 <h3 id="4-use-a-named-openfeature-client-optional">4. Use a named OpenFeature client (optional)<a class="headerlink" href="#4-use-a-named-openfeature-client-optional" title="Permanent link">&para;</a></h3>
 <p>OpenFeature supports multiple named clients. Create a provider for a specific one:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">Client</span><span class="w"> </span><span class="n">paymentsClient</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OpenFeatureAPI</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">getClient</span><span class="p">(</span><span class="s">&quot;payments&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">Client</span><span class="w"> </span><span class="n">paymentsClient</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OpenFeatureAPI</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">getClient</span><span class="p">(</span><span class="s">"payments"</span><span class="p">);</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">FlagProvider</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OpenFeatureFlagProvider</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">paymentsClient</span><span class="p">);</span>
 </code></pre></div>
 <h3 id="5-resolve-flags-with-evaluation-context-optional">5. Resolve flags with evaluation context (optional)<a class="headerlink" href="#5-resolve-flags-with-evaluation-context-optional" title="Permanent link">&para;</a></h3>
 <p>Pass targeting context (user ID, attributes) for personalized flag resolution:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">EvaluationContext</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EvaluationContext</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="p">.</span><span class="na">targetingKey</span><span class="p">(</span><span class="s">&quot;user-7291&quot;</span><span class="p">)</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="p">.</span><span class="na">attribute</span><span class="p">(</span><span class="s">&quot;plan&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;enterprise&quot;</span><span class="p">)</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="p">.</span><span class="na">targetingKey</span><span class="p">(</span><span class="s">"user-7291"</span><span class="p">)</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="p">.</span><span class="na">attribute</span><span class="p">(</span><span class="s">"plan"</span><span class="p">,</span><span class="w"> </span><span class="s">"enterprise"</span><span class="p">)</span>
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="n">FlagProvider</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OpenFeatureFlagProvider</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="n">Optional</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">&quot;checkout-flow&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="p">);</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="n">Optional</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">"checkout-flow"</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="p">);</span>
 </code></pre></div>
 <p>The adapter automatically maps FlagZen <code>EvaluationContext</code> to OpenFeature context.</p>
 <h3 id="6-use-with-spring-boot-optional">6. Use with Spring Boot (optional)<a class="headerlink" href="#6-use-with-spring-boot-optional" title="Permanent link">&para;</a></h3>
@@ -1742,7 +1742,7 @@
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nd">@Bean</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">FlagProvider</span><span class="w"> </span><span class="nf">flagProvider</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">        </span><span class="n">OpenFeatureAPI</span><span class="w"> </span><span class="n">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OpenFeatureAPI</span><span class="p">.</span><span class="na">getInstance</span><span class="p">();</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">        </span><span class="n">api</span><span class="p">.</span><span class="na">setProviderAndWait</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">FlagdProvider</span><span class="p">(</span><span class="s">&quot;http://localhost:8013&quot;</span><span class="p">));</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">        </span><span class="n">api</span><span class="p">.</span><span class="na">setProviderAndWait</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">FlagdProvider</span><span class="p">(</span><span class="s">"http://localhost:8013"</span><span class="p">));</span>
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">        </span><span class="n">Client</span><span class="w"> </span><span class="n">client</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">getClient</span><span class="p">();</span>
 <a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">OpenFeatureFlagProvider</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
 <a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="p">}</span>
@@ -1794,6 +1794,12 @@
     <div class="md-footer-meta__inner md-grid">
       <div class="md-copyright">
   
+  <div class="md-copyright__highlight">
+    Maintained by
+    <a href="https://craftosphere.com" title="Craftosphere">
+      <img src="../../assets/craftosphere-logo-tOW.svg" alt="Craftosphere" height="20" style="height: 1.6em; vertical-align: middle;">
+    </a>
+  </div>
   
     Made with
     <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
@@ -1831,10 +1837,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>

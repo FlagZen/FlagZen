@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -33,10 +33,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -2122,15 +2122,15 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">FlagKeyParser</span><span class="w"> </span><span class="nf">screamingSnakeCase</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">prefix</span><span class="p">)</span>
 </code></pre></div>
 <p><strong>Example</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">FlagKeyParser</span><span class="w"> </span><span class="n">parser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FLAGZEN_&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">FlagKeyParser</span><span class="w"> </span><span class="n">parser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FLAGZEN_"</span><span class="p">);</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">&quot;FLAGZEN_CHECKOUT_FLOW&quot;</span><span class="p">);</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1">// =&gt; Optional.of([&quot;checkout&quot;, &quot;flow&quot;])</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">"FLAGZEN_CHECKOUT_FLOW"</span><span class="p">);</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1">// =&gt; Optional.of(["checkout", "flow"])</span>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">&quot;FLAGZEN_MAX_RETRIES&quot;</span><span class="p">);</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1">// =&gt; Optional.of([&quot;max&quot;, &quot;retries&quot;])</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">"FLAGZEN_MAX_RETRIES"</span><span class="p">);</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1">// =&gt; Optional.of(["max", "retries"])</span>
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">&quot;OTHER_PREFIX_VALUE&quot;</span><span class="p">);</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">"OTHER_PREFIX_VALUE"</span><span class="p">);</span>
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1">// =&gt; Optional.empty() (prefix mismatch)</span>
 </code></pre></div>
 <h4 id="flagkeyparsersscreamingsnakecase"><code>FlagKeyParsers.screamingSnakeCase()</code><a class="headerlink" href="#flagkeyparsersscreamingsnakecase" title="Permanent link">&para;</a></h4>
@@ -2141,14 +2141,14 @@
 <p><strong>Example</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">FlagKeyParser</span><span class="w"> </span><span class="n">parser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">();</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">&quot;CHECKOUT_FLOW&quot;</span><span class="p">);</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1">// =&gt; Optional.of([&quot;checkout&quot;, &quot;flow&quot;])</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">"CHECKOUT_FLOW"</span><span class="p">);</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1">// =&gt; Optional.of(["checkout", "flow"])</span>
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">&quot;MAX_RETRIES&quot;</span><span class="p">);</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="c1">// =&gt; Optional.of([&quot;max&quot;, &quot;retries&quot;])</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">"MAX_RETRIES"</span><span class="p">);</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="c1">// =&gt; Optional.of(["max", "retries"])</span>
 <a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">&quot;lowercase_value&quot;</span><span class="p">);</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="c1">// =&gt; Optional.of([&quot;lowercase&quot;, &quot;value&quot;]) (uppercasing is not validated)</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">"lowercase_value"</span><span class="p">);</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="c1">// =&gt; Optional.of(["lowercase", "value"]) (uppercasing is not validated)</span>
 </code></pre></div>
 <h4 id="flagkeyparserscamelcasestring-prefix"><code>FlagKeyParsers.camelCase(String prefix)</code><a class="headerlink" href="#flagkeyparserscamelcasestring-prefix" title="Permanent link">&para;</a></h4>
 <p>Matches camelCase names with a given prefix, splitting on uppercase boundaries.</p>
@@ -2156,15 +2156,15 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">FlagKeyParser</span><span class="w"> </span><span class="nf">camelCase</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">prefix</span><span class="p">)</span>
 </code></pre></div>
 <p><strong>Example</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">FlagKeyParser</span><span class="w"> </span><span class="n">parser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">camelCase</span><span class="p">(</span><span class="s">&quot;myApp&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">FlagKeyParser</span><span class="w"> </span><span class="n">parser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">camelCase</span><span class="p">(</span><span class="s">"myApp"</span><span class="p">);</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">&quot;myAppCheckoutFlow&quot;</span><span class="p">);</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1">// =&gt; Optional.of([&quot;checkout&quot;, &quot;flow&quot;])</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">"myAppCheckoutFlow"</span><span class="p">);</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1">// =&gt; Optional.of(["checkout", "flow"])</span>
 <a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">&quot;myAppMaxRetries&quot;</span><span class="p">);</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1">// =&gt; Optional.of([&quot;max&quot;, &quot;retries&quot;])</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">"myAppMaxRetries"</span><span class="p">);</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1">// =&gt; Optional.of(["max", "retries"])</span>
 <a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">&quot;otherAppValue&quot;</span><span class="p">);</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">"otherAppValue"</span><span class="p">);</span>
 <a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="c1">// =&gt; Optional.empty() (prefix mismatch)</span>
 </code></pre></div>
 <h4 id="flagkeyparserscamelcase"><code>FlagKeyParsers.camelCase()</code><a class="headerlink" href="#flagkeyparserscamelcase" title="Permanent link">&para;</a></h4>
@@ -2175,14 +2175,14 @@
 <p><strong>Example</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">FlagKeyParser</span><span class="w"> </span><span class="n">parser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">camelCase</span><span class="p">();</span>
 <a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">&quot;checkoutFlow&quot;</span><span class="p">);</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1">// =&gt; Optional.of([&quot;checkout&quot;, &quot;flow&quot;])</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">"checkoutFlow"</span><span class="p">);</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1">// =&gt; Optional.of(["checkout", "flow"])</span>
 <a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">&quot;maxRetries&quot;</span><span class="p">);</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1">// =&gt; Optional.of([&quot;max&quot;, &quot;retries&quot;])</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">"maxRetries"</span><span class="p">);</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1">// =&gt; Optional.of(["max", "retries"])</span>
 <a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">);</span>
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="c1">// =&gt; Optional.of([&quot;x&quot;]) (single segment)</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">"x"</span><span class="p">);</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="c1">// =&gt; Optional.of(["x"]) (single segment)</span>
 </code></pre></div>
 <h2 id="flagkeyformat">FlagKeyFormat<a class="headerlink" href="#flagkeyformat" title="Permanent link">&para;</a></h2>
 <p>Formats lowercase key segments into a flag key string.</p>
@@ -2204,66 +2204,66 @@
 <p><strong>Example</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">FlagKeyFormat</span><span class="w"> </span><span class="n">format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">kebabCase</span><span class="p">();</span>
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">&quot;checkout&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;flow&quot;</span><span class="o">]</span><span class="p">);</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1">// =&gt; &quot;checkout-flow&quot;</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">"checkout"</span><span class="p">,</span><span class="w"> </span><span class="s">"flow"</span><span class="o">]</span><span class="p">);</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1">// =&gt; "checkout-flow"</span>
 <a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">&quot;max&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;retries&quot;</span><span class="o">]</span><span class="p">);</span>
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1">// =&gt; &quot;max-retries&quot;</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">"max"</span><span class="p">,</span><span class="w"> </span><span class="s">"retries"</span><span class="o">]</span><span class="p">);</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1">// =&gt; "max-retries"</span>
 </code></pre></div>
 <h4 id="flagkeyformatssnakecase"><code>FlagKeyFormats.snakeCase()</code><a class="headerlink" href="#flagkeyformatssnakecase" title="Permanent link">&para;</a></h4>
 <p>Joins segments with underscores.</p>
 <p><strong>Example</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">FlagKeyFormat</span><span class="w"> </span><span class="n">format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">snakeCase</span><span class="p">();</span>
 <a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">&quot;checkout&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;flow&quot;</span><span class="o">]</span><span class="p">);</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1">// =&gt; &quot;checkout_flow&quot;</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">"checkout"</span><span class="p">,</span><span class="w"> </span><span class="s">"flow"</span><span class="o">]</span><span class="p">);</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1">// =&gt; "checkout_flow"</span>
 <a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">&quot;max&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;retries&quot;</span><span class="o">]</span><span class="p">);</span>
-<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="c1">// =&gt; &quot;max_retries&quot;</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">"max"</span><span class="p">,</span><span class="w"> </span><span class="s">"retries"</span><span class="o">]</span><span class="p">);</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="c1">// =&gt; "max_retries"</span>
 </code></pre></div>
 <h4 id="flagkeyformatscamelcase"><code>FlagKeyFormats.camelCase()</code><a class="headerlink" href="#flagkeyformatscamelcase" title="Permanent link">&para;</a></h4>
 <p>Joins segments in camelCase (first segment as-is, subsequent segments capitalized).</p>
 <p><strong>Example</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">FlagKeyFormat</span><span class="w"> </span><span class="n">format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">camelCase</span><span class="p">();</span>
 <a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">&quot;checkout&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;flow&quot;</span><span class="o">]</span><span class="p">);</span>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1">// =&gt; &quot;checkoutFlow&quot;</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">"checkout"</span><span class="p">,</span><span class="w"> </span><span class="s">"flow"</span><span class="o">]</span><span class="p">);</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1">// =&gt; "checkoutFlow"</span>
 <a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">&quot;max&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;retries&quot;</span><span class="o">]</span><span class="p">);</span>
-<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="c1">// =&gt; &quot;maxRetries&quot;</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">"max"</span><span class="p">,</span><span class="w"> </span><span class="s">"retries"</span><span class="o">]</span><span class="p">);</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="c1">// =&gt; "maxRetries"</span>
 </code></pre></div>
 <h4 id="flagkeyformatspascalcase"><code>FlagKeyFormats.pascalCase()</code><a class="headerlink" href="#flagkeyformatspascalcase" title="Permanent link">&para;</a></h4>
 <p>Joins segments in PascalCase (all segments capitalized).</p>
 <p><strong>Example</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">FlagKeyFormat</span><span class="w"> </span><span class="n">format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">pascalCase</span><span class="p">();</span>
 <a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">&quot;checkout&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;flow&quot;</span><span class="o">]</span><span class="p">);</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1">// =&gt; &quot;CheckoutFlow&quot;</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">"checkout"</span><span class="p">,</span><span class="w"> </span><span class="s">"flow"</span><span class="o">]</span><span class="p">);</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1">// =&gt; "CheckoutFlow"</span>
 <a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">&quot;max&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;retries&quot;</span><span class="o">]</span><span class="p">);</span>
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="c1">// =&gt; &quot;MaxRetries&quot;</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">"max"</span><span class="p">,</span><span class="w"> </span><span class="s">"retries"</span><span class="o">]</span><span class="p">);</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="c1">// =&gt; "MaxRetries"</span>
 </code></pre></div>
 <h4 id="flagkeyformatsdotcase"><code>FlagKeyFormats.dotCase()</code><a class="headerlink" href="#flagkeyformatsdotcase" title="Permanent link">&para;</a></h4>
 <p>Joins segments with dots.</p>
 <p><strong>Example</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">FlagKeyFormat</span><span class="w"> </span><span class="n">format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">dotCase</span><span class="p">();</span>
 <a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">&quot;checkout&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;flow&quot;</span><span class="o">]</span><span class="p">);</span>
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1">// =&gt; &quot;checkout.flow&quot;</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">"checkout"</span><span class="p">,</span><span class="w"> </span><span class="s">"flow"</span><span class="o">]</span><span class="p">);</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1">// =&gt; "checkout.flow"</span>
 <a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>
-<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">&quot;max&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;retries&quot;</span><span class="o">]</span><span class="p">);</span>
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="c1">// =&gt; &quot;max.retries&quot;</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">"max"</span><span class="p">,</span><span class="w"> </span><span class="s">"retries"</span><span class="o">]</span><span class="p">);</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="c1">// =&gt; "max.retries"</span>
 </code></pre></div>
 <h4 id="flagkeyformatscoloncase"><code>FlagKeyFormats.colonCase()</code><a class="headerlink" href="#flagkeyformatscoloncase" title="Permanent link">&para;</a></h4>
 <p>Joins segments with colons.</p>
 <p><strong>Example</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">FlagKeyFormat</span><span class="w"> </span><span class="n">format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">colonCase</span><span class="p">();</span>
 <a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">&quot;checkout&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;flow&quot;</span><span class="o">]</span><span class="p">);</span>
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="c1">// =&gt; &quot;checkout:flow&quot;</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">"checkout"</span><span class="p">,</span><span class="w"> </span><span class="s">"flow"</span><span class="o">]</span><span class="p">);</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="c1">// =&gt; "checkout:flow"</span>
 <a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>
-<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">&quot;max&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;retries&quot;</span><span class="o">]</span><span class="p">);</span>
-<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="c1">// =&gt; &quot;max:retries&quot;</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="n">format</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="o">[</span><span class="s">"max"</span><span class="p">,</span><span class="w"> </span><span class="s">"retries"</span><span class="o">]</span><span class="p">);</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="c1">// =&gt; "max:retries"</span>
 </code></pre></div>
 <h2 id="conflictstrategy">ConflictStrategy<a class="headerlink" href="#conflictstrategy" title="Permanent link">&para;</a></h2>
 <p>Strategy for handling conflicts when multiple source names map to the same flag key.</p>
@@ -2333,15 +2333,15 @@
 <h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1">// Low cardinality: WARN by default</span>
 <a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="n">EnvironmentVariableFlagProvider</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EnvironmentVariableFlagProvider</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FLAGZEN_&quot;</span><span class="p">))</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FLAGZEN_"</span><span class="p">))</span>
 <a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">    </span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">kebabCase</span><span class="p">())</span>
 <a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 <a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="c1">// If FLAGZEN_X and other sources map to same key, logs warning</span>
 <a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>
 <a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="c1">// High cardinality: ERROR by default</span>
 <a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="n">EnvironmentVariableFlagProvider</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EnvironmentVariableFlagProvider</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FLAGZEN_&quot;</span><span class="p">))</span>
-<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FF_&quot;</span><span class="p">))</span>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FLAGZEN_"</span><span class="p">))</span>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FF_"</span><span class="p">))</span>
 <a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a><span class="w">    </span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">kebabCase</span><span class="p">())</span>
 <a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a><span class="w">    </span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">snakeCase</span><span class="p">())</span>
 <a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
@@ -2349,8 +2349,8 @@
 <a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a>
 <a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a><span class="c1">// Override default</span>
 <a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a><span class="n">EnvironmentVariableFlagProvider</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EnvironmentVariableFlagProvider</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-<a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FLAGZEN_&quot;</span><span class="p">))</span>
-<a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FF_&quot;</span><span class="p">))</span>
+<a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FLAGZEN_"</span><span class="p">))</span>
+<a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FF_"</span><span class="p">))</span>
 <a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a><span class="w">    </span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">kebabCase</span><span class="p">())</span>
 <a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a><span class="w">    </span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">snakeCase</span><span class="p">())</span>
 <a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a><span class="w">    </span><span class="p">.</span><span class="na">onConflict</span><span class="p">(</span><span class="n">ConflictStrategy</span><span class="p">.</span><span class="na">WARN</span><span class="p">)</span>
@@ -2359,21 +2359,21 @@
 </code></pre></div>
 <h2 id="parseformat-pipeline-example">Parse/Format Pipeline Example<a class="headerlink" href="#parseformat-pipeline-example" title="Permanent link">&para;</a></h2>
 <p>Combining parsers and formatters to create a full mapping:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">FlagKeyParser</span><span class="w"> </span><span class="n">parser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FLAGZEN_&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">FlagKeyParser</span><span class="w"> </span><span class="n">parser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FLAGZEN_"</span><span class="p">);</span>
 <a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="n">FlagKeyFormat</span><span class="w"> </span><span class="n">format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">kebabCase</span><span class="p">();</span>
 <a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
 <a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="c1">// Environment variable: FLAGZEN_CHECKOUT_FLOW</span>
 <a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="c1">// Step 1: Parse</span>
-<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="n">Optional</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">segments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">&quot;FLAGZEN_CHECKOUT_FLOW&quot;</span><span class="p">);</span>
-<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="c1">// =&gt; Optional.of([&quot;checkout&quot;, &quot;flow&quot;])</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="n">Optional</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">segments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="s">"FLAGZEN_CHECKOUT_FLOW"</span><span class="p">);</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="c1">// =&gt; Optional.of(["checkout", "flow"])</span>
 <a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>
 <a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="c1">// Step 2: Format</span>
 <a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="n">String</span><span class="w"> </span><span class="n">flagKey</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">segments</span><span class="p">.</span><span class="na">map</span><span class="p">(</span><span class="n">format</span><span class="p">::</span><span class="n">format</span><span class="p">).</span><span class="na">orElse</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
-<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="c1">// =&gt; &quot;checkout-flow&quot;</span>
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="c1">// =&gt; "checkout-flow"</span>
 <a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>
 <a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a><span class="c1">// Step 3: Resolve flag</span>
 <a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a><span class="n">FlagProvider</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
-<a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a><span class="n">Optional</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">&quot;checkout-flow&quot;</span><span class="p">);</span>
+<a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a><span class="n">Optional</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">provider</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">"checkout-flow"</span><span class="p">);</span>
 </code></pre></div>
 <h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
 <ul>
@@ -2426,6 +2426,12 @@
     <div class="md-footer-meta__inner md-grid">
       <div class="md-copyright">
   
+  <div class="md-copyright__highlight">
+    Maintained by
+    <a href="https://craftosphere.com" title="Craftosphere">
+      <img src="../../assets/craftosphere-logo-tOW.svg" alt="Craftosphere" height="20" style="height: 1.6em; vertical-align: middle;">
+    </a>
+  </div>
   
     Made with
     <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
@@ -2463,10 +2469,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>

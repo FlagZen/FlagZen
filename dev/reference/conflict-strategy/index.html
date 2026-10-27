@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -33,10 +33,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1749,10 +1749,10 @@
 <p><strong>Module</strong>: <code>flagzen-key-mapping</code></p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>When a <code>FlagProvider</code> implementation (like <code>EnvironmentVariableFlagProvider</code>) uses multiple parsers or formatters, different source names can map to the same flag key. For example:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Parser 1 (SCREAMING_SNAKE_CASE with &quot;FLAGZEN_&quot; prefix):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Parser 1 (SCREAMING_SNAKE_CASE with "FLAGZEN_" prefix):
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  FLAGZEN_CHECKOUT_FLOW =&gt; checkout-flow (with kebab-case format)
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>Parser 2 (camelCase with &quot;myApp&quot; prefix):
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>Parser 2 (camelCase with "myApp" prefix):
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  myAppCheckoutFlow =&gt; checkout-flow (with kebab-case format)
 </code></pre></div>
 <p>Both map to the same flag key <code>checkout-flow</code> but come from different sources. The conflict strategy determines what happens in this situation.</p>
@@ -1773,7 +1773,7 @@
 </ul>
 <p><strong>Use Case</strong>: Migration scenarios or low-cardinality configs where conflicts are rare and acceptable.</p>
 <p><strong>Example</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>[WARN] Conflict detected for flag key &#39;checkout-flow&#39;:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>[WARN] Conflict detected for flag key 'checkout-flow':
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  - FLAGZEN_CHECKOUT_FLOW =&gt; checkout-flow
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  - myAppCheckoutFlow =&gt; checkout-flow
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>The last mapping will be used. This is probably unintentional.
@@ -1787,7 +1787,7 @@
 </ul>
 <p><strong>Use Case</strong>: High-cardinality configs where conflicts are unexpected and must be prevented.</p>
 <p><strong>Example</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>IllegalStateException: Conflict detected: multiple sources map to flag key &#39;checkout-flow&#39;:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>IllegalStateException: Conflict detected: multiple sources map to flag key 'checkout-flow':
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  - FLAGZEN_CHECKOUT_FLOW
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  - myAppCheckoutFlow
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>Use ConflictStrategy.WARN to override, or adjust parsers/formatters to eliminate conflicts.
@@ -1835,15 +1835,15 @@
 <p>Use the builder's <code>.onConflict()</code> method:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// Use WARN strategy (low cardinality defaults to WARN anyway)</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">EnvironmentVariableFlagProvider</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EnvironmentVariableFlagProvider</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FLAGZEN_&quot;</span><span class="p">))</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FLAGZEN_"</span><span class="p">))</span>
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">kebabCase</span><span class="p">())</span>
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="p">.</span><span class="na">onConflict</span><span class="p">(</span><span class="n">ConflictStrategy</span><span class="p">.</span><span class="na">WARN</span><span class="p">)</span>
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 <a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
 <a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="c1">// Override high-cardinality ERROR default with WARN</span>
 <a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="n">EnvironmentVariableFlagProvider</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EnvironmentVariableFlagProvider</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FLAGZEN_&quot;</span><span class="p">))</span>
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FF_&quot;</span><span class="p">))</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FLAGZEN_"</span><span class="p">))</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FF_"</span><span class="p">))</span>
 <a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">    </span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">kebabCase</span><span class="p">())</span>
 <a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">    </span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">snakeCase</span><span class="p">())</span>
 <a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">    </span><span class="p">.</span><span class="na">onConflict</span><span class="p">(</span><span class="n">ConflictStrategy</span><span class="p">.</span><span class="na">WARN</span><span class="p">)</span><span class="w">  </span><span class="c1">// Override default ERROR</span>
@@ -1853,15 +1853,15 @@
 <p>If <code>.onConflict()</code> is not called, the cardinality defaults apply:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1">// Cardinality 1x1: defaults to WARN</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">EnvironmentVariableFlagProvider</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EnvironmentVariableFlagProvider</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FLAGZEN_&quot;</span><span class="p">))</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FLAGZEN_"</span><span class="p">))</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">kebabCase</span><span class="p">())</span>
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1">// Constructs successfully, logs warnings if conflicts found</span>
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
 <a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="c1">// Cardinality 2x2: defaults to ERROR</span>
 <a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="n">EnvironmentVariableFlagProvider</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EnvironmentVariableFlagProvider</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FLAGZEN_&quot;</span><span class="p">))</span>
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FF_&quot;</span><span class="p">))</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FLAGZEN_"</span><span class="p">))</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FF_"</span><span class="p">))</span>
 <a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">    </span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">kebabCase</span><span class="p">())</span>
 <a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">    </span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">snakeCase</span><span class="p">())</span>
 <a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
@@ -1880,12 +1880,12 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Old convention: FLAGZEN_CHECKOUT_FLOW=CLASSIC
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>New convention: FF_CHECKOUT_FLOW=PREMIUM
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>Both map to flag key &#39;checkout-flow&#39; but have different values.
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>Both map to flag key 'checkout-flow' but have different values.
 </code></pre></div>
 <p>Use <code>WARN</code> strategy with intentional parser ordering (first or last wins semantics) to manage this:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">EnvironmentVariableFlagProvider</span><span class="w"> </span><span class="n">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EnvironmentVariableFlagProvider</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FLAGZEN_&quot;</span><span class="p">))</span><span class="w">  </span><span class="c1">// Old convention</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">&quot;FF_&quot;</span><span class="p">))</span><span class="w">       </span><span class="c1">// New convention</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FLAGZEN_"</span><span class="p">))</span><span class="w">  </span><span class="c1">// Old convention</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="p">.</span><span class="na">parser</span><span class="p">(</span><span class="n">FlagKeyParsers</span><span class="p">.</span><span class="na">screamingSnakeCase</span><span class="p">(</span><span class="s">"FF_"</span><span class="p">))</span><span class="w">       </span><span class="c1">// New convention</span>
 <a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">FlagKeyFormats</span><span class="p">.</span><span class="na">kebabCase</span><span class="p">())</span>
 <a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="p">.</span><span class="na">onConflict</span><span class="p">(</span><span class="n">ConflictStrategy</span><span class="p">.</span><span class="na">WARN</span><span class="p">)</span>
 <a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
@@ -1943,6 +1943,12 @@
     <div class="md-footer-meta__inner md-grid">
       <div class="md-copyright">
   
+  <div class="md-copyright__highlight">
+    Maintained by
+    <a href="https://craftosphere.com" title="Craftosphere">
+      <img src="../../assets/craftosphere-logo-tOW.svg" alt="Craftosphere" height="20" style="height: 1.6em; vertical-align: middle;">
+    </a>
+  </div>
   
     Made with
     <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
@@ -1980,10 +1986,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>
