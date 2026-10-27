@@ -206,3 +206,14 @@ class CheckoutTest {
 ## License
 
 Apache License 2.0
+
+## Maintained by
+
+<!-- markdownlint-disable MD033 -->
+<a href="https://craftosphere.com">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="branding/craftosphere-logo-tOW.svg">
+    <img src="branding/craftosphere-logo-tOK.svg" alt="Craftosphere" height="40">
+  </picture>
+</a>
+<!-- markdownlint-enable MD033 -->

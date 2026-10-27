@@ -49,3 +49,7 @@ See [Getting Started](tutorials/getting-started.md) for the full walkthrough.
 | [Togglz](how-to/togglz.md) | `flagzen-togglz` | No | Via UserProvider | Web console |
 | [Environment variables](how-to/environment-variables.md) | `flagzen-env` | No | No | No |
 | Custom | [Write your own](how-to/custom-provider.md) | You decide | You decide | You decide |
+
+## About
+
+FlagZen is designed and maintained by [Craftosphere](https://craftosphere.com). The source code is on [GitHub](https://github.com/FlagZen/FlagZen) under the Apache License 2.0.

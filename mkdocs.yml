@@ -10,6 +10,7 @@ docs_dir: docs/site
 
 theme:
   name: material
+  custom_dir: docs/overrides
   logo: assets/logo-white-circle-bg.png
   favicon: assets/logo.png
   palette:

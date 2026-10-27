@@ -1,0 +1,23 @@
+{#-
+  Overrides Material's partials/copyright.html to add the maintainer link.
+  The footer meta bar is dark in both colour schemes, so the white-text logo fits both.
+-#}
+<div class="md-copyright">
+  {% if config.copyright %}
+    <div class="md-copyright__highlight">
+      {{ config.copyright }}
+    </div>
+  {% endif %}
+  <div class="md-copyright__highlight">
+    Maintained by
+    <a href="https://craftosphere.com" title="Craftosphere">
+      <img src="{{ base_url }}/assets/craftosphere-logo-tOW.svg" alt="Craftosphere" height="20" style="height: 1.6em; vertical-align: middle;">
+    </a>
+  </div>
+  {% if not config.extra.generator == false %}
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  {% endif %}
+</div>

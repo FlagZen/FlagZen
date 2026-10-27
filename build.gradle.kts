@@ -73,6 +73,11 @@ subprojects {
                 description.set("Type-safe polymorphic dispatch for feature flags in Java")
                 url.set("https://github.com/FlagZen/FlagZen")
 
+                organization {
+                    name.set("Craftosphere")
+                    url.set("https://craftosphere.com")
+                }
+
                 licenses {
                     license {
                         name.set("Apache License, Version 2.0")
@@ -84,6 +89,8 @@ subprojects {
                     developer {
                         id.set("attilafejer")
                         name.set("Attila Fejér")
+                        organization.set("Craftosphere")
+                        organizationUrl.set("https://craftosphere.com")
                     }
                 }
 
